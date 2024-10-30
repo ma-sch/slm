@@ -54,9 +54,27 @@
             v-if="item.children"
             :key="`group-${i}`"
             :item="item"
+            :sub-group="item.subGroup"
+            :text="item.text"
           >
           <!--  -->
           </base-item-group>
+
+          <div
+            v-else-if="item.divider && !item.title"
+            class="mt-4"
+          >
+            <v-divider />
+          </div>
+
+          <div
+            v-else-if="item.divider && item.title"
+            class="mt-4"
+          >
+            <v-divider>
+              {{ item.title }}
+            </v-divider>
+          </div>
 
           <base-item
             v-else
@@ -131,53 +149,88 @@ export default {
             visible: true,
           },
           {
+            id: 'main-menu-divider-resources',
+            title: this.$t('drawer.section.resources.title'),
+            divider: true,
+            visible: true
+          },
+          {
             id: 'main-menu-button-resources',
             icon: 'mdi-desktop-classic',
-            title: this.$t('drawer.section.resources.title'),
+            title: this.$t('drawer.section.resources.devices.title'),
             to: '/resources',
             visible: true,
           },
           {
             id: 'main-menu-button-clusters',
             icon: 'mdi-server',
-            title: this.$t('drawer.section.clusters.title'),
+            title: this.$t('drawer.section.resources.clusters.title'),
             to: '/clusters',
             visible: true,
           },
-          // {
-          //   id: 'main-menu-button-provider',
-          //   icon: 'mdi-usb',
-          //   title: this.$t('drawer.section.provider.title'),
-          //   to: '/provider',
-          //   visible: true,
-          // },
+          {
+            id: 'main-menu-divider-services',
+            title: this.$t('drawer.section.services.title'),
+            divider: true,
+            visible: true
+          },
           {
             id: 'main-menu-button-service-offering',
-            title: this.$t('drawer.section.serviceOfferings.title'),
+            title: this.$t('drawer.section.services.serviceOfferings.title'),
             icon: 'mdi-offer',
             to: '/services/offerings',
             visible: true,
           },
           {
             id: 'main-menu-button-service-instances',
-            title: this.$t('drawer.section.services.title'),
+            title: this.$t('drawer.section.services.services.title'),
             icon: 'mdi-apps',
             to: '/services/instances',
             visible: true,
           },
           {
             id: 'main-menu-button-service-vendors',
-            title: this.$t('drawer.section.serviceVendor.title'),
+            title: this.$t('drawer.section.services.serviceVendor.title'),
             icon: 'mdi-toolbox',
             to: '/services/vendors',
             visible: this.userStore.isUserDeveloper,
           },
           {
+            id: 'main-menu-divider-admin',
+            divider: true,
+            visible: true
+          },
+          {
             id: 'main-menu-button-admin',
             title: this.$t('drawer.section.admin.title'),
             icon: 'mdi-shield-account-variant-outline',
-            to: '/admin',
+            group: '/admin',
+            subGroup:true,
+            text: true,
             visible: this.userStore.userRoles.includes('slm-admin'),
+            children: [
+              {
+                id: 'main-menu-button-admin-components',
+                title: this.$t('drawer.section.admin.components.title'),
+                icon: 'mdi-view-module',
+                to: 'components',
+                visible: this.userStore.userRoles.includes('slm-admin'),
+              },
+              {
+                id: 'main-menu-button-admin-service-categories',
+                title: this.$t('drawer.section.admin.service-categories.title'),
+                icon: 'mdi-shape-outline',
+                to: 'service-categories',
+                visible: this.userStore.userRoles.includes('slm-admin'),
+              },
+              {
+                id: 'main-menu-button-admin-service-vendors',
+                title: this.$t('drawer.section.admin.service-vendors.title'),
+                icon: 'mdi-treasure-chest',
+                to: 'service-vendors',
+                visible: this.userStore.userRoles.includes('slm-admin'),
+              }
+            ],
           },
         ]
       },
