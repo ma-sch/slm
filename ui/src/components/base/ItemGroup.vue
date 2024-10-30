@@ -12,7 +12,9 @@
         v-bind="props"
         :tile="item.title"
       >
-        {{ item.title }}
+        <v-list-item-title>
+          {{ item.title }}
+        </v-list-item-title>
       </v-list-item>
 
       <v-list-item
