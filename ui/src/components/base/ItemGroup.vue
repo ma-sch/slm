@@ -7,9 +7,10 @@
     :color="store.barColor !== 'rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.7)' ? 'white' : 'grey darken-1'"
   >
     <template #activator="{ props }">
-      <v-list-item v-if="text"
-                   v-bind="props"
-                   :tile="item.title"
+      <v-list-item
+        v-if="text"
+        v-bind="props"
+        :tile="item.title"
       >
         {{ item.title }}
       </v-list-item>
@@ -22,8 +23,7 @@
         class="align-self-center"
         color="white"
         contain
-      >
-      </v-list-item>
+      />
     </template>
 
     <template v-for="(child, i) in children">
@@ -43,7 +43,6 @@
           :item="child"
         />
       </div>
-
     </template>
   </v-list-group>
 </template>
@@ -130,7 +129,7 @@ export default {
 }
 
 .v-list-group {
-  --list-indent-size: 0px;
+  --list-indent-size: 16px;
   --prepend-width: 0px;
 }
 

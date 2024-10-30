@@ -8,23 +8,27 @@
         "title": "Jobs"
       },
       "resources": {
-        "title": "Resources"
-      },
-      "clusters": {
-        "title": "Clusters"
-      },
-      "provider": {
-        "title": "Provider"
-      },
-      "serviceOfferings": {
-        "title": "Service Offerings"
-      },
-      "serviceVendor": {
-        "title": "Service Vendor"
+        "title": "Resources",
+        "devices": {
+          "title": "Devices"
+        },
+        "clusters": {
+          "title": "Clusters"
+        }
       },
       "services": {
-        "title": "Services"
+        "title": "Services",
+        "serviceOfferings": {
+          "title": "Service Offerings"
+        },
+        "serviceVendor": {
+          "title": "Service Vendor"
+        },
+        "services": {
+          "title": "Services"
+        }
       },
+
       "admin": {
         "title": "Admin",
         "components":{
