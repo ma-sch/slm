@@ -79,6 +79,7 @@
         <minio.version>8.5.7</minio.version>
         <commons.io.version>2.11.0</commons.io.version>
         <hypersistence-utils-version>3.8.2</hypersistence-utils-version>
+        <uuid.generator.version>5.0.0</uuid.generator.version>
 
         <testcontainers.version>1.20.1</testcontainers.version>
         <assertj.version>3.26.3</assertj.version>
@@ -258,6 +259,12 @@
             <groupId>com.esotericsoftware.yamlbeans</groupId>
             <artifactId>yamlbeans</artifactId>
             <version>1.15</version>
+        </dependency>
+        <!-- UUID !-->
+        <dependency>
+            <groupId>com.fasterxml.uuid</groupId>
+            <artifactId>java-uuid-generator</artifactId>
+            <version>${uuid.generator.version}</version>
         </dependency>
         <!-- Serialization !-->
         <dependency>

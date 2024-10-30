@@ -82,6 +82,10 @@ public class NotificationServiceClient {
     }
 
     public void postNotification(JwtAuthenticationToken jwtAuthenticationToken, Category category, JobTarget jobTarget, JobGoal jobGoal) {
+        this.postNotification(jwtAuthenticationToken, category, jobTarget, jobGoal, "");
+    }
+
+    public void postNotification(JwtAuthenticationToken jwtAuthenticationToken, Category category, JobTarget jobTarget, JobGoal jobGoal, String text) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(jwtAuthenticationToken.getToken().getTokenValue());
         HttpEntity<String> request = new HttpEntity<String>(headers);
@@ -89,13 +93,14 @@ public class NotificationServiceClient {
         try {
             URIBuilder builder = new URIBuilder();
             URL url = getNotificationServiceUrl();
-            String uri = builder.setScheme(url.getProtocol())
+            var uri = builder.setScheme(url.getProtocol())
                     .setHost(url.getHost())
                     .setPort(url.getPort())
                     .setPath("/notification")
                     .addParameter("category", category.name())
                     .addParameter("jobTarget", jobTarget.name())
                     .addParameter("jobGoal", jobGoal.name())
+                    .addParameter("text", text)
                     .build()
                     .toString();
             restTemplate.postForEntity(uri, request, String.class);

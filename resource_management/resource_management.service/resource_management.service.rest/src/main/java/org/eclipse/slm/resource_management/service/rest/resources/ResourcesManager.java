@@ -323,7 +323,7 @@ public class ResourcesManager {
             );
         }
 
-        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.Resources, JobTarget.RESOURCE, JobGoal.CREATE);
+        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.CREATE);
         publisher.publishEvent(new ResourceEvent(this, resourceId, ResourceEvent.Operation.CREATE));
         return resource;
 
@@ -360,7 +360,7 @@ public class ResourcesManager {
                     remoteAccessServiceId
             );
 
-        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.Resources, JobTarget.RESOURCE, JobGoal.DELETE);
+        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.DELETE);
         publisher.publishEvent(new ResourceEvent(this, resourceId, ResourceEvent.Operation.DELETE));
     }
     //endregion

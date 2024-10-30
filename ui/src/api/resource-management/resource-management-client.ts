@@ -2,7 +2,7 @@ import {
     AasRestControllerApi,
     CapabilitiesRestControllerApi,
     CapabilityProvidersRestControllerApi,
-    ClustersRestControllerApi,
+    ClustersRestControllerApi, DiscoveryRestControllerApi,
     JobsRestControllerApi,
     LocationRestControllerApi,
     MetricsRestControllerApi,
@@ -28,6 +28,7 @@ class ResourceManagementClient{
     capabilityProvidersApi = new CapabilityProvidersRestControllerApi(undefined, this.apiUrl);
     capabilityApi = new CapabilitiesRestControllerApi(undefined, this.apiUrl)
     submodelsApi = new SubmodelsRestControllerApi(undefined, this.apiUrl);
+    discoveryApi = new DiscoveryRestControllerApi(undefined, this.apiUrl);
 
 }
 

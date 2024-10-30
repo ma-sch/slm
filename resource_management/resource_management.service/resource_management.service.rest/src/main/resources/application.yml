@@ -183,3 +183,9 @@ consul:
 monitoring:
   service:
     url: http://localhost:9080
+
+### Discovery
+discovery:
+  driver-registry:
+    address: 10.17.167.87
+    port: 50051

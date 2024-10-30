@@ -5,6 +5,8 @@ import {useResourcesStore} from "@/stores/resourcesStore";
 import {useServicesStore} from "@/stores/servicesStore";
 import NotificationServiceClient from "@/api/notification-service/notification-service-client";
 import logRequestError from "@/api/restApiHelper";
+import {useDiscoveryStore} from "@/stores/discoveryStore";
+import {no} from "vuetify/locale";
 
 export interface NotificationStoreState{
   notifications_: any[],
@@ -45,19 +47,26 @@ export const useNotificationStore = defineStore('notificationStore', {
         app.config.globalProperties.$toast.info(notification.text)
         const resourcesStore = useResourcesStore();
         const servicesStore = useServicesStore();
+        const discoveryStore = useDiscoveryStore();
         switch (notification.category) {
-          case 'Jobs':
-            // console.log('Update jobs store')
-              const jobsStore = useJobsStore();
+          case 'JOBS':
+            const jobsStore = useJobsStore();
 
-              jobsStore.updateJobsStore().then();
-              resourcesStore.updateResourcesStore();
-              servicesStore.updateServicesStore();
-            break
-          case 'Resources':
+            jobsStore.updateJobsStore().then();
             resourcesStore.updateResourcesStore();
+            servicesStore.updateServicesStore();
             break
-          case 'Services':
+          case 'RESOURCES':
+            if (notification.target === 'DISCOVERY') {
+              discoveryStore.updateDiscoveryStore();
+            }
+            else {
+              resourcesStore.updateResourcesStore();
+            }
+            break
+          case 'SERVICES':
+            servicesStore.updateServicesStore();
+          case 'PROJECTS':
             servicesStore.updateServicesStore();
             break
           default:
