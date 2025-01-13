@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="active"
+    v-model="dialogActive"
     width="400"
     @click:outside="$emit('canceled')"
   >
@@ -41,30 +41,32 @@
   </v-dialog>
 </template>
 
-<script>
-import {toRef} from "vue";
+<script setup>
+import {ref, toRef, watch} from 'vue';
 
-export default {
-    name: 'ConfirmDialog',
-    props: {
-      show: {
-        type: Boolean,
-        default: false
-      },
-      title: {
-        type: String,
-        default: ""
-      },
-      text: {
-        type: String,
-        default: ""
-      }
-    },
-    setup(props){
-      const active = toRef(props, 'show')
-      return{
-        active
-      }
-    }
+const emit = defineEmits(['confirmed', 'canceled']);
+
+const props = defineProps({
+  show: {
+    type: Boolean,
+    default: false
+  },
+  title: {
+    type: String,
+    default: ""
+  },
+  text: {
+    type: String,
+    default: ""
   }
+});
+
+
+const dialogActive = ref(false)
+const showProp = toRef(props,'show'); // react to prop
+
+watch(showProp, (value) => {
+  dialogActive.value = showProp.value;
+});
+
 </script>

@@ -22,6 +22,7 @@
           <td> {{ submodel.id }} </td>
           <td>
             <a
+              v-if="aasDescriptor"
               :href="`${aasGuiUrl}/?aas=${aasDescriptor.endpoints[0].protocolInformation.href}&path=${submodel.endpoints[0].protocolInformation.href}`"
               target="_blank"
             ><v-icon>mdi-open-in-new</v-icon></a>
@@ -83,7 +84,7 @@
   </div>
 </template>
 <script>
-import ConfirmDialog from '@/components/base/ConfirmDialog'
+import ConfirmDialog from '@/components/base/ConfirmDialog.vue'
 import getEnv from '@/utils/env'
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 
@@ -125,7 +126,6 @@ export default {
     },
     getAasDescriptor() {
       ResourceManagementClient.aasApi.getResourceAasDescriptor(this.resourceId).then(response => {
-        console.log(response)
         this.aasDescriptor = response.data
       }).catch((e) => {
         console.log(e)

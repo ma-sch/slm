@@ -8,9 +8,11 @@ import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElement;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierException;
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.eclipse.digitaltwin.basyx.submodelrepository.client.ConnectedSubmodelRepository;
+import org.eclipse.digitaltwin.basyx.submodelservice.value.SubmodelValueOnly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -21,13 +23,28 @@ public class SubmodelRepositoryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(SubmodelRepositoryClient.class);
 
-    private final String submodelRepositoryUrl;
+    private String submodelRepositoryUrl;
+
+    private final DiscoveryClient discoveryClient;
+
+    private final String submodelRepositoryDiscoveryInstanceId = "submodel-repository";
 
     private final ConnectedSubmodelRepository connectedSubmodelRepository;
 
-    public SubmodelRepositoryClient(@Value("${aas.submodel-repository.url}") String submodelRepositoryUrl) {
+    public SubmodelRepositoryClient(@Value("${aas.submodel-repository.url}") String submodelRepositoryUrl,
+                                    DiscoveryClient discoveryClient) {
         this.submodelRepositoryUrl = submodelRepositoryUrl;
         this.connectedSubmodelRepository = new ConnectedSubmodelRepository(submodelRepositoryUrl);
+        this.discoveryClient = discoveryClient;
+
+        var submodelRepositoryServiceInstance = this.discoveryClient.getInstances(submodelRepositoryDiscoveryInstanceId).get(0);
+        if (submodelRepositoryServiceInstance != null) {
+            this.submodelRepositoryUrl = "http://" + submodelRepositoryServiceInstance.getHost()
+                    + ":" + submodelRepositoryServiceInstance.getPort();
+        }
+        else {
+            LOG.warn("No service instance '" + submodelRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL from application.yml.");
+        }
     }
 
     public List<Submodel> getAllSubmodels() throws DeserializationException {
@@ -47,6 +64,12 @@ public class SubmodelRepositoryClient {
     public Submodel getSubmodel(String submodelId) {
         var submodel = this.connectedSubmodelRepository.getSubmodel(submodelId);
         return submodel;
+    }
+
+    public SubmodelValueOnly getSubmodelValueOnly(String submodelId) {
+        var submodelValueOnly = this.connectedSubmodelRepository.getSubmodelByIdValueOnly(submodelId);
+
+        return submodelValueOnly;
     }
 
     public void createOrUpdateSubmodel(Submodel submodel) {

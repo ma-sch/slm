@@ -9,7 +9,7 @@ info:
     email: matthias.schneider@ipa.fraunhofer.de
   version: 1.4.0-SNAPSHOT
 servers:
-  - url: http://slm.local:9010
+  - url: http://localhost:9010
     description: Generated server url
 security:
   - bearer_auth: []
@@ -444,6 +444,64 @@ paths:
             "*/*":
               schema:
                 type: object
+  "/resources/discovery/inbox/onboard":
+    post:
+      tags:
+        - discovery-rest-controller
+      operationId: onboardDiscoveredResources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OnboardingRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+  "/resources/discovery/inbox/ignore":
+    post:
+      tags:
+        - discovery-rest-controller
+      operationId: ignoreDiscoveredResource
+      parameters:
+        - name: resultId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: ignored
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+  "/resources/discovery/drivers/{driverId}/discover":
+    post:
+      tags:
+        - discovery-rest-controller
+      operationId: discover
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/DiscoveryRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/DiscoveryJobStartedResponse"
   "/resources/clusters":
     get:
       tags:
@@ -671,27 +729,27 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
         - name: extent
           in: query
           description: Determines to which extent the resource is being serialized
           required: false
           schema:
             type: string
-            default: withoutBlobValue
             enum:
               - withBlobValue
               - withoutBlobValue
+            default: withoutBlobValue
       responses:
         '200':
-          description: Default error handling for unmentioned status codes
+          description: Requested Submodels
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                "$ref": "#/components/schemas/GetSubmodelsResult"
         '500':
           description: Internal Server Error
           content:
@@ -723,20 +781,20 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
         - name: extent
           in: query
           description: Determines to which extent the resource is being serialized
           required: false
           schema:
             type: string
-            default: withoutBlobValue
             enum:
               - withBlobValue
               - withoutBlobValue
+            default: withoutBlobValue
       responses:
         '200':
           description: Requested Submodel
@@ -797,20 +855,20 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
         - name: extent
           in: query
           description: Determines to which extent the resource is being serialized
           required: false
           schema:
             type: string
-            default: withoutBlobValue
             enum:
               - withBlobValue
               - withoutBlobValue
+            default: withoutBlobValue
       responses:
         '200':
           description: List of found submodel elements
@@ -862,20 +920,20 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
         - name: extent
           in: query
           description: Determines to which extent the resource is being serialized
           required: false
           schema:
             type: string
-            default: withoutBlobValue
             enum:
               - withBlobValue
               - withoutBlobValue
+            default: withoutBlobValue
       responses:
         '200':
           description: Requested submodel element
@@ -927,20 +985,20 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
         - name: extent
           in: query
           description: Determines to which extent the resource is being serialized
           required: false
           schema:
             type: string
-            default: withoutBlobValue
             enum:
               - withBlobValue
               - withoutBlobValue
+            default: withoutBlobValue
       responses:
         '200':
           description: Requested submodel element
@@ -964,7 +1022,7 @@ paths:
     get:
       tags:
         - resources-submodel-repository-api-http-controller
-      summary: Returns a specific Submodel in the ValueOnly representation
+      summary: Returns a specific Submodel in the value only representation
       operationId: getSubmodelByIdValueOnly
       parameters:
         - name: aasId
@@ -985,23 +1043,23 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
         - name: extent
           in: query
           description: Determines to which extent the resource is being serialized
           required: false
           schema:
             type: string
-            default: withoutBlobValue
             enum:
               - withBlobValue
               - withoutBlobValue
+            default: withoutBlobValue
       responses:
         '200':
-          description: Requested Submodel
+          description: Requested Submodel in value only representation
           content:
             application/json:
               schema:
@@ -1043,10 +1101,10 @@ paths:
           required: false
           schema:
             type: string
-            default: deep
             enum:
               - deep
               - core
+            default: deep
       responses:
         '200':
           description: Requested Submodel in the metadata representation
@@ -1060,6 +1118,80 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/{aasId}/aas/submodels/$value":
+    get:
+      tags:
+        - resources-submodel-repository-api-http-controller
+      summary: Returns all Submodels in their ValueOnly representation
+      operationId: getAllSubmodelsValueOnly
+      parameters:
+        - name: aasId
+          in: path
+          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: semanticId
+          in: query
+          description: The value of the semantic id reference (UTF8-BASE64-URL-encoded)
+          required: false
+          schema:
+            type: string
+        - name: idShort
+          in: query
+          description: The Asset Administration Shell’s IdShort
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of elements in the response array
+          required: false
+          schema:
+            minimum: 1
+            type: string
+            enum:
+              - '1'
+        - name: cursor
+          in: query
+          description: A server-generated identifier retrieved from pagingMetadata that
+            specifies from which position the result listing should continue
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            enum:
+              - deep
+              - core
+            default: deep
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+            default: withoutBlobValue
+      responses:
+        '200':
+          description: Requested Submodels in value only representation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/GetSubmodelsValueOnlyResult"
         '500':
           description: Internal Server Error
           content:
@@ -1194,6 +1326,12 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: includedOnboarded
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: OK
@@ -1202,7 +1340,7 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/DiscoveredResource"
+                  "$ref": "#/components/schemas/DiscoveredResourceDTO"
   "/resources/discovery/drivers":
     get:
       tags:
@@ -1217,24 +1355,6 @@ paths:
                 type: array
                 items:
                   "$ref": "#/components/schemas/DriverInfo"
-  "/resources/discovery/drivers/{driverId}/discover":
-    get:
-      tags:
-        - discovery-rest-controller
-      operationId: discover
-      parameters:
-        - name: driverId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            "*/*":
-              schema:
-                "$ref": "#/components/schemas/DiscoveryJobStartedResponse"
   "/resources/connection-types":
     get:
       tags:
@@ -1601,6 +1721,30 @@ components:
         action:
           oneOf:
             - "$ref": "#/components/schemas/AwxAction"
+    OnboardingRequest:
+      type: object
+      properties:
+        resultIds:
+          type: array
+          items:
+            type: string
+    DiscoveryRequest:
+      type: object
+      properties:
+        filterValues:
+          type: object
+          additionalProperties:
+            type: string
+        optionValues:
+          type: object
+          additionalProperties:
+            type: string
+    DiscoveryJobStartedResponse:
+      type: object
+      properties:
+        discoveryJobId:
+          type: string
+          format: uuid
     ClusterCreateRequest:
       required:
         - clusterMembers
@@ -1885,13 +2029,13 @@ components:
           "$ref": "#/components/schemas/ConnectionType"
         executionEnvironment:
           "$ref": "#/components/schemas/ExecutionEnvironment"
+        isCluster:
+          type: boolean
         connectionTypes:
           uniqueItems: true
           type: array
           items:
             "$ref": "#/components/schemas/ConnectionType"
-        isCluster:
-          type: boolean
       discriminator:
         propertyName: capabilityClass
     CapabilityService:
@@ -2132,13 +2276,13 @@ components:
     AssetAdministrationShellDescriptor:
       type: object
       properties:
-        id:
-          type: string
         endpoints:
           type: array
           items:
             "$ref": "#/components/schemas/Endpoint"
         idShort:
+          type: string
+        globalAssetId:
           type: string
         assetType:
           type: string
@@ -2146,16 +2290,20 @@ components:
           "$ref": "#/components/schemas/AdministrativeInformation"
         assetKind:
           "$ref": "#/components/schemas/AssetKind"
-        globalAssetId:
-          type: string
-        submodelDescriptors:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SubmodelDescriptor"
         specificAssetIds:
           type: array
           items:
             "$ref": "#/components/schemas/SpecificAssetId"
+        submodelDescriptors:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SubmodelDescriptor"
+        id:
+          type: string
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
@@ -2164,10 +2312,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
     AssetKind:
       type: string
       enum:
@@ -2212,10 +2356,10 @@ components:
     EmbeddedDataSpecification:
       type: object
       properties:
-        dataSpecificationContent:
-          "$ref": "#/components/schemas/DataSpecificationContent"
         dataSpecification:
           "$ref": "#/components/schemas/Reference"
+        dataSpecificationContent:
+          "$ref": "#/components/schemas/DataSpecificationContent"
     Endpoint:
       type: object
       properties:
@@ -2226,16 +2370,16 @@ components:
     Extension:
       type: object
       properties:
-        name:
-          type: string
-        value:
-          type: string
         valueType:
           "$ref": "#/components/schemas/DataTypeDefXsd"
         refersTo:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
+        name:
+          type: string
+        value:
+          type: string
         semanticId:
           "$ref": "#/components/schemas/Reference"
         supplementalSemanticIds:
@@ -2279,30 +2423,30 @@ components:
     LangStringNameType:
       type: object
       properties:
-        language:
-          type: string
         text:
+          type: string
+        language:
           type: string
     LangStringTextType:
       type: object
       properties:
-        language:
-          type: string
         text:
+          type: string
+        language:
           type: string
     ProtocolInformation:
       type: object
       properties:
-        href:
-          type: string
         endpointProtocol:
           type: string
-        subprotocolBodyEncoding:
+        href:
           type: string
         endpointProtocolVersion:
           type: array
           items:
             type: string
+        subprotocolBodyEncoding:
+          type: string
         securityAttributes:
           type: array
           items:
@@ -2314,14 +2458,14 @@ components:
     Reference:
       type: object
       properties:
-        type:
-          "$ref": "#/components/schemas/ReferenceTypes"
+        referredSemanticId:
+          "$ref": "#/components/schemas/Reference"
         keys:
           type: array
           items:
             "$ref": "#/components/schemas/Key"
-        referredSemanticId:
-          "$ref": "#/components/schemas/Reference"
+        type:
+          "$ref": "#/components/schemas/ReferenceTypes"
     ReferenceTypes:
       type: string
       enum:
@@ -2330,11 +2474,11 @@ components:
     SecurityAttributeObject:
       type: object
       properties:
+        key:
+          type: string
         type:
           "$ref": "#/components/schemas/SecurityTypeEnum"
         value:
-          type: string
-        key:
           type: string
     SecurityTypeEnum:
       type: string
@@ -2345,12 +2489,12 @@ components:
     SpecificAssetId:
       type: object
       properties:
+        externalSubjectId:
+          "$ref": "#/components/schemas/Reference"
         name:
           type: string
         value:
           type: string
-        externalSubjectId:
-          "$ref": "#/components/schemas/Reference"
         semanticId:
           "$ref": "#/components/schemas/Reference"
         supplementalSemanticIds:
@@ -2360,8 +2504,6 @@ components:
     SubmodelDescriptor:
       type: object
       properties:
-        id:
-          type: string
         endpoints:
           type: array
           items:
@@ -2376,6 +2518,12 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
+        id:
+          type: string
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
@@ -2384,10 +2532,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
     Base64UrlEncodedCursor:
       type: object
       properties:
@@ -2398,16 +2542,16 @@ components:
     Message:
       type: object
       properties:
-        text:
+        code:
           type: string
         timestamp:
           type: string
-        code:
+        text:
+          type: string
+        correlationId:
           type: string
         messageType:
           "$ref": "#/components/schemas/MessageTypeEnum"
-        correlationId:
-          type: string
     MessageTypeEnum:
       type: string
       enum:
@@ -2422,24 +2566,39 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Message"
+    GetSubmodelsResult:
+      type: object
+      properties:
+        paging_metadata:
+          "$ref": "#/components/schemas/PagedResultPagingMetadata"
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Submodel"
     ModellingKind:
       type: string
       enum:
         - INSTANCE
         - TEMPLATE
+    PagedResultPagingMetadata:
+      type: object
+      properties:
+        cursor:
+          type: string
+          example: wJlCDLIl6KTWypN7T6vc6nWEmEYe99Hjf1XY1xmqV-M=#
     Qualifier:
       type: object
       properties:
-        type:
-          type: string
-        value:
-          type: string
         kind:
           "$ref": "#/components/schemas/QualifierKind"
         valueType:
           "$ref": "#/components/schemas/DataTypeDefXsd"
         valueId:
           "$ref": "#/components/schemas/Reference"
+        type:
+          type: string
+        value:
+          type: string
         semanticId:
           "$ref": "#/components/schemas/Reference"
         supplementalSemanticIds:
@@ -2459,14 +2618,10 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/SubmodelElement"
-        id:
-          type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        displayName:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringNameType"
+        id:
+          type: string
         description:
           type: array
           items:
@@ -2475,6 +2630,10 @@ components:
           type: string
         category:
           type: string
+        displayName:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringNameType"
         extensions:
           type: array
           items:
@@ -2502,10 +2661,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/EmbeddedDataSpecification"
-        displayName:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringNameType"
         description:
           type: array
           items:
@@ -2514,6 +2669,10 @@ components:
           type: string
         category:
           type: string
+        displayName:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringNameType"
         extensions:
           type: array
           items:
@@ -2539,6 +2698,13 @@ components:
           type: object
           additionalProperties:
             "$ref": "#/components/schemas/SubmodelElementValue"
+    GetSubmodelsValueOnlyResult:
+      type: object
+      properties:
+        empty:
+          type: boolean
+      additionalProperties:
+        type: object
     VirtualResourceProvider:
       required:
         - capabilityClass
@@ -2600,6 +2766,8 @@ components:
           type: string
         firmwareVersion:
           type: string
+        ignored:
+          type: boolean
     DiscoveryJob:
       type: object
       properties:
@@ -2627,6 +2795,59 @@ components:
         - IN_PROGRESS
         - COMPLETED
         - FAILED
+    DiscoveredResourceDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        resourceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        serialNumber:
+          type: string
+        manufacturerName:
+          type: string
+        productName:
+          type: string
+        ipAddress:
+          type: string
+        macAddress:
+          type: string
+        firmwareVersion:
+          type: string
+        ignored:
+          type: boolean
+        discoveryJobId:
+          type: string
+          format: uuid
+        resultId:
+          type: string
+        onboarded:
+          type: boolean
+    DiscoveryRequestFilter:
+      type: object
+      properties:
+        key:
+          type: string
+        defaultValue:
+          type: string
+        dataType:
+          type: string
+        description:
+          type: string
+    DiscoveryRequestOption:
+      type: object
+      properties:
+        key:
+          type: string
+        defaultValue:
+          type: string
+        dataType:
+          type: string
+        description:
+          type: string
     DriverInfo:
       type: object
       properties:
@@ -2645,12 +2866,14 @@ components:
           format: int32
         ipv4Address:
           type: string
-    DiscoveryJobStartedResponse:
-      type: object
-      properties:
-        discoveryJobId:
-          type: string
-          format: uuid
+        discoveryRequestFilters:
+          type: array
+          items:
+            "$ref": "#/components/schemas/DiscoveryRequestFilter"
+        discoveryRequestOptions:
+          type: array
+          items:
+            "$ref": "#/components/schemas/DiscoveryRequestOption"
     ConnectionTypeDTO:
       required:
         - isRemote
@@ -2799,14 +3022,10 @@ components:
           "$ref": "#/components/schemas/Reference"
         assetInformation:
           "$ref": "#/components/schemas/AssetInformation"
-        id:
-          type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        displayName:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringNameType"
+        id:
+          type: string
         description:
           type: array
           items:
@@ -2815,6 +3034,10 @@ components:
           type: string
         category:
           type: string
+        displayName:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringNameType"
         extensions:
           type: array
           items:
@@ -2826,12 +3049,12 @@ components:
     AssetInformation:
       type: object
       properties:
+        globalAssetId:
+          type: string
         assetType:
           type: string
         assetKind:
           "$ref": "#/components/schemas/AssetKind"
-        globalAssetId:
-          type: string
         specificAssetIds:
           type: array
           items:
@@ -2841,9 +3064,9 @@ components:
     Resource:
       type: object
       properties:
-        contentType:
-          type: string
         path:
+          type: string
+        contentType:
           type: string
   securitySchemes:
     spring_oauth:

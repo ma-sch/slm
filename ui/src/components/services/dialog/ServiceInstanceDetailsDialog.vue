@@ -254,7 +254,7 @@
         </v-card-text>
       </v-card>
 
-      <resources-info-dialog
+      <DeviceInfoView
         :resource="selectedResource"
         @closed="selectedResource = null"
       />
@@ -265,7 +265,7 @@
 <script>
 
 import {serviceInstanceMixin} from "@/components/services/serviceInstanceMixin";
-import ResourcesInfoDialog from '@/components/resources/dialogs/ResourcesInfoDialog'
+import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
 import ApiState from "@/api/apiState";
 import ProgressCircular from "@/components/base/ProgressCircular";
 import getEnv from "@/utils/env";
@@ -280,7 +280,7 @@ import ServiceManagementClient from "@/api/service-management/service-management
 
 export default {
     name: 'ServiceInstanceDetailsDialog',
-    components: {NoItemAvailableNote, ProgressCircular, ResourcesInfoDialog },
+    components: {NoItemAvailableNote, ProgressCircular, DeviceInfoView },
     mixins: [ serviceInstanceMixin ],
     props: {
       serviceInstance: {

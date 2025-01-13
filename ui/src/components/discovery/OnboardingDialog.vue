@@ -34,7 +34,13 @@
           v-slot="{ meta, handleSubmit, validate }"
         >
           <v-container>
-            {{ discoveredResourcesIds }}
+            Do you want to onboard the following resources?
+            <div
+              v-for="(discoveredResourceId, index) in discoveredResourcesIds"
+              :key="index"
+            >
+              {{ discoveredResourceId }}
+            </div>
           </v-container>
           <v-card-actions>
             <v-row class="mx-4">
@@ -48,7 +54,7 @@
                 justify="end"
                 variant="text"
                 :color="!meta.valid ? $vuetify.theme.themes.light.colors.disable : $vuetify.theme.themes.light.colors.secondary"
-                @click="!meta.valid ? validate() : handleSubmit(onScanButtonClicked)"
+                @click="!meta.valid ? validate() : handleSubmit(onAddButtonClicked)"
               >
                 Add
               </v-btn>
@@ -64,6 +70,7 @@
 import {toRef} from "vue";
 import {Form as ValidationForm} from "vee-validate";
 import * as yup from "yup";
+import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 
 export default {
     name: 'DiscoverDialog',
@@ -105,9 +112,10 @@ export default {
       closeDialog () {
         this.$emit('canceled')
       },
-      onScanButtonClicked () {
-        this.$emit('completed', this.selectedDriver)
-        this.selectedDriver = undefined
+      onAddButtonClicked () {
+        ResourceManagementClient.discoveryApi.onboardDiscoveredResources({ 'resultIds': this.discoveredResourcesIds })
+
+        this.$emit('completed' )
       }
     }
   }

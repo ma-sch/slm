@@ -21,7 +21,7 @@
       </v-card-text>
     </base-material-card>
 
-    <resources-info-dialog
+    <DeviceInfoView
       :resource="selectedResource"
       @closed="selectedResource = null"
     />
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import ResourcesInfoDialog from '@/components/resources/dialogs/ResourcesInfoDialog'
+import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
 import ResourcesCreateDialog from '@/components/resources/dialogs/create/ResourcesCreateDialog'
 import ResourcesTableSingleHosts from '@/components/resources/ResourcesTableSingleHosts'
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
@@ -56,7 +56,7 @@ export default {
     name: 'ResourcesOverview',
     components: {
       OverviewHeading,
-      ResourcesInfoDialog,
+      DeviceInfoView,
       ResourcesCreateDialog,
       ResourcesTableSingleHosts,
       NoItemAvailableNote,

@@ -97,6 +97,14 @@
         </th>
       </template>
 
+      <template #item.product="{ item }">
+        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerProductDesignation[0].en") }}
+      </template>
+
+      <template #item.vendor="{ item }">
+        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName[0].en") }}
+      </template>
+
       <template #item.capabilityServices="{ item }">
         <v-tooltip
           v-for="capabilityService in getDeploymentCapabilityServices(item.capabilityServices)"
@@ -121,51 +129,8 @@
         </v-tooltip>
       </template>
 
-      <template #item.fabosDevice="{ item }">
-        <v-tooltip
-          v-if="hasBaseConfigurationCapabilityService(item.capabilityServices)"
-          location="right"
-        >
-          <template
-            #activator="{ props }"
-          >
-            <v-icon
-              :color="getFabOSDeviceIcon(item.capabilityServices).color"
-              v-bind="props"
-            >
-              {{ getFabOSDeviceIcon(item.capabilityServices).logo }}
-            </v-icon>
-          </template>
-          <span>Status: {{ getStatusOfBaseConfigurationCapabilityService(item.capabilityServices) }}</span>
-        </v-tooltip>
-        <v-icon
-          v-else
-          color="primary"
-        >
-          mdi-close-circle-outline
-        </v-icon>
-      </template>
-
-      <template #item.cpuArch="{ item }">
-        <div v-if="item.metrics != null">
-          {{ item.metrics.cpuArch }}
-        </div>
-        <div v-else>
-          -
-        </div>
-      </template>
-
-      <template #item.cpuCores="{ item }">
-        <div v-if="item.metrics != null">
-          {{ item.metrics.cpuCores }}
-        </div>
-        <div v-else>
-          -
-        </div>
-      </template>
-
-      <template #item.os="{ item }">
-        <v-icon>{{ getOsIcon(item.remoteAccessService) }}</v-icon>
+      <template #item.firmware="{ item }">
+        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.FirmwareVersion") }}
       </template>
 
       <!-- Column: Actions -->
@@ -292,19 +257,14 @@ export default {
     data () {
       return {
         tableHeaders: [
+          { title: "Product", key: "product" },
+          { title: "Vendor", key: "vendor" },
           { title: 'Capabilities', key: 'capabilityServices', value: 'capabilityServices' },
           { title: 'Hostname', key: 'hostname', value: 'hostname' },
           { title: 'IP', key: 'ip', value: 'ip' },
           { title: 'Location', key: 'location.name', value: 'location.name'},
-          { title: 'FabOS Device', key: 'fabosDevice', value: "fabosDevice" },
-          { title: 'Connection Type', key: 'remoteAccessService.connectionType', value:'remoteAccessService.connectionType'},
-          { title: 'Port', key: 'remoteAccessService.Port', value:'remoteAccessService.Port'},
-          // { text: 'CPU Arch', value: 'cpuArch' },
-          // { text: 'CPU Cores', value: 'cpuCores' },
-          { title: 'OS', key: 'os', value: 'os' },
-          { title: 'UUID', key: 'id', value: 'id', sortable: false },
-          { title: 'Cluster Member', key: 'clusterMember', value: 'clusterMember' },
-          { title:'', value: 'actions', sortable: false },
+          { title: 'Firmware', key: 'firmware' },
+          { title: 'Actions', value: 'actions', sortable: false },
         ],
         groupBy: [],
         sortBy: [{key: 'ip', order: 'asc'}],
@@ -357,6 +317,7 @@ export default {
     },
     created() {
       this.filteredResources = this.resources
+      this.resourceStore.getResourceAasValues()
     },
     methods: {
       hasBaseConfigurationCapabilityService(capabilityServicesOfResource) {

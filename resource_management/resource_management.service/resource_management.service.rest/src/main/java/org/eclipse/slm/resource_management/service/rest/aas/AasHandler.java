@@ -1,7 +1,9 @@
 package org.eclipse.slm.resource_management.service.rest.aas;
 
+import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
 import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShellDescriptor;
 import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
+import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiException;
 import org.eclipse.slm.common.aas.clients.AasRegistryClient;
@@ -11,10 +13,11 @@ import org.eclipse.slm.common.aas.clients.SubmodelRepositoryClient;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
-import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
 import org.eclipse.slm.resource_management.model.resource.ResourceAas;
 import org.eclipse.slm.resource_management.service.rest.aas.resources.ResourcesSubmodelRepositoryApiHTTPController;
-import org.eclipse.slm.resource_management.service.rest.aas.resources.consul.ConsulSubmodel;
+import org.eclipse.slm.resource_management.service.rest.aas.resources.deviceinfo.DeviceInfoSubmodel;
+import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3;
+import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3Submodel;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourceEvent;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesConsulClient;
 import org.slf4j.Logger;
@@ -75,7 +78,8 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
             var resources = resourcesConsulClient.getResources(new ConsulCredential());
 
             for (var resource: resources) {
-                this.createResourceAasAndSubmodels(resource);
+                var digitalNameplateV3 = new DigitalNameplateV3.Builder("N/A", "N/A", "N/A", "N/A").build();
+                this.createResourceAasAndSubmodels(resource, digitalNameplateV3);
             }
         } catch (ConsulLoginFailedException e) {
             throw new RuntimeException(e);
@@ -103,12 +107,30 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
         return url;
     }
 
-    private void createResourceAasAndSubmodels(BasicResource resource) {
+    public void createResourceAasAndSubmodels(BasicResource resource, DigitalNameplateV3 digitalNameplateV3) {
         try {
-            var resourceAAS = new ResourceAas(resource);
+            // Create AAS if it does not exist
+            AssetAdministrationShell resourceAAS;
+            try {
+                resourceAAS = this.aasRepositoryClient.getAas(ResourceAas.createAasIdFromResourceId(resource.getId()));
+            } catch (ElementDoesNotExistException e) {
+                resourceAAS = new ResourceAas(resource);
+                this.aasRepositoryClient.createOrUpdateAas(resourceAAS);
+            }
             var resourceAASIdEncoded = new Base64UrlEncodedIdentifier(resourceAAS.getId());
-            this.aasRepositoryClient.createOrUpdateAas(resourceAAS);
 
+            // Create submodel DigitalNameplate (if it does not exist)
+            var digitalNameplateSubmodelOptional = resourceAAS.getSubmodels().stream()
+                    .filter(reference -> reference.getKeys().stream()
+                            .anyMatch(key -> key.getType().equals(KeyTypes.SUBMODEL) && key.getValue().contains("DigitalNameplate"))).findAny();
+            if (digitalNameplateSubmodelOptional.isEmpty()) {
+                var digitalNameplateSubmodelId = DigitalNameplateV3Submodel.SUBMODEL_IDSHORT + "-" + resource.getId();
+                var digitalNameplateSubmodel = new DigitalNameplateV3Submodel(digitalNameplateSubmodelId, digitalNameplateV3);
+                this.submodelRepositoryClient.createOrUpdateSubmodel(digitalNameplateSubmodel);
+                this.aasRepositoryClient.addSubmodelReferenceToAas(resourceAAS.getId(), digitalNameplateSubmodelId);
+            }
+
+            // Create submodel PlatformResources
             var platformResourcesSubmodelId = "PlatformResources-" + resource.getId();
             var platformResourcesSubmodelUrl = this.monitoringServiceUrl + "/" + resource.getId() + "/submodel";
             this.aasRepositoryClient.addSubmodelReferenceToAas(resourceAAS.getId(), platformResourcesSubmodelId);
@@ -118,16 +140,18 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
                     platformResourcesSubmodelId,
                     null);
 
-            var consulSubmodelId = "Consul-" + resource.getId();
-            var consulSubmodelIdEncoded = new Base64UrlEncodedIdentifier(consulSubmodelId);
-            var consulSubmodelUrl = this.getResourcesSubmodelRepositoryUrl(resourceAASIdEncoded)
-                    + "/submodels/" + consulSubmodelIdEncoded.getEncodedIdentifier();
-            this.aasRepositoryClient.addSubmodelReferenceToAas(resourceAAS.getId(), consulSubmodelId);
+            // Create submodel DeviceInfo
+            var deviceInfoSubmodelId =  DeviceInfoSubmodel.SUBMODEL_ID_SHORT + "-" + resource.getId();
+            var deviceInfoSubmodelIdEncoded = new Base64UrlEncodedIdentifier(deviceInfoSubmodelId);
+            var deviceInfoSubmodelUrl = this.getResourcesSubmodelRepositoryUrl(resourceAASIdEncoded)
+                    + "/submodels/" + deviceInfoSubmodelIdEncoded.getEncodedIdentifier();
+            this.aasRepositoryClient.addSubmodelReferenceToAas(resourceAAS.getId(), deviceInfoSubmodelId);
             this.submodelRegistryClient.registerSubmodel(
-                    consulSubmodelUrl,
-                    consulSubmodelId,
-                    consulSubmodelId,
-                    ConsulSubmodel.SEMANTIC_ID_VALUE);
+                    deviceInfoSubmodelUrl,
+                    deviceInfoSubmodelId,
+                    deviceInfoSubmodelId,
+                    DeviceInfoSubmodel.SEMANTIC_ID_VALUE);
+
         }
         catch (ApiException e) {
             LOG.error("Unable to create AAS and submodels for resource [id='" + resource.getId() + "']: " + e.getMessage());
@@ -150,29 +174,28 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
                         if (endpoint.startsWith(this.submodelRepositoryClient.getSubmodelRepositoryUrl())) {
                             this.submodelRepositoryClient.deleteSubmodel(submodelId);
                         }
+                        else {
+                            try {
+                                this.submodelRegistryClient.unregisterSubmodel(submodelId);
+                            } catch (ApiException e) {
+                                LOG.error("Unable to unregister submodel [id='" + submodelId + "']: " + e.getMessage());
+                            }
+                        }
                     }
-                    this.submodelRegistryClient.unregisterSubmodel(submodelId);
                 }
             }
             this.aasRepositoryClient.deleteAAS(resourceAasId);
-
-        } catch (ApiException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public void onApplicationEvent(ResourceEvent resourceEvent) {
         switch (resourceEvent.getOperation()) {
             case CREATE -> {
-                try {
-                    var optionalResource = resourcesConsulClient.getResourceById(new ConsulCredential(), resourceEvent.getResourceId());
-                    optionalResource.ifPresent(this::createResourceAasAndSubmodels);
-                } catch (ConsulLoginFailedException e) {
-                    throw new RuntimeException(e);
-                } catch (ResourceNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
+                // Handled in ResourcesManager.addExistingResource
             }
             case DELETE -> {
                 this.deleteResourceAasAndSubmodels(resourceEvent.getResourceId());

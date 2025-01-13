@@ -23,6 +23,7 @@
     "cors": "^2.8.5",
     "dot-properties": "^1.0.1",
     "dotenv": "^8.6.0",
+    "jsonpath": "^1.1.1",
     "localforage": "^1.10.0",
     "material-design-icons-iconfont": "^6.7.0",
     "moment": "^2.29.4",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/eslint-parser": "^7.24.1",
+    "@typescript-eslint/parser": "^8.16.0",
     "@vue/babel-preset-app": "^5.0.8",
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-e2e-cypress": "^5.0.8",

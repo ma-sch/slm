@@ -7,6 +7,7 @@ import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultKey;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultReference;
 import org.eclipse.digitaltwin.basyx.aasrepository.client.ConnectedAasRepository;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierException;
+import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingSubmodelReferenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,12 +49,16 @@ public class AasRepositoryClient {
     }
 
     public void addSubmodelReferenceToAas(String aasId, String smId) {
-        var submodelReference = new DefaultReference.Builder()
-                .keys(new DefaultKey.Builder()
-                        .type(KeyTypes.SUBMODEL)
-                        .value(smId).build())
-                .build();
-        this.connectedAasRepository.addSubmodelReference(aasId, submodelReference);
+        try {
+            var submodelReference = new DefaultReference.Builder()
+                    .keys(new DefaultKey.Builder()
+                            .type(KeyTypes.SUBMODEL)
+                            .value(smId).build())
+                    .build();
+            this.connectedAasRepository.addSubmodelReference(aasId, submodelReference);
+        } catch (CollidingSubmodelReferenceException e) {
+            LOG.warn(e.getMessage());
+        }
     }
 
     public void removeSubmodelReferenceFromAas(String aasId, String smId) {

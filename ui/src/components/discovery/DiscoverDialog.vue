@@ -44,9 +44,9 @@
                 <v-select
                   v-bind="field"
                   v-model="selectedDriver"
-                  class="mx-8"
                   :items="drivers"
                   item-title="instanceId"
+                  class="mx-8"
                   return-object
                   label="Select driver to execute scan"
                   autofocus
@@ -64,6 +64,46 @@
                 <span>{{ errors[0] }}</span>
               </Field>
             </v-row>
+
+            <div
+              v-if="selectedDriver"
+            >
+              <v-row
+                v-if="selectedDriver.discoveryRequestFilters.length > 0"
+                class="mx-6 my-2"
+              >
+                Filters
+              </v-row>
+              <v-row
+                v-for="filter in selectedDriver.discoveryRequestFilters"
+                :key="filter.key"
+              >
+                <v-text-field
+                  v-model="filterValues[filter.key]"
+                  class="mx-8"
+                  :label="filter.key"
+                  clearable
+                />
+              </v-row>
+
+              <v-row
+                v-if="selectedDriver.discoveryRequestOptions.length > 0"
+                class="mx-6 my-2"
+              >
+                Options
+              </v-row>
+              <v-row
+                v-for="option in selectedDriver.discoveryRequestOptions"
+                :key="option.key"
+              >
+                <v-text-field
+                  v-model="optionValues[option.key]"
+                  class="mx-8"
+                  :label="option.key"
+                  clearable
+                />
+              </v-row>
+            </div>
           </v-container>
           <v-card-actions>
             <v-row class="mx-4">
@@ -123,7 +163,9 @@ export default {
     data () {
       return {
         dialog: this.active,
-        selectedDriver: undefined
+        selectedDriver: undefined,
+        filterValues: {},
+        optionValues: {}
       }
     },
   computed: {
@@ -136,7 +178,7 @@ export default {
         this.$emit('canceled')
       },
       onScanButtonClicked () {
-        this.$emit('completed', this.selectedDriver)
+        this.$emit('completed', this.selectedDriver, this.filterValues, this.optionValues)
         this.selectedDriver = undefined
       }
     }

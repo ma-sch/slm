@@ -169,6 +169,32 @@ export default {
             visible: true,
           },
           {
+            id: 'main-menu-button-discovery',
+            icon: 'mdi-tab-search',
+            title: this.$t('drawer.section.resources.discovery.title'),
+            group: '/discovery',
+            subGroup:true,
+            text: true,
+            to: '/discovery/inbox',
+            visible: true,
+            children: [
+              {
+                id: 'main-menu-button-admin-components',
+                title: this.$t('drawer.section.resources.discovery.inbox.title'),
+                icon: 'mdi-tray-full',
+                to: 'inbox',
+                visible: true
+              },
+              {
+                id: 'main-menu-button-admin-service-categories',
+                title: this.$t('drawer.section.resources.discovery.drivers.title'),
+                icon: 'mdi-magnify-scan',
+                to: 'drivers',
+                visible: true
+              }
+            ]
+          },
+          {
             id: 'main-menu-divider-services',
             title: this.$t('drawer.section.services.title'),
             divider: true,

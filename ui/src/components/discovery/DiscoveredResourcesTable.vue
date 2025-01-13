@@ -66,11 +66,32 @@
       :headers="tableHeaders"
       :items="discoveredResources"
       :search="searchDiscoveredResources"
-      item-key="resourceId"
+      item-key="resultId"
+      item-value="resultId"
       show-select
       :row-props="colorRowItem"
       :loading="apiStateDiscovery === ApiState.LOADING || apiStateDiscovery === ApiState.UPDATING"
       @click:row="onRowClick"
+    >
+      <template
+        #item.actions="{ item }"
+      >
+        <action-button
+          :type="ActionButtonType.CUSTOM"
+          color="secondary"
+          :icon="item.ignored ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
+          @click="onIgnoreResourceButtonClicked(item)"
+        />
+      </template>
+    </v-data-table>
+
+    <confirm-dialog
+      :show="confirmIgnoreResourceDialog"
+      title="Ignore discovered resource"
+      :text="resourceSelectedForDeleted?.ignored ? `Do you want to unignore the discovered resource '${resourceSelectedForDeleted?.name}'?`
+        : `Do you want to ignore the discovered resource '${resourceSelectedForDeleted?.name}'?`"
+      @confirmed="onIgnoreResourceDialogConfirmed"
+      @canceled="confirmIgnoreResourceDialog = false"
     />
   </v-container>
 </template>
@@ -80,6 +101,10 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useDiscoveryStore } from "@/stores/discoveryStore";
 import {storeToRefs} from "pinia";
 import ApiState from "@/api/apiState";
+import ActionButton from "@/components/base/ActionButton.vue";
+import {ActionButtonType} from "@/components/base/ActionButtonType";
+import ResourceManagementClient from "@/api/resource-management/resource-management-client";
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 
 const emit = defineEmits(['selectedDiscoveredResourcesChanged'])
 
@@ -100,6 +125,7 @@ const tableHeaders = [
   { title: 'IP address', key: 'ipAddress', value: 'ipAddress' },
   { title: 'MAC address ', key: 'macAddress', value: 'macAddress' },
   { title: 'Firmware version', key: 'firmwareVersion', value: 'firmwareVersion' },
+  { title: '', value: 'actions', sortable: false },
 ];
 
 watch(selectedDiscoveredResourceIds, (newVal) => {
@@ -107,11 +133,11 @@ watch(selectedDiscoveredResourceIds, (newVal) => {
 });
 
 const onRowClick = (click, row) => {
-  row.toggleSelect({ value: row.item.id });
+  row.toggleSelect({ value: row.item.resultId });
 };
 
 const colorRowItem = (row) => {
-  if (selectedDiscoveredResourceIds.value.includes(row.item.id)) {
+  if (selectedDiscoveredResourceIds.value.includes(row.item.resultId)) {
     return { class: 'v-data-table__selected' };
   }
 };
@@ -122,9 +148,25 @@ const onFilterChanged = () => {
     showOnlyLatestJobsOfDrivers.value,
     showIgnoredResources.value
   )
-  console.log("Table:")
-  console.log(discoveredResources)
 };
+
+const resourceSelectedForDeleted = ref(undefined)
+const confirmIgnoreResourceDialog = ref(false)
+const onIgnoreResourceButtonClicked = (item) => {
+  confirmIgnoreResourceDialog.value = true;
+  console.log(item)
+  resourceSelectedForDeleted.value = item;
+};
+const onIgnoreResourceDialogConfirmed = () => {
+  confirmIgnoreResourceDialog.value = false;
+  ResourceManagementClient.discoveryApi.ignoreDiscoveredResource(resourceSelectedForDeleted.value.resultId, !resourceSelectedForDeleted.value.ignored);
+  discoveryStore.getDiscoveredResources(
+      removeDuplicates.value,
+      showOnlyLatestJobsOfDrivers.value,
+      showIgnoredResources.value
+  )
+};
+
 </script>
 
 <style>

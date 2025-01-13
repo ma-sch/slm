@@ -23,8 +23,9 @@ public class ConsulNodesApiClient extends AbstractConsulApiClient {
 
     public final static Logger LOG = LoggerFactory.getLogger(ConsulNodesApiClient.class);
     private final ConsulAclApiClient consulAclApiClient;
+
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Autowired
     public ConsulNodesApiClient(
@@ -97,5 +98,14 @@ public class ConsulNodesApiClient extends AbstractConsulApiClient {
                 .setNode(consulNodeName)
                 .build();
         this.getConsulClient(consulCredential).catalogClient().deregister(deregistration);
+    }
+
+    public void addMetaDataToNode(ConsulCredential consulCredential, UUID nodeId, Map<String, String> additionalMetaData)
+            throws ConsulLoginFailedException {
+        var node = this.getNodeById(consulCredential, nodeId).orElseThrow();
+        node.getMeta().putAll(additionalMetaData);
+        var catalogRegistration = ConsulObjectMapper.map(node, CatalogRegistration.class);
+        this.getConsulClient(consulCredential).catalogClient().register(catalogRegistration);
+
     }
 }

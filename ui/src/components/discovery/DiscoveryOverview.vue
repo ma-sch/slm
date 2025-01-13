@@ -96,14 +96,20 @@ export default {
     }
   },
   methods: {
-    triggerDiscovery(driver) {
+    triggerDiscovery(driver, filterValues, optionValues) {
       this.showDiscoverDialog = false;
-      ResourceManagementClient.discoveryApi.discover(driver.instanceId);
+      var discoveryRequest = {
+        'filterValues': filterValues,
+        'optionValues': optionValues
+      }
+
+      ResourceManagementClient.discoveryApi.discover(driver.instanceId, discoveryRequest);
       this.$toast.info(`Scan started by driver '${driver.instanceId}'`)
     },
     triggerOnboarding() {
-      this.showOnboardingDialog = false;
       console.log("Onboarding triggered")
+      this.showOnboardingDialog = false;
+      this.discoveryStore.getDiscoveredResources();
     },
     onSelectedDiscoveredResourcesChanged: function(selectedDiscoveredResourceIds) {
       this.selectedDiscoveredResourceIds = selectedDiscoveredResourceIds

@@ -2,12 +2,15 @@ import {
     AasRestControllerApi,
     CapabilitiesRestControllerApi,
     CapabilityProvidersRestControllerApi,
-    ClustersRestControllerApi, DiscoveryRestControllerApi,
+    ClustersRestControllerApi,
+    DiscoveryRestControllerApi,
     JobsRestControllerApi,
     LocationRestControllerApi,
     MetricsRestControllerApi,
     ProfilerRestControllerApi,
     ResourcesRestControllerApi,
+    ResourcesSubmodelRepositoryApiHttpControllerApi,
+    ResourcesSubmodelRepositoryApiHttpControllerApiAxiosParamCreator,
     SubmodelsRestControllerApi,
     SubmodelTemplatesRestControllerApi
 } from "@/api/resource-management/client";
@@ -29,6 +32,7 @@ class ResourceManagementClient{
     capabilityApi = new CapabilitiesRestControllerApi(undefined, this.apiUrl)
     submodelsApi = new SubmodelsRestControllerApi(undefined, this.apiUrl);
     discoveryApi = new DiscoveryRestControllerApi(undefined, this.apiUrl);
+    resourcesSubmodelRepositoryApi = new ResourcesSubmodelRepositoryApiHttpControllerApi(undefined, this.apiUrl);
 
 }
 

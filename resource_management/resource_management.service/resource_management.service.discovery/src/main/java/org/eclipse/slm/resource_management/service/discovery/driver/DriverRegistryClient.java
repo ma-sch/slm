@@ -62,6 +62,12 @@ public class DriverRegistryClient {
                 var patchVersion = versionInfo.getPatch();
                 driverInfo.setVersion(majorVersion + "." + minorVersion + "." + patchVersion);
 
+                var discoveryRequestFilters = driverClient.getDiscoveryRequestFilters();
+                driverInfo.setDiscoveryRequestFilters(discoveryRequestFilters);
+
+                var discoveryRequestOptions = driverClient.getDiscoveryRequestOptions();
+                driverInfo.setDiscoveryRequestOptions(discoveryRequestOptions);
+
                 driverInfos.add(driverInfo);
             } catch (DriverNotReachableException e) {
                 LOG.warn("Failed to get version info for driver: {}", driverInfo.getInstanceId());

@@ -4,12 +4,15 @@ import {defineStore} from "pinia";
 import {useProviderStore} from "@/stores/providerStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
+import jp from "jsonpath";
+import { Base64 } from "js-base64";
 
 interface ResourcesStoreState{
     apiStateResources_: number,
 
     resources_: any[],
     resourceAASs_: any[],
+    resourceAASValues_: {}
     locations_: any[],
     profiler_: any[],
     resourceConnectionTypes_: any[],
@@ -40,6 +43,7 @@ export const useResourcesStore = defineStore('resourcesStore', {
 
         resources_: [],
         resourceAASs_: [],
+        resourceAASValues_: [],
         locations_: [],
         profiler_: [],
         resourceConnectionTypes_: [],
@@ -82,6 +86,10 @@ export const useResourcesStore = defineStore('resourcesStore', {
             }   else {
                 return state.resourceAASs_
             }
+        },
+
+        resourceAASValues: (state) => {
+            return state.resourceAASValues_
         },
 
         profiler: (state) => {
@@ -280,6 +288,29 @@ export const useResourcesStore = defineStore('resourcesStore', {
                     this.setAvailableResourceTypes([]);
                     this.apiStateResources_ = ApiState.ERROR;
                 })
+        },
+
+        async getResourceAasValues () {
+            return await Promise.all(this.resources.map(async (resource) => {
+                await ResourceManagementClient.resourcesSubmodelRepositoryApi.getAllSubmodelsValueOnly(Base64.encode("Resource_" + resource.id))
+                    .then(
+                        response => {
+                            this.resourceAASValues_[resource.id] = response.data;
+                        }
+                    ).catch(logRequestError)
+            }));
+        },
+
+        getSubmodelElementValueOfResourceSubmodel (resourceId, submodelIdShort, submodelElementJsonPath) {
+            try {
+                var value = jp.value(this.resourceAASValues_[resourceId][submodelIdShort]["valuesOnlyMap"], submodelElementJsonPath);
+                if (value == undefined) {
+                    value = "N/A";
+                }
+                return value
+            } catch (e) {
+                return "N/A"
+            }
         },
 
         async getResourceAASFromBackend () {

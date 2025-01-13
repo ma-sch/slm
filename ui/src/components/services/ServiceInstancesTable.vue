@@ -180,7 +180,7 @@
       @confirmed="onServiceDeleteConfirmed"
     />
 
-    <resources-info-dialog
+    <DeviceInfoView
       :resource="selectedResource"
       @closed="selectedResource = null"
     />
@@ -198,7 +198,7 @@
 
 <script>
 import ServiceInstanceDeleteDialog from '@/components/services/ServiceInstanceDeleteDialog'
-import ResourcesInfoDialog from '@/components/resources/dialogs/ResourcesInfoDialog'
+import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
 import ConfirmDialog from "@/components/base/ConfirmDialog";
 import {serviceInstanceMixin} from "@/components/services/serviceInstanceMixin";
 import {useServicesStore} from "@/stores/servicesStore";
@@ -212,7 +212,7 @@ export default {
     comments: {
       ServiceInstanceDeleteDialog,
     },
-    components: { ServiceInstanceDeleteDialog, ResourcesInfoDialog, ConfirmDialog },
+    components: { ServiceInstanceDeleteDialog, DeviceInfoView, ConfirmDialog },
     mixins: [ serviceInstanceMixin ],
     setup(){
       const servicesStore = useServicesStore();

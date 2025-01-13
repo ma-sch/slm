@@ -1,0 +1,119 @@
+<template>
+  <v-dialog
+    v-model="show"
+    @click:outside="onCloseButtonClicked"
+  >
+    <template #default="{}">
+      <v-card v-if="show">
+        <v-toolbar
+          color="primary"
+          theme="dark"
+        >
+          {{ resource.hostname }}
+        </v-toolbar>
+
+        <v-card-text>
+          <v-tabs
+            v-model="tab"
+            color="secondary"
+            stacked
+          >
+            <!-- Common -->
+            <v-tab :value="1">
+              <v-icon>mdi-information-outline</v-icon>
+              Common
+            </v-tab>
+
+            <!-- Nameplate -->
+            <v-tab :value="2">
+              <v-icon>mdi-id-card</v-icon>
+              Nameplate
+            </v-tab>
+
+            <!-- Hardware -->
+            <v-tab :value="3">
+              <v-icon>mdi-expansion-card</v-icon>
+              Hardware
+            </v-tab>
+
+            <!-- Submodels -->
+            <v-tab :value="4">
+              <v-icon>mdi-adjust</v-icon>
+              Submodels
+            </v-tab>
+          </v-tabs>
+
+          <v-tabs-window v-model="tab">
+            <!-- Common -->
+            <v-tabs-window-item
+              :value="1"
+            >
+              <DeviceInfoCommonView :resource-id="resource.id" />
+            </v-tabs-window-item>
+
+            <!-- Nameplate -->
+            <v-tabs-window-item
+              :value="2"
+            >
+              <DeviceInfoNameplateView :resource-id="resource.id" />
+            </v-tabs-window-item>
+
+            <!-- Hardware -->
+            <v-tabs-window-item
+              :value="3"
+            >
+              <DeviceInfoHardwareView
+                :resource-id="resource.id"
+              />
+            </v-tabs-window-item>
+
+            <!-- Submodels -->
+            <v-tabs-window-item
+              :value="4"
+            >
+              <DeviceInfoSubmodelsView
+                :resource-id="resource.id"
+              />
+            </v-tabs-window-item>
+          </v-tabs-window>
+        </v-card-text>
+
+        <v-card-actions class="justify-end">
+          <v-btn
+            variant="text"
+            @click="onCloseButtonClicked"
+          >
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
+</template>
+
+<script setup>
+import {computed, ref} from 'vue';
+import DeviceInfoSubmodelsView from "@/components/resources/deviceinfo/DeviceInfoSubmodelsView";
+import DeviceInfoNameplateView from "@/components/resources/deviceinfo/DeviceInfoNameplateView";
+import DeviceInfoHardwareView from "@/components/resources/deviceinfo/DeviceInfoHardwareView";
+import DeviceInfoCommonView from "@/components/resources/deviceinfo/DeviceInfoCommonView.vue";
+
+const emit = defineEmits(['closed']);
+
+const props = defineProps({
+  resource: {
+    type: Object,
+    default: null,
+  }
+});
+
+
+const tab = ref(null);
+
+
+const show = computed(() => props.resource !== null);
+
+const onCloseButtonClicked = () => {
+  emit('closed');
+};
+</script>

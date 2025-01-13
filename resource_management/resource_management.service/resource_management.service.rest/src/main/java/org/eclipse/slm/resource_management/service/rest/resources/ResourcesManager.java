@@ -12,6 +12,8 @@ import org.eclipse.slm.notification_service.model.JobGoal;
 import org.eclipse.slm.notification_service.model.JobTarget;
 import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
 import org.eclipse.slm.resource_management.model.resource.*;
+import org.eclipse.slm.resource_management.service.rest.aas.AasHandler;
+import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3;
 import org.eclipse.slm.resource_management.service.rest.capabilities.SingleHostCapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.model.capabilities.CapabilityNotFoundException;
 import org.eclipse.slm.resource_management.model.consul.capability.CapabilityService;
@@ -47,6 +49,7 @@ public class ResourcesManager {
     private final SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient;
     private final LocationJpaRepository locationJpaRepository;
     private final ApplicationEventPublisher publisher;
+    private final AasHandler aasHandler;
 
     @Autowired
     public ResourcesManager(
@@ -59,7 +62,7 @@ public class ResourcesManager {
             CapabilitiesConsulClient capabilitiesConsulClient,
             SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient,
             LocationJpaRepository locationJpaRepository,
-            ApplicationEventPublisher publisher
+            ApplicationEventPublisher publisher, AasHandler aasHandler
     ) {
         this.resourcesConsulClient = resourcesConsulClient;
         this.resourcesVaultClient = resourcesVaultClient;
@@ -71,6 +74,7 @@ public class ResourcesManager {
         this.singleHostCapabilitiesConsulClient = singleHostCapabilitiesConsulClient;
         this.locationJpaRepository = locationJpaRepository;
         this.publisher = publisher;
+        this.aasHandler = aasHandler;
     }
 
     public List<BasicResource> getResourcesWithCredentialsByRemoteAccessService(
@@ -155,6 +159,21 @@ public class ResourcesManager {
         return resources;
     }
 
+    public Optional<BasicResource> getResourceWithoutCredentials(UUID resourceId) {
+        Optional<BasicResource> optionalResource = null;
+        try {
+            optionalResource = resourcesConsulClient.getResourceById(
+                    new ConsulCredential(),
+                    resourceId
+            );
+        } catch (ResourceNotFoundException | ConsulLoginFailedException e) {
+            LOG.error(e.getMessage());
+            return Optional.empty();
+        }
+
+        return optionalResource;
+    }
+
     public BasicResource getResourceWithCredentialsByRemoteAccessService(
             JwtAuthenticationToken jwtAuthenticationToken,
             UUID resourceId
@@ -223,81 +242,19 @@ public class ResourcesManager {
     }
 
     //region ADD/DELETE
-    public void addExistingResource(
-            JwtAuthenticationToken jwtAuthenticationToken,
-            BasicResource basicResource,
-            ConnectionType connectionType,
-            int connectionPort,
-            CredentialUsernamePassword credentialUsernamePassword,
-            Optional<UUID> optionalLocationId,
-            Optional<UUID> optionalResourceBaseConfigurationId
-    ) throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
-        this.addExistingResource(
-                jwtAuthenticationToken,
-                basicResource.getId(),
-                basicResource.getHostname(),
-                basicResource.getIp(),
-                optionalLocationId,
-                credentialUsernamePassword.getUsername(),
-                credentialUsernamePassword.getPassword(),
-                connectionType,
-                connectionPort,
-                optionalResourceBaseConfigurationId
-        );
-    }
-
     public BasicResource addExistingResource(
             JwtAuthenticationToken jwtAuthenticationToken,
             UUID resourceId,
             String resourceHostname,
             String resourceIp,
-            Optional<UUID> optionalLocationId,
-            String resourceUsername,
-            String resourcePassword,
-            ConnectionType connectionType,
-            int connectionPort,
-            Optional<UUID> optionalResourceBaseConfigurationId
+            DigitalNameplateV3 digitalNameplateV3
     ) throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
         /// Create realm role in Keycloak for new resource
         var resourceKeycloakRoleName = "resource_" + resourceId;
         this.keycloakUtil.createRealmRoleAndAssignToUser(jwtAuthenticationToken, resourceKeycloakRoleName);
 
-        boolean remoteAccessAvailable = (connectionType != null && ConnectionTypeUtils.isRemote(connectionType));
-        CredentialUsernamePassword credential = null;
-        if(remoteAccessAvailable)
-            credential = new CredentialUsernamePassword(resourceUsername, resourcePassword);
-
-        Optional<Location> optionalLocation;
-
-        if(optionalLocationId.isPresent())
-            optionalLocation = locationJpaRepository.findById(optionalLocationId.orElse(null));
-        else
-            optionalLocation = Optional.empty();
-
-        var resource = this.resourcesConsulClient.addResource(
-                resourceId,
-                resourceHostname,
-                resourceIp,
-                connectionType,
-                optionalLocation
-        );
-
-        if(remoteAccessAvailable) {
-            RemoteAccessService remoteAccessService = this.resourcesConsulClient.addConnectionService(
-                    connectionType,
-                    connectionPort,
-                    resource,
-                    credential
-            );
-
-            var serviceKeycloakRoleName = "service_" + remoteAccessService.getId();
-            this.keycloakUtil.createRealmRoleAndAssignToUser(jwtAuthenticationToken, serviceKeycloakRoleName);
-
-
-            this.resourcesVaultClient.addSecretsForConnectionService(
-                    remoteAccessService
-            );
-        }
+        var resource = new BasicResource(resourceId, resourceHostname, resourceIp);
+        resource = this.resourcesConsulClient.addResource(resource);
 
         //Add Health Checks if Capabilities with Health Checks are available:
         var capabilities = this.capabilitiesManager.getCapabilities();
@@ -314,21 +271,12 @@ public class ResourcesManager {
             }
         }
 
-        if(optionalResourceBaseConfigurationId.isPresent()) {
-            UUID baseConfigurationId = optionalResourceBaseConfigurationId.get();
-            capabilitiesManager.installBaseConfigurationOnResource(
-                    jwtAuthenticationToken,
-                    resource.getId(),
-                    baseConfigurationId
-            );
-        }
+        this.aasHandler.createResourceAasAndSubmodels(resource, digitalNameplateV3);
 
         notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.CREATE);
-        publisher.publishEvent(new ResourceEvent(this, resourceId, ResourceEvent.Operation.CREATE));
+
         return resource;
-
     }
-
 
     public void deleteResource(
             JwtAuthenticationToken jwtAuthenticationToken,
@@ -364,4 +312,35 @@ public class ResourcesManager {
         publisher.publishEvent(new ResourceEvent(this, resourceId, ResourceEvent.Operation.DELETE));
     }
     //endregion
+
+    public void setRemoteAccessOfResource(
+            JwtAuthenticationToken jwtAuthenticationToken,
+            UUID resourceId,
+            String resourceUsername,
+            String resourcePassword,
+            ConnectionType connectionType,
+            int connectionPort) throws ConsulLoginFailedException {
+        var credential = new CredentialUsernamePassword(resourceUsername, resourcePassword);
+
+        this.resourcesConsulClient.setResourceConnectionType(resourceId, connectionType);
+        var remoteAccessService = this.resourcesConsulClient.addConnectionService(
+                connectionType,
+                connectionPort,
+                resourceId,
+                credential);
+
+        var serviceKeycloakRoleName = "service_" + remoteAccessService.getId();
+        this.keycloakUtil.createRealmRoleAndAssignToUser(jwtAuthenticationToken, serviceKeycloakRoleName);
+
+        this.resourcesVaultClient.addSecretsForConnectionService(
+                remoteAccessService
+        );
+
+    }
+
+    public void setLocationOfResource(UUID resourceId, UUID locationId) throws ConsulLoginFailedException {
+        var optionalLocation = locationJpaRepository.findById(locationId);
+
+        this.resourcesConsulClient.setResourceLocation(resourceId, optionalLocation.get());
+    }
 }

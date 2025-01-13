@@ -70,7 +70,6 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
                 response => {
                     this.discoveredResources_ = response.data;
                     this.apiStateDiscovery_ = ApiState.LOADED;
-                    console.log(this.discoveredResources_)
                 }
             ).catch(logRequestError)
         },

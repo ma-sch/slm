@@ -1,5 +1,8 @@
 package org.eclipse.slm.resource_management.model.discovery;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DriverInfo {
 
     private String instanceId;
@@ -15,6 +18,10 @@ public class DriverInfo {
     private int portNumber;
 
     private String ipv4Address;
+
+    private List<DiscoveryRequestFilter> discoveryRequestFilters = new ArrayList<>();
+
+    private List<DiscoveryRequestOption> discoveryRequestOptions = new ArrayList<>();
 
     public String getInstanceId() {
         return instanceId;
@@ -70,5 +77,21 @@ public class DriverInfo {
 
     public void setIpv4Address(String ipv4Address) {
         this.ipv4Address = ipv4Address;
+    }
+
+    public List<DiscoveryRequestFilter> getDiscoveryRequestFilters() {
+        return discoveryRequestFilters;
+    }
+
+    public void setDiscoveryRequestFilters(List<DiscoveryRequestFilter> discoveryRequestFilters) {
+        this.discoveryRequestFilters = discoveryRequestFilters;
+    }
+
+    public List<DiscoveryRequestOption> getDiscoveryRequestOptions() {
+        return discoveryRequestOptions;
+    }
+
+    public void setDiscoveryRequestOptions(List<DiscoveryRequestOption> discoveryRequestOptions) {
+        this.discoveryRequestOptions = discoveryRequestOptions;
     }
 }

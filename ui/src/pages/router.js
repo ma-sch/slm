@@ -48,9 +48,14 @@ const routes = [
       },
       // Discovery
       {
-        name: 'Discovery',
-        path: '/discovery',
-        component: () => import('@/pages/DiscoveryPage'),
+        name: 'Discovery Inbox',
+        path: '/discovery/inbox',
+        component: () => import('@/pages/DiscoveryInboxPage'),
+      },
+      {
+        name: 'Discovery Drivers',
+        path: '/discovery/drivers',
+        component: () => import('@/pages/DiscoveryDriversPage'),
       },
       // Resources
       {
