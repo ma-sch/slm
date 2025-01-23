@@ -315,19 +315,14 @@ export default {
         this.filterResources()
       }
     },
+  mounted () {
+    this.resourceStore.getResourceAasValues()
+  },
     created() {
       this.filteredResources = this.resources
       this.resourceStore.getResourceAasValues()
     },
     methods: {
-      hasBaseConfigurationCapabilityService(capabilityServicesOfResource) {
-        return capabilityServicesOfResource.some(cs => cs.capability.capabilityClass==="BaseConfigurationCapability")
-      },
-      getStatusOfBaseConfigurationCapabilityService(capabilityServicesOfResource) {
-        const bcCapabilityService = capabilityServicesOfResource.find(cs => cs.capability.capabilityClass==="BaseConfigurationCapability")
-
-        return bcCapabilityService.status
-      },
       getDeploymentCapabilityServices(capabilityServices) {
         return capabilityServices.filter(cs => cs.capability.capabilityClass!=="BaseConfigurationCapability")
       },
@@ -349,7 +344,6 @@ export default {
       },
       runAddCapability(configParameter) {
         this.addCapability(this.selectedResourceId, this.selectedCapabilityId, this.selectedSkipInstall, configParameter)
-
       },
       addCapability (resourceId, capabilityId, skipInstall, configParameterMap) {
         ResourceManagementClient.capabilityApi.installCapabilityOnSingleHost(resourceId, capabilityId, configParameterMap, skipInstall).then();
@@ -488,30 +482,6 @@ export default {
       },
       resourceHasRemoteAccessService(resource) {
         return resource.remoteAccessService != null
-      },
-      getFabOSDeviceIcon(capabilityServices) {
-        const baseConfigService = capabilityServices.find(cs => cs.capability.capabilityClass === "BaseConfigurationCapability")
-
-        if(baseConfigService.status === "INSTALL" || baseConfigService.status === "UNINSTALL")
-          return {
-            "color": "info",
-            "logo": "mdi-timer-sand"
-          }
-        if(baseConfigService.status === "READY")
-          return {
-            "color": "info",
-            "logo": "mdi-check-circle-outline"
-          }
-        if(baseConfigService.status === "FAILED")
-          return {
-            "color": "error",
-            "logo": "mdi-message-alert"
-          }
-        else
-          return {
-            "color": "warn",
-            "logo": "mdi-help-circle-outline"
-          }
       },
       getCapabilitiesByCapabilityClass(capabilityClass) {
         return this.availableSingleHostCapabilitiesNoDefault.filter(shc => shc.capabilityClass === capabilityClass)

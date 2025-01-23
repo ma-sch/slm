@@ -122,7 +122,7 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
             // Create submodel DigitalNameplate (if it does not exist)
             var digitalNameplateSubmodelOptional = resourceAAS.getSubmodels().stream()
                     .filter(reference -> reference.getKeys().stream()
-                            .anyMatch(key -> key.getType().equals(KeyTypes.SUBMODEL) && key.getValue().contains("DigitalNameplate"))).findAny();
+                            .anyMatch(key -> key.getType().equals(KeyTypes.SUBMODEL) && key.getValue().contains("Nameplate"))).findAny();
             if (digitalNameplateSubmodelOptional.isEmpty()) {
                 var digitalNameplateSubmodelId = DigitalNameplateV3Submodel.SUBMODEL_IDSHORT + "-" + resource.getId();
                 var digitalNameplateSubmodel = new DigitalNameplateV3Submodel(digitalNameplateSubmodelId, digitalNameplateV3);

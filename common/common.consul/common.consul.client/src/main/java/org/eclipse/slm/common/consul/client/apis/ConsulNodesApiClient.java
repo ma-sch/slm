@@ -80,7 +80,9 @@ public class ConsulNodesApiClient extends AbstractConsulApiClient {
         node.setDatacenter(String.valueOf(getNode.getDatacenter()));
         node.setAddress(getNode.getAddress());
         node.setTaggedAddresses(taggedAddresses);
-        node.setMeta(getNode.getNodeMeta().get());
+        if (getNode.getNodeMeta().isPresent()) {
+            node.setMeta(getNode.getNodeMeta().get());
+        }
 
         return node;
     }

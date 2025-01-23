@@ -23,7 +23,7 @@
           </v-tooltip>
           <v-switch
             id="resource-create-switch-ssh-available"
-            v-model="resourceAccessAvailable"
+            v-model="remoteAccess.available"
             label="Remote access to resource available?"
           />
         </v-row>
@@ -92,9 +92,9 @@
         <v-row>
           <v-col cols="9">
             <Field
-              v-if="resourceAccessAvailable"
+              v-if="remoteAccess.available"
               v-slot="{ errors, field }"
-              v-model="resourceConnectionType"
+              v-model="remoteAccess.connectionType"
               name="Resource Connection"
               :rules="string_required"
             >
@@ -104,7 +104,7 @@
                 required
                 label="Connection Type"
                 prepend-icon="mdi-connection"
-                :items="resourceConnectionTypes"
+                :items="availableConnectionTypes"
                 item-title="prettyName"
                 item-value="name"
                 :error-messages="errors"
@@ -115,9 +115,9 @@
           </v-col>
           <v-col cols="3">
             <Field
-              v-if="resourceAccessAvailable"
+              v-if="remoteAccess.available"
               v-slot="{ errors, field }"
-              v-model="resourceConnectionPort"
+              v-model="remoteAccess.connectionPort"
               name="Connection Port"
               :rules="string_required"
             >
@@ -133,9 +133,9 @@
           </v-col>
         </v-row>
         <Field
-          v-if="resourceAccessAvailable"
+          v-if="remoteAccess.available"
           v-slot="{ errors, field }"
-          v-model="resourceUsername"
+          v-model="remoteAccess.username"
           name="Username"
           :rules="string_required"
         >
@@ -147,13 +147,13 @@
             required
             prepend-icon="mdi-account"
             :error-messages="errors"
-            :model-value="resourceUsername"
+            :model-value="remoteAccess.username"
           />
         </Field>
         <Field
-          v-if="resourceAccessAvailable"
+          v-if="remoteAccess.available"
           v-slot="{ errors, field }"
-          v-model="resourcePassword"
+          v-model="remoteAccess.password"
           name="Password"
           :rules="string_required"
         >
@@ -224,19 +224,20 @@ export default {
     },
     data () {
       return {
-        resourceAccessAvailable: false,
         resourceHostname: '',
         resourceIp: '',
         resourceLocation: '',
-        resourceConnectionType: '',
-        resourceConnectionPort: 0,
-        resourceUsername: '',
-        resourcePassword: '',
-        addBaseConfigurationToResource: false
+        remoteAccess: {
+          available: false,
+          connectionType: '',
+          connectionPort: 0,
+          username: '',
+          password: ''
+        },
       }
     },
     computed: {
-      resourceConnectionTypes() {
+      availableConnectionTypes() {
         return this.resourceStore.resourceConnectionTypes
       },
       locations () {
@@ -258,26 +259,26 @@ export default {
     },
     methods: {
       updateConnectionPort(connectionTypeName) {
-        let connectionType = this.resourceConnectionTypes.find(ct => {
+        let connectionType = this.availableConnectionTypes.find(ct => {
           return ct.name === connectionTypeName
         });
 
         if(connectionType !== undefined)
-          this.resourceConnectionPort = connectionType.defaultPort
+          this.remoteAccess.connectionPort = connectionType.defaultPort
       },
       clearForm () {
-        this.resourceAccessAvailable = false
         this.resourceHostname = ''
         this.resourceIp = ''
         this.resourceLocation = ''
-        this.resourceUsername = ''
-        this.resourcePassword = ''
-        this.resourceConnectionType = ''
-        this.resourceConnectionPort = 0
+        this.remoteAccess.available = false
+        this.remoteAccess.username = ''
+        this.remoteAccess.password = ''
+        this.remoteAccess.connectionType = ''
+        this.remoteAccess.connectionPort = 0
         this.addBaseConfigurationToResource = false
       },
       showBaseConfigurationSwitch() {
-        return this.availableBaseConfigurationCapabilities.length > 0 && this.resourceAccessAvailable
+        return this.availableBaseConfigurationCapabilities.length > 0 && this.remoteAccess.available
       },
       onBackButtonClicked () {
         this.clearForm()
@@ -288,23 +289,37 @@ export default {
         this.$emit('canceled')
       },
       onAddButtonClicked () {
-        ResourceManagementClient.resourcesApi.addExistingResource(
-          this.resourceHostname,
-          this.resourceIp,
-          this.resourceConnectionType,
-          this.resourceUsername,
-          this.resourcePassword,
-          this.resourceConnectionPort,
-          this.resourceLocation,
-          this.resourceBaseConfigurationId
-        ).then().catch(logRequestError);
+        ResourceManagementClient.resourcesApi.addExistingResource({
+          resourceHostname: this.resourceHostname,
+          resourceIp: this.resourceIp,
+          digitalNameplateV3: {}
+        }).then(
+          response => {
+            if (response.status === 201) {
+              let resourceId = response.data;
 
-        this.clearForm()
-        this.$emit('confirmed')
-      },
-      ipValueChanged (value) {
-      },
+              if (this.resourceLocation !== '') {
+                ResourceManagementClient.resourcesApi.addResourceLocation(
+                    resourceId, this.resourceLocation
+                ).then().catch(logRequestError);
+              }
 
+              if (this.remoteAccess.available) {
+                ResourceManagementClient.resourcesApi.addResourceRemoteAccess(
+                    resourceId,
+                    this.remoteAccess.connectionType,
+                    this.remoteAccess.username,
+                    this.remoteAccess.password,
+                    this.remoteAccess.connectionPort
+                ).then().catch(logRequestError);
+              }
+
+              this.clearForm()
+              this.$emit('confirmed')
+            }
+          }
+        ).catch(logRequestError);
+      },
     },
   }
 </script>

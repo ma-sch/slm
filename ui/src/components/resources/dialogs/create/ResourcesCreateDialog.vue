@@ -46,7 +46,7 @@
         @confirmed="closeDialog"
       />
 
-      <resources-create-dialog-page-add-existing-resource-host
+      <resources-create-dialog-page-add-existing-resource-device
         v-if="page === ResourcesCreateDialogPage.ADD_EXISTING_RESOURCE_HOST"
         @page-changed="onPageChanged"
         @title-changed="onTitleChanged"
@@ -84,8 +84,8 @@
 <script>
 import ResourcesCreateDialogPage from "@/components/resources/dialogs/create/ResourcesCreateDialogPage";
 import ResourcesCreateDialogPageStart from "@/components/resources/dialogs/create/ResourcesCreateDialogPageStart";
-import ResourcesCreateDialogPageAddExistingResourceHost
-  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResourceHost";
+import ResourcesCreateDialogPageAddExistingResourceDevice
+  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResourceDevice";
 import ResourcesCreateDialogPageAddExistingResource
   from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResource";
 import ResourcesCreateDialogPageAddExistingResourceCluster
@@ -101,7 +101,7 @@ export default {
     components: {
       ResourcesCreateDialogPageStart,
       ResourcesCreateDialogPageAddExistingResource,
-      ResourcesCreateDialogPageAddExistingResourceHost,
+      ResourcesCreateDialogPageAddExistingResourceDevice,
       ResourcesCreateDialogPageAddExistingResourceCluster,
       ResourcesCreateDialogPageCreateNewResource,
       ResourcesCreateDialogPageCreateNewResourceCluster

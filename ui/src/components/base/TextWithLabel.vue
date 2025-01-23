@@ -2,6 +2,7 @@
   <v-tooltip
     :text="tooltip"
     :disabled="tooltip === ''"
+    :open-delay="tooltipDelay"
   >
     <template #activator="{ props }">
       <div v-bind="props">
@@ -30,6 +31,11 @@ const props = defineProps({
     type: String,
     default: "",
     required: false
-  }
+  },
+  tooltipDelay: {
+    type: Number,
+    default: 0,
+    required: false
+}
 });
 </script>

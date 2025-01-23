@@ -16,7 +16,7 @@
             >
               mdi-desktop-classic
             </v-icon>
-            Host
+            Device
           </v-btn>
         </v-col>
         <v-col class="text-center">
