@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import {defineProps, ref} from 'vue'
 import TextWithLabel from "@/components/base/TextWithLabel";
 import {useResourcesStore} from "@/stores/resourcesStore";
 
