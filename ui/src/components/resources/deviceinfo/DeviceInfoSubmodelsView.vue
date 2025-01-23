@@ -1,49 +1,44 @@
 <template>
   <div>
-    <v-table
+    <v-data-table
       v-if="submodels.length > 0"
-      v-slot
+      :items="submodels"
+      :headers="headers"
+      item-value="idShort"
     >
-      <thead>
-        <tr>
-          <th>{{ 'IdShort' }}</th>
-          <th>{{ 'Id' }}</th>
-          <th>{{ 'Details' }}</th>
-          <th>{{ 'semantic Id' }}</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="submodel in submodels"
-          :key="submodel.idShort"
+      <template #item.idShort="{ item }">
+        {{ item.idShort }}
+      </template>
+      <template #item.id="{ item }">
+        {{ item.id }}
+      </template>
+      <template #item.semanticId="{ item }">
+        <div v-if="item.semanticId">
+          {{ item.semanticId.keys[0].value }}
+        </div>
+      </template>
+      <template #item.actions="{ item }">
+        <v-btn
+          color="info"
+          class="ma-2"
         >
-          <td> {{ submodel.idShort }}</td>
-          <td> {{ submodel.id }} </td>
-          <td>
-            <a
-              v-if="aasDescriptor"
-              :href="`${aasGuiUrl}/?aas=${aasDescriptor.endpoints[0].protocolInformation.href}&path=${submodel.endpoints[0].protocolInformation.href}`"
-              target="_blank"
-            ><v-icon>mdi-open-in-new</v-icon></a>
-          </td>
-          <td>
-            <div v-if="submodel.semanticId">
-              {{ submodel.semanticId.keys[0].value }}
-            </div>
-          </td>
-          <td>
-            <v-btn
-              color="error"
-              class="ma-2"
-              @click.stop="submodelToDelete = submodel"
-            >
-              <v-icon icon="mdi-delete" />
-            </v-btn>
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
+          <a
+            v-if="aasDescriptor"
+            :href="`${aasGuiUrl}/?aas=${aasDescriptor.endpoints[0].protocolInformation.href}&path=${item.endpoints[0].protocolInformation.href}`"
+            target="_blank"
+          >
+            <v-icon color="white">mdi-open-in-new</v-icon>
+          </a>
+        </v-btn>
+        <v-btn
+          color="error"
+          class="ma-2"
+          @click.stop="submodelToDelete = item"
+        >
+          <v-icon icon="mdi-delete" />
+        </v-btn>
+      </template>
+    </v-data-table>
     <div v-else>
       <v-alert
         variant="outlined"
@@ -103,7 +98,13 @@ export default {
       submodels: [],
       submodelToDelete: undefined,
       file: undefined,
-      aasGuiUrl: getEnv("VUE_APP_BASYX_AAS_GUI_URL")
+      aasGuiUrl: getEnv("VUE_APP_BASYX_AAS_GUI_URL"),
+      headers: [
+        { title: 'Id Short', value: 'idShort', sortable: true },
+        { title: 'Id', value: 'id', sortable: true },
+        { title: 'Semantic Id', value: 'semanticId', sortable: true },
+        { title: 'Actions', value: 'actions', sortable: false },
+      ]
     }
   },
 
