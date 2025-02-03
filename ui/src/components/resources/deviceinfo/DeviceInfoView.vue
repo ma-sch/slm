@@ -1,10 +1,16 @@
 <template>
   <v-dialog
     v-model="show"
+    width="90%"
+    height="90%"
     @click:outside="onCloseButtonClicked"
   >
     <template #default="{}">
-      <v-card v-if="show">
+      <v-card
+        v-if="show"
+        height="90%"
+        min-height="90%"
+      >
         <v-toolbar
           color="primary"
           theme="dark"

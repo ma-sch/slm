@@ -4,7 +4,7 @@
       v-if="submodels.length > 0"
       :items="submodels"
       :headers="headers"
-      item-value="idShort"
+      item-value="id"
     >
       <template #item.idShort="{ item }">
         {{ item.idShort }}
@@ -100,10 +100,10 @@ export default {
       file: undefined,
       aasGuiUrl: getEnv("VUE_APP_BASYX_AAS_GUI_URL"),
       headers: [
-        { title: 'Id Short', value: 'idShort', sortable: true },
-        { title: 'Id', value: 'id', sortable: true },
-        { title: 'Semantic Id', value: 'semanticId', sortable: true },
-        { title: 'Actions', value: 'actions', sortable: false },
+        { title: 'Id Short', value: 'idShort', sortable: true, width: '30%' },
+        { title: 'Id', value: 'id', sortable: true, width: '30%' },
+        { title: 'Semantic Id', value: 'semanticId', sortable: true, width: '30%' },
+        { title: 'Actions', value: 'actions', sortable: false, width: '10%' },
       ]
     }
   },
