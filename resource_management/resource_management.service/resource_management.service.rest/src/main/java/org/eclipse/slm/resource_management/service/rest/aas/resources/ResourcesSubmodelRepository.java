@@ -102,10 +102,10 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
                         submodelValueOnly.setValuesOnlyMap(submodelValueOnlyBasyx.getValuesOnlyMap());
                         submodelValueOnly.setIdShort(submodelDescriptor.getIdShort());
 
-                        submodelsValueOnlyLocalRemote.put(submodelDescriptor.getIdShort(), submodelValueOnly);
+                        submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
                     });
                 }
-            } catch (ElementDoesNotExistException | org.eclipse.digitaltwin.basyx.client.internal.ApiException e) {
+            } catch (ElementDoesNotExistException | org.eclipse.digitaltwin.basyx.client.internal.ApiException | IllegalStateException e) {
                 LOG.info(e.getMessage());
             }
         }

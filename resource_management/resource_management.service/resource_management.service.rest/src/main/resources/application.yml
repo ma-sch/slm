@@ -90,6 +90,11 @@ spring:
     init:
       platform: mysql
       mode: always
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "myuser"
+    password: "secret"
 
 management:
   endpoints:

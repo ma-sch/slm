@@ -6,6 +6,7 @@ import org.eclipse.slm.common.consul.client.apis.ConsulAclApiClient;
 import org.eclipse.slm.common.consul.model.catalog.NodeService;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
+import org.eclipse.slm.common.messaging.resources.ResourceMessageSender;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.notification_service.model.Category;
 import org.eclipse.slm.notification_service.model.JobGoal;
@@ -24,7 +25,6 @@ import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNot
 import org.eclipse.slm.resource_management.persistence.api.LocationJpaRepository;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesManager;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesConsulClient;
-import org.eclipse.slm.resource_management.service.rest.utils.ConnectionTypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +50,7 @@ public class ResourcesManager {
     private final LocationJpaRepository locationJpaRepository;
     private final ApplicationEventPublisher publisher;
     private final AasHandler aasHandler;
+    private final ResourceMessageSender resourceMessageSender;
 
     @Autowired
     public ResourcesManager(
@@ -62,7 +63,8 @@ public class ResourcesManager {
             CapabilitiesConsulClient capabilitiesConsulClient,
             SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient,
             LocationJpaRepository locationJpaRepository,
-            ApplicationEventPublisher publisher, AasHandler aasHandler
+            ApplicationEventPublisher publisher, AasHandler aasHandler,
+            ResourceMessageSender resourceMessageSender
     ) {
         this.resourcesConsulClient = resourcesConsulClient;
         this.resourcesVaultClient = resourcesVaultClient;
@@ -75,6 +77,7 @@ public class ResourcesManager {
         this.locationJpaRepository = locationJpaRepository;
         this.publisher = publisher;
         this.aasHandler = aasHandler;
+        this.resourceMessageSender = resourceMessageSender;
     }
 
     public List<BasicResource> getResourcesWithCredentialsByRemoteAccessService(
@@ -274,6 +277,8 @@ public class ResourcesManager {
         this.aasHandler.createResourceAasAndSubmodels(resource, digitalNameplateV3);
 
         notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.CREATE);
+
+        resourceMessageSender.sendResourceCreatedMessage(resource.getId());
 
         return resource;
     }
