@@ -45,7 +45,8 @@ import java.util.concurrent.Executor;
         "org.eclipse.slm.common.model",
         "org.eclipse.slm.common.parent",
         "org.eclipse.slm.common.utils",
-        "org.eclipse.slm.common.vault"
+        "org.eclipse.slm.common.vault",
+        "org.eclipse.slm.common.messaging"
 }
 )
 @EntityScan(basePackages = {

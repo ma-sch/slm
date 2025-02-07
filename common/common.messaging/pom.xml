@@ -4,27 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>common</artifactId>
+    <artifactId>common.messaging</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.eclipse.slm</groupId>
-        <artifactId>slm</artifactId>
+        <artifactId>common</artifactId>
         <version>${revision}</version>
     </parent>
 
     <modules>
-        <module>common.aas</module>
-        <module>common.awx</module>
-        <module>common.utils</module>
-        <module>common.consul</module>
-        <module>common.parent</module>
-        <module>common.vault</module>
-        <module>common.keycloak</module>
-        <module>common.model</module>
-        <module>common.minio</module>
-        <module>common.messaging</module>
+        <module>common.messaging.resources</module>
     </modules>
 
 </project>
