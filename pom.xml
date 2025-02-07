@@ -16,6 +16,7 @@
         <module>service_management</module>
         <module>ui</module>
         <module>notification_service</module>
+        <module>information_service</module>
         <module>catalog</module>
         <module>coverage</module>
     </modules>

@@ -6,19 +6,19 @@ application:
 
 ### Deployment
 deployment:
-  scheme: "http"
   hostname: "slm.local"
+  scheme: "http"
   port: ${server.port}
 
 ### Server / API
 server:
-  port: 9020
+  port: 9030
   error:
     include-message: always
 
 open-api:
-  title: Service Management
-  description: REST API of Service Management
+  title: Information Service
+  description: REST API of Information Service
   version: "^project.version^"
   contact:
     name: Fraunhofer IPA
@@ -34,20 +34,9 @@ springdoc:
       clientId: ui
       clientSecret: unused-and-not-required
 
-### Database
-database:
-  host: 127.0.0.1
-  port: 3320
-  schema: services
-  username: service-management
-  password: password
-
-### Spring
 spring:
   application:
-    name: service_management
-  main:
-    allow-bean-definition-overriding: true
+    name: information_service
   config:
     import: "consul:"
   cloud:
@@ -57,6 +46,7 @@ spring:
       discovery:
         enabled: true
         hostname: ${deployment.hostname}
+        port: ${deployment.port}
         acl-token: ${consul.acl-token}
         register-health-check: true
         tags: slm, backend, ${spring.application.name}
@@ -69,27 +59,11 @@ spring:
         profileSeparator: '::'
         format: YAML
         acl-token: ${consul.acl-token}
-  security:
-    user:
-      name: "user"
-      password: "password"
-  jpa:
-    properties:
-      hibernate:
-        enable_lazy_load_no_trans: true
-        type:
-          preferred_uuid_jdbc_type: CHAR
-    hibernate:
-      ddl-auto: update
-  datasource:
-    driver-class-name=org: 'mariadb.jdbc.Driver'
-    url: jdbc:mariadb://${database.host}:${database.port}/${database.schema}?createDatabaseIfNotExist=true&serverTimezone=UTC
-    username: ${database.username}
-    password: ${database.password}
-  sql:
-    init:
-      mode: always
-      platform: mysql
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "myuser"
+    password: "secret"
 
 management:
   endpoints:
@@ -97,62 +71,6 @@ management:
   info:
     git.enabled: false
 
-### Git
-git:
-  service-offering-importer:
-    clone-directory: tmp/
-    updater-interval-minutes: 15
-
-### Components - Internal
-notification-service:
-  scheme: "http"
-  host: "localhost"
-  port: 9001
-
-### Resource Management
-resource-management:
-  url: "http://localhost:9010"
-
-### Security
-security:
-  auth-white-list: ""
-  origins: "*"
-
-### Keycloak
-keycloak:
-  tenants:
-    config-path: consul:keycloak
-
-### AWX
-awx:
-  scheme: http
-  host: localhost
-  port: 8013
-  username: admin
-  password: password
-  polling-interval-in-s: 4
-
-### Vault
-vault:
-  scheme: http
-  host: localhost
-  port: 8200
-  authentication: APPROLE
-#  token: your-secret-token
-  app-role:
-    role-id: service-lifecycle-management
-    secret-id: your-secret-id
-    app-role-path: approle
-
-### Minio
-minio:
-  scheme: http
-  host: localhost
-  port: 9091
-  access-key: admin
-  secret-key: password
-
-### AAS
 aas:
   broker:
     host: localhost
@@ -183,10 +101,11 @@ aas:
     url: ${aas.submodel-repository.scheme}://${aas.submodel-repository.host}:${aas.submodel-repository.port}${aas.submodel-repository.path}
   concept-descriptions-repository:
     scheme: http
-    host: slm.local
+    host: localhost
     port: 8081
     path:
     url: ${aas.concept-descriptions-repository.scheme}://${aas.concept-descriptions-repository.host}:${aas.concept-descriptions-repository.port}${aas.concept-descriptions-repository.path}
+
 
 ### Consul
 consul:
@@ -195,7 +114,3 @@ consul:
   port: 8500
   datacenter: fabos
   acl-token: QUZbGhZPy2GglE69ldeDyUO1
-
-service-management:
-  url: http://localhost:9020
-
