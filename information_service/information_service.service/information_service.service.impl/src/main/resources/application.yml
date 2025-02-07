@@ -6,7 +6,7 @@ application:
 
 ### Deployment
 deployment:
-  hostname: "slm.local"
+  hostname: "localhost"
   scheme: "http"
   port: ${server.port}
 
@@ -110,7 +110,7 @@ aas:
 ### Consul
 consul:
   scheme: http
-  host: slm.local
+  host: localhost
   port: 8500
   datacenter: fabos
-  acl-token: QUZbGhZPy2GglE69ldeDyUO1
+  acl-token: your-consul-acl-token
