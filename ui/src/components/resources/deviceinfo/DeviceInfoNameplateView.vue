@@ -22,7 +22,7 @@ const resourceStore = useResourcesStore();
       <v-col>
         <TextWithLabel
           :label="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerName.Name')"
-          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerName[0].en')"
+          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerName..en')"
           :tooltip="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerName.Description')"
           :tooltip-delay="tooltipDelay"
         />
@@ -30,7 +30,7 @@ const resourceStore = useResourcesStore();
       <v-col>
         <TextWithLabel
           :label="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerProductDesignation.Name')"
-          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerProductDesignation[0].en')"
+          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerProductDesignation..en')"
           :tooltip="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerProductDesignation.Description')"
           :tooltip-delay="tooltipDelay"
         />
@@ -49,7 +49,7 @@ const resourceStore = useResourcesStore();
       <v-col>
         <TextWithLabel
           :label="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerProductRoot.Name')"
-          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerProductRoot[0].en')"
+          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerProductRoot..en')"
           :tooltip="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerProductRoot.Description')"
           :tooltip-delay="tooltipDelay"
         />
@@ -57,7 +57,7 @@ const resourceStore = useResourcesStore();
       <v-col>
         <TextWithLabel
           :label="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerProductFamily.Name')"
-          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerProductFamily[0].en')"
+          :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'Nameplate', '$.ManufacturerProductFamily..en')"
           :tooltip="$t('AAS.SubmodelTemplates.DigitalNameplateV3.Properties.ManufacturerProductFamily.Description')"
           :tooltip-delay="tooltipDelay"
         />

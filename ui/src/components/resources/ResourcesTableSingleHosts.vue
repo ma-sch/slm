@@ -98,11 +98,11 @@
       </template>
 
       <template #item.product="{ item }">
-        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerProductDesignation[0].en") }}
+        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerProductType..en") }}
       </template>
 
       <template #item.vendor="{ item }">
-        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName[0].en") }}
+        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en") }}
       </template>
 
       <template #item.capabilityServices="{ item }">
