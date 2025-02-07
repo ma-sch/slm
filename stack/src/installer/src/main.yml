@@ -54,6 +54,13 @@
         _consul_token: "{{ CONSUL_MASTER_TOKEN }}"
         _store_compose_file: /compose/vault.yml
 
+    - name: "Start RabbitMQ"
+      include_role:
+        name: rabbitmq/init
+      vars:
+        _consul_token: "{{ CONSUL_MASTER_TOKEN }}"
+        _store_compose_file: /compose/rabbitmq.yml
+
     - name: "Start Minio"
       include_role:
         name: minio/init

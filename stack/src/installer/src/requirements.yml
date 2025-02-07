@@ -1,4 +1,5 @@
 collections:
   - community.general
   - community.docker
+  - community.rabbitmq
   - awx.awx

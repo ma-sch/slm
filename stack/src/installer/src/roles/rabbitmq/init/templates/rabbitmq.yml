@@ -1,0 +1,25 @@
+services:
+  rabbitmq:
+    image: 'rabbitmq:4.0.5-management-alpine'
+    restart: unless-stopped
+    environment:
+      - 'RABBITMQ_DEFAULT_USER={{ app_configs.rabbitmq.users.admin.username }}'
+      - 'RABBITMQ_DEFAULT_PASS={{ app_configs.rabbitmq.users.admin.password }}'
+    networks:
+        default:
+            aliases:
+            - rabbitmq
+    ports:
+      - '{{ RABBITMQ_PORT }}:5672'
+      - '{{ RABBITMQ_MANAGEMENT_PORT }}:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  rabbitmq_data:
