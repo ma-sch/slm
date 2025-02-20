@@ -16,7 +16,6 @@ public class ResourceMessageSender {
 
     public static final String EXCHANGE_NAME = "resources";
 
-
     private final RabbitTemplate rabbitTemplate;
 
     public ResourceMessageSender(final RabbitTemplate rabbitTemplate) {
@@ -32,6 +31,12 @@ public class ResourceMessageSender {
         var message = new ResourceCreatedMessage(resourceId);
         rabbitTemplate.convertAndSend(ResourceMessageSender.EXCHANGE_NAME, ResourceCreatedMessage.ROUTING_KEY, message);
         LOG.info("Sent resource created message: {}", message);
+    }
+
+    public void sendResourceInformationMessage(UUID resourceId) {
+        var message = new ResourceInformationFoundMessage(resourceId, null);
+        rabbitTemplate.convertAndSend(ResourceMessageSender.EXCHANGE_NAME, ResourceInformationFoundMessage.ROUTING_KEY, message);
+        LOG.info("Sent resource information message: {}", message);
     }
 
 }

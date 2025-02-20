@@ -11,11 +11,14 @@ import org.eclipse.slm.common.aas.clients.IDTASubmodelTemplates;
 import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
 import org.eclipse.slm.common.aas.clients.SubmodelRepositoryClient;
 import org.eclipse.slm.common.messaging.resources.ResourceCreatedMessage;
+import org.eclipse.slm.common.messaging.resources.ResourceInformationFoundMessage;
 import org.eclipse.slm.common.messaging.resources.ResourceMessageListener;
+import org.eclipse.slm.common.messaging.resources.ResourceMessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -30,13 +33,15 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
     private final AasRepositoryClient aasRepositoryClient;
     private final SubmodelRepositoryClient submodelRepositoryClient;
     private final SubmodelRegistryClient submodelRegistryClient;
+    private final ResourceMessageSender resourceMessageSender;
 
     public InformationServiceResourceMessageListener(AasRepositoryClient aasRepositoryClient,
                                                      SubmodelRepositoryClient submodelRepositoryClient,
-                                                     SubmodelRegistryClient submodelRegistryClient) {
+                                                     SubmodelRegistryClient submodelRegistryClient, ResourceMessageSender resourceMessageSender) {
         this.aasRepositoryClient = aasRepositoryClient;
         this.submodelRepositoryClient = submodelRepositoryClient;
         this.submodelRegistryClient = submodelRegistryClient;
+        this.resourceMessageSender = resourceMessageSender;
     }
 
     @Override
@@ -45,7 +50,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
         try {
 
-            var aasId = "Resource_" + resource.getResourceId();
+            var aasId = "Resource_" + resource.resourceId();
             var aas = aasRepositoryClient.getAas(aasId);
             var semanticIdToSubmodelDescriptors = new HashMap<String, List<SubmodelDescriptor>>();
 
@@ -104,13 +109,19 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                     .build();
 
             var uriOfTheProductBase64Encoded = Base64.getEncoder().encodeToString(uriOfTheProduct.getBytes());
-            var shellIds = webClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/lookup/shells")
-                            .queryParam("assetIds", uriOfTheProductBase64Encoded)
-                            .build())
-                    .retrieve()
-                    .bodyToMono(String[].class)
-                    .block();
+            String[] shellIds = new String[0];
+            try {
+                shellIds = webClient.get()
+                        .uri(uriBuilder -> uriBuilder.path("/lookup/shells")
+                                .queryParam("assetIds", uriOfTheProductBase64Encoded)
+                                .build())
+                        .retrieve()
+                        .bodyToMono(String[].class)
+                        .block();
+            } catch (WebClientResponseException.NotFound e) {
+                LOG.info("No shells found for asset id '{}', skipping information retrieval", uriOfTheProduct);
+                return;
+            }
 
             DefaultSubmodel[] receivedSubmodels = new DefaultSubmodel[0];
             for (var shellId : shellIds) {
@@ -163,11 +174,17 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
             }
 
             LOG.info("Successfully added {} submodels to AAS '{}'", receivedSubmodels.length, aasId);
+
+            resourceMessageSender.sendResourceInformationMessage(resource.resourceId());
         }
         catch (Exception e) {
             LOG.error("Error while processing resource created message: {}", e.getMessage());
-            e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onResourceInformationFound(ResourceInformationFoundMessage resourceInformationFoundMessage) {
+        // Nothing to do
     }
 
 }

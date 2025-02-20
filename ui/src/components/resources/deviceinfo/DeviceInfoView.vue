@@ -42,8 +42,14 @@
               Hardware
             </v-tab>
 
-            <!-- Submodels -->
+            <!-- Software -->
             <v-tab :value="4">
+              <v-icon>mdi-apps</v-icon>
+              Software
+            </v-tab>
+
+            <!-- Submodels -->
+            <v-tab :value="5">
               <v-icon>mdi-adjust</v-icon>
               Submodels
             </v-tab>
@@ -73,9 +79,18 @@
               />
             </v-tabs-window-item>
 
-            <!-- Submodels -->
+            <!-- Software -->
             <v-tabs-window-item
               :value="4"
+            >
+              <DeviceInfoSoftwareView
+                :resource-id="resource.id"
+              />
+            </v-tabs-window-item>
+
+            <!-- Submodels -->
+            <v-tabs-window-item
+              :value="5"
             >
               <DeviceInfoSubmodelsView
                 :resource-id="resource.id"
@@ -103,6 +118,7 @@ import DeviceInfoSubmodelsView from "@/components/resources/deviceinfo/DeviceInf
 import DeviceInfoNameplateView from "@/components/resources/deviceinfo/DeviceInfoNameplateView";
 import DeviceInfoHardwareView from "@/components/resources/deviceinfo/DeviceInfoHardwareView";
 import DeviceInfoCommonView from "@/components/resources/deviceinfo/DeviceInfoCommonView.vue";
+import DeviceInfoSoftwareView from "@/components/resources/deviceinfo/DeviceInfoSoftwareView.vue";
 
 const emit = defineEmits(['closed']);
 

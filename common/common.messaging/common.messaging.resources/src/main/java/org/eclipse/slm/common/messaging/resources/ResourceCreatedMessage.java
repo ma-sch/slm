@@ -6,12 +6,14 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public record ResourceCreatedMessage(
-        @JsonProperty("getResourceId") UUID getResourceId
+        @JsonProperty("resourceId") UUID resourceId
 ) implements Serializable {
+
+    public static final String QUEUE_NAME_PREFIX_RESOURCE_CREATED = "resource.created_";
 
     public static final String ROUTING_KEY = "resource.created";
 
-    public UUID getResourceId() {
-        return getResourceId;
+    public UUID resourceId() {
+        return resourceId;
     }
 }

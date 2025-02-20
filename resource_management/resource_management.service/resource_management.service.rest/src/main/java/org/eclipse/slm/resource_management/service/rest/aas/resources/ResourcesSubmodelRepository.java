@@ -105,8 +105,8 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
                         submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
                     });
                 }
-            } catch (ElementDoesNotExistException | org.eclipse.digitaltwin.basyx.client.internal.ApiException | IllegalStateException e) {
-                LOG.info(e.getMessage());
+            } catch (ElementDoesNotExistException | org.eclipse.digitaltwin.basyx.client.internal.ApiException | IllegalStateException | NullPointerException e) {
+                LOG.info("Failed to get value only representation for submodel '{}': {}", submodelId, e.getMessage());
             }
         }
 

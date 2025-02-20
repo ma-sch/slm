@@ -606,6 +606,28 @@ paths:
       responses:
         '200':
           description: OK
+  "/resources/{resourceId}/updates":
+    get:
+      tags:
+        - updates-rest-controller
+      summary: Get available updates for resource
+      operationId: geAvailableUpdatesOfResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/UpdateInformation"
   "/resources/{resourceId}/deployment-capabilities":
     get:
       tags:
@@ -2072,13 +2094,13 @@ components:
           "$ref": "#/components/schemas/ConnectionType"
         executionEnvironment:
           "$ref": "#/components/schemas/ExecutionEnvironment"
+        isCluster:
+          type: boolean
         connectionTypes:
           uniqueItems: true
           type: array
           items:
             "$ref": "#/components/schemas/ConnectionType"
-        isCluster:
-          type: boolean
       discriminator:
         propertyName: capabilityClass
     CapabilityService:
@@ -2301,6 +2323,17 @@ components:
       type: object
       allOf:
         - "$ref": "#/components/schemas/Capability"
+    UpdateInformation:
+      type: object
+      properties:
+        version:
+          type: string
+        date:
+          type: string
+        installationUri:
+          type: string
+        installationChecksum:
+          type: string
     AdministrativeInformation:
       type: object
       properties:
@@ -2321,32 +2354,28 @@ components:
       properties:
         id:
           type: string
+        idShort:
+          type: string
         endpoints:
           type: array
           items:
             "$ref": "#/components/schemas/Endpoint"
-        idShort:
-          type: string
-        specificAssetIds:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SpecificAssetId"
         submodelDescriptors:
           type: array
           items:
             "$ref": "#/components/schemas/SubmodelDescriptor"
+        specificAssetIds:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SpecificAssetId"
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        assetKind:
-          "$ref": "#/components/schemas/AssetKind"
         assetType:
           type: string
         globalAssetId:
           type: string
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
+        assetKind:
+          "$ref": "#/components/schemas/AssetKind"
         displayName:
           type: array
           items:
@@ -2355,6 +2384,10 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
     AssetKind:
       type: string
       enum:
@@ -2432,10 +2465,10 @@ components:
     Key:
       type: object
       properties:
-        type:
-          "$ref": "#/components/schemas/KeyTypes"
         value:
           type: string
+        type:
+          "$ref": "#/components/schemas/KeyTypes"
     KeyTypes:
       type: string
       enum:
@@ -2480,24 +2513,24 @@ components:
     ProtocolInformation:
       type: object
       properties:
-        endpointProtocol:
-          type: string
         href:
           type: string
-        subprotocolBody:
+        endpointProtocol:
           type: string
-        subprotocol:
-          type: string
+        securityAttributes:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SecurityAttributeObject"
         endpointProtocolVersion:
           type: array
           items:
             type: string
         subprotocolBodyEncoding:
           type: string
-        securityAttributes:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SecurityAttributeObject"
+        subprotocolBody:
+          type: string
+        subprotocol:
+          type: string
     Reference:
       type: object
       properties:
@@ -2517,12 +2550,12 @@ components:
     SecurityAttributeObject:
       type: object
       properties:
-        type:
-          "$ref": "#/components/schemas/SecurityTypeEnum"
         value:
           type: string
         key:
           type: string
+        type:
+          "$ref": "#/components/schemas/SecurityTypeEnum"
     SecurityTypeEnum:
       type: string
       enum:
@@ -2549,24 +2582,20 @@ components:
       properties:
         id:
           type: string
+        idShort:
+          type: string
         endpoints:
           type: array
           items:
             "$ref": "#/components/schemas/Endpoint"
         semanticId:
           "$ref": "#/components/schemas/Reference"
-        idShort:
-          type: string
         supplementalSemanticId:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
@@ -2575,6 +2604,10 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
     Base64UrlEncodedCursor:
       type: object
       properties:
@@ -2582,33 +2615,6 @@ components:
           type: string
         decodedCursor:
           type: string
-    Message:
-      type: object
-      properties:
-        text:
-          type: string
-        timestamp:
-          type: string
-        code:
-          type: string
-        messageType:
-          "$ref": "#/components/schemas/MessageTypeEnum"
-        correlationId:
-          type: string
-    MessageTypeEnum:
-      type: string
-      enum:
-        - ERROR
-        - EXCEPTION
-        - INFO
-        - WARNING
-    Result:
-      type: object
-      properties:
-        messages:
-          type: array
-          items:
-            "$ref": "#/components/schemas/Message"
     GetSubmodelsResult:
       type: object
       properties:
@@ -2632,9 +2638,9 @@ components:
     Qualifier:
       type: object
       properties:
-        type:
-          type: string
         value:
+          type: string
+        type:
           type: string
         kind:
           "$ref": "#/components/schemas/QualifierKind"
@@ -2665,14 +2671,14 @@ components:
           type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringNameType"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         idShort:
           type: string
         category:
@@ -2704,14 +2710,14 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/EmbeddedDataSpecification"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringNameType"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         idShort:
           type: string
         category:
@@ -2730,6 +2736,33 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Qualifier"
+    Message:
+      type: object
+      properties:
+        text:
+          type: string
+        timestamp:
+          type: string
+        messageType:
+          "$ref": "#/components/schemas/MessageTypeEnum"
+        correlationId:
+          type: string
+        code:
+          type: string
+    MessageTypeEnum:
+      type: string
+      enum:
+        - ERROR
+        - EXCEPTION
+        - INFO
+        - WARNING
+    Result:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Message"
     SubmodelElementValue:
       type: object
     SubmodelValueOnly:
@@ -3069,14 +3102,14 @@ components:
           type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringNameType"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         idShort:
           type: string
         category:
@@ -3092,24 +3125,24 @@ components:
     AssetInformation:
       type: object
       properties:
+        defaultThumbnail:
+          "$ref": "#/components/schemas/Resource"
         specificAssetIds:
           type: array
           items:
             "$ref": "#/components/schemas/SpecificAssetId"
-        assetKind:
-          "$ref": "#/components/schemas/AssetKind"
         assetType:
           type: string
         globalAssetId:
           type: string
-        defaultThumbnail:
-          "$ref": "#/components/schemas/Resource"
+        assetKind:
+          "$ref": "#/components/schemas/AssetKind"
     Resource:
       type: object
       properties:
-        contentType:
-          type: string
         path:
+          type: string
+        contentType:
           type: string
   securitySchemes:
     spring_oauth:

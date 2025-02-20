@@ -12,7 +12,7 @@ import {
     ResourcesSubmodelRepositoryApiHttpControllerApi,
     ResourcesSubmodelRepositoryApiHttpControllerApiAxiosParamCreator,
     SubmodelsRestControllerApi,
-    SubmodelTemplatesRestControllerApi
+    SubmodelTemplatesRestControllerApi, UpdatesRestControllerApi
 } from "@/api/resource-management/client";
 
 
@@ -33,6 +33,7 @@ class ResourceManagementClient{
     submodelsApi = new SubmodelsRestControllerApi(undefined, this.apiUrl);
     discoveryApi = new DiscoveryRestControllerApi(undefined, this.apiUrl);
     resourcesSubmodelRepositoryApi = new ResourcesSubmodelRepositoryApiHttpControllerApi(undefined, this.apiUrl);
+    resourcesUpdatesApi = new UpdatesRestControllerApi(undefined, this.apiUrl);
 
 }
 

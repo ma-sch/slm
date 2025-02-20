@@ -742,7 +742,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
 //                            singleHostCapabilitiesConsulClient.addSingleHostCapabilityToNode(
 //                                    new ConsulCredential(),
 //                                    capability,
-//                                    jobDetails.getResourceId()
+//                                    jobDetails.resourceId()
 //                            );
                         }
 

@@ -98,11 +98,18 @@
       </template>
 
       <template #item.product="{ item }">
-        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerProductType..en") }}
+        <div>
+          {{ getProductOfResource(item.id) }}
+        </div>
       </template>
 
       <template #item.vendor="{ item }">
-        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en") }}
+        <div v-if="resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, 'Nameplate', '$.ManufacturerName..en') == 'N/A'">
+          {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..de") }}
+        </div>
+        <div v-else>
+          {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en") }}
+        </div>
       </template>
 
       <template #item.capabilityServices="{ item }">
@@ -308,30 +315,30 @@ export default {
         return [...new Set(
           this.availableSingleHostCapabilitiesNoDefault.map(shc => shc.capabilityClass)
         )].sort()
-      }
+      },
     },
-    watch: {
-      resources() {
-        this.filterResources()
-      }
-    },
-  mounted () {
+  watch: {
+    resources() {
+      this.filterResources()
+    }
+  },
+  mounted() {
     this.resourceStore.getResourceAasValues()
   },
-    created() {
-      this.filteredResources = this.resources
-      this.resourceStore.getResourceAasValues()
+  created() {
+    this.filteredResources = this.resources
+    this.resourceStore.getResourceAasValues()
+  },
+  methods: {
+    getDeploymentCapabilityServices(capabilityServices) {
+      return capabilityServices.filter(cs => cs.capability.capabilityClass !== "BaseConfigurationCapability")
     },
-    methods: {
-      getDeploymentCapabilityServices(capabilityServices) {
-        return capabilityServices.filter(cs => cs.capability.capabilityClass!=="BaseConfigurationCapability")
-      },
-      deleteResource (resource) {
-        const resourceId = resource.id
-        ResourceManagementClient.resourcesApi.deleteResource(resourceId).then();
-        this.resourceStore.setResourceMarkedForDelete(resource);
-        this.resourceToDelete = null
-      },
+    deleteResource(resource) {
+      const resourceId = resource.id
+      ResourceManagementClient.resourcesApi.deleteResource(resourceId).then();
+      this.resourceStore.setResourceMarkedForDelete(resource);
+      this.resourceToDelete = null
+    },
       openDefineCapabilityParamsDialog(resourceId, capabilityId, skipInstall) {
         if(this.isDefineCapabilityDialogRequired(capabilityId, skipInstall) === false) {
           this.addCapability(resourceId,capabilityId,skipInstall,{})
@@ -492,6 +499,23 @@ export default {
       runProfiler() {
         ResourceManagementClient.profilerApi.runProfiler1().then().catch(logRequestError);
         app.config.globalProperties.$toast.info('Started Profiler for all devices.')
+      },
+      getProductOfResource(resourceId) {
+        let productValue = "N/A"
+        if ((productValue = this.resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+            'Nameplate', '$.ManufacturerProductType..en')) != 'N/A') {
+
+        }
+        else if ((productValue = this.resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+            'Nameplate', '$.ManufacturerProductType')) != 'N/A') {
+
+        }
+        else if ((productValue = this.resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+            'Nameplate', '$.OrderCodeOfManufacturer')) != 'N/A') {
+
+        }
+
+        return productValue;
       }
     }
   }
