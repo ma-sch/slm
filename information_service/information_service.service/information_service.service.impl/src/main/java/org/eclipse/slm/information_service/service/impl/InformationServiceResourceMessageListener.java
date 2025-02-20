@@ -16,6 +16,7 @@ import org.eclipse.slm.common.messaging.resources.ResourceMessageListener;
 import org.eclipse.slm.common.messaging.resources.ResourceMessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -35,9 +36,14 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
     private final SubmodelRegistryClient submodelRegistryClient;
     private final ResourceMessageSender resourceMessageSender;
 
-    public InformationServiceResourceMessageListener(AasRepositoryClient aasRepositoryClient,
+    private final String updateHubServiceUrl;
+
+    public InformationServiceResourceMessageListener(@Value("${update-hub.url}") String updateHubServiceUrl,
+                                                     AasRepositoryClient aasRepositoryClient,
                                                      SubmodelRepositoryClient submodelRepositoryClient,
-                                                     SubmodelRegistryClient submodelRegistryClient, ResourceMessageSender resourceMessageSender) {
+                                                     SubmodelRegistryClient submodelRegistryClient,
+                                                     ResourceMessageSender resourceMessageSender) {
+        this.updateHubServiceUrl = updateHubServiceUrl;
         this.aasRepositoryClient = aasRepositoryClient;
         this.submodelRepositoryClient = submodelRepositoryClient;
         this.submodelRegistryClient = submodelRegistryClient;
@@ -102,7 +108,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
             // Get submodels of device via Update Hub Service using ID Link
             var webClientBuilder = WebClient.builder();
-            var webClient = webClientBuilder.baseUrl("http://localhost:6080")
+            var webClient = webClientBuilder.baseUrl(updateHubServiceUrl)
                     .codecs(codecs -> codecs
                             .defaultCodecs()
                             .maxInMemorySize(10000 * 1024))
