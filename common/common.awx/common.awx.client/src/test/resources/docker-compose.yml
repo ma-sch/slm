@@ -17,7 +17,6 @@ services:
       CONTROL_PLANE_NODE_COUNT: 1
       EXECUTION_NODE_COUNT: 0
       AWX_LOGGING_MODE: stdout
-      #      DJANGO_SUPERUSER_PASSWORD: PrXajTWYbthSGyRhqHDO
       DJANGO_SUPERUSER_PASSWORD: password
       UWSGI_MOUNT_PATH: /
       RUN_MIGRATIONS: 1
@@ -38,9 +37,6 @@ services:
     privileged: true
     tty: true
     ports:
-#      - "7899-7999:7899-7999"  # sdb-listen
-#      - "6899:6899"
-#      - "2222:2222"  # receptor foo node
       - "8013:8013"
     links:
       - awx-postgres
