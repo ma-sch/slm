@@ -36,8 +36,8 @@ services:
       - awx_test-redis:/var/run/redis
     privileged: true
     tty: true
-    ports:
-      - "8013:8013"
+#    ports:
+#      - "8013:8013"
     links:
       - awx-postgres
       - awx-redis
