@@ -91,7 +91,10 @@ public class AwxWebsocketClient implements AutoCloseable{
         this.session.close();
     }
 
-    public void registerObserver(AwxJobObserver observer) {
-        observer.listenToEndpoint(this.awxJobEndpoint);
+    public void registerObserver(AwxJobObserver observer) throws DeploymentException, IOException {
+        if (this.awxJobEndpoint == null) {
+            this.start();
+            observer.listenToEndpoint(this.awxJobEndpoint);
+        }
     }
 }

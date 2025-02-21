@@ -84,7 +84,7 @@ class ClusterDeleteFunctions extends AbstractClusterFunctions implements IAwxJob
                 uninstallAction.getPlaybook(),
                 extraVars
         );
-        var awxJobObserver = this.awxJobObserverInitializer.init(jobId, JobTarget.RESOURCE, JobGoal.DELETE, this);
+        var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(jobId, JobTarget.RESOURCE, JobGoal.DELETE, this);
         clusterJob.setAwxJobObserver(awxJobObserver);
 
         return clusterJob;

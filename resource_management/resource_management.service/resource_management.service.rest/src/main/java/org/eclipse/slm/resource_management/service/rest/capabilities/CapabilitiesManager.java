@@ -448,7 +448,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                         awxInstallCapabilityAction.getPlaybook(),
                         new ExtraVars(extraVars)
                 );
-                var awxJobObserver = this.awxJobObserverInitializer.init(
+                var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(
                         awxJobId, JobTarget.DEPLOYMENT_CAPABILITY, ADD, this
                 );
                 this.awxJobObserverToJobDetails.put(
@@ -622,7 +622,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                 capabilityService
         );
 
-        var awxJobObserver = this.awxJobObserverInitializer.init(
+        var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(
                 awxJobId,
                 JobTarget.DEPLOYMENT_CAPABILITY,
                 DELETE,

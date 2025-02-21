@@ -104,7 +104,7 @@ public class ServiceUndeploymentHandler extends AbstractServiceDeploymentHandler
         var jobTarget = JobTarget.SERVICE;
         var jobGoal = JobGoal.DELETE;
         var awxJobId = awxJobExecutor.executeJob(new AwxCredential(jwtAuthenticationToken), awxGitRepoOfProject, awxGitBranchOfProject, awxPlaybook, extraVars);
-        var awxJobObserver = awxJobObserverInitializer.init(awxJobId, jobTarget, jobGoal, this);
+        var awxJobObserver = awxJobObserverInitializer.initNewObserver(awxJobId, jobTarget, jobGoal, this);
         this.observedAwxJobsToUndeploymentJobDetails.put(awxJobObserver, new UndeploymentJobRun(jwtAuthenticationToken, serviceInstance.getId(), serviceInstance.getResourceId()));
         this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobId, jobTarget, jobGoal);
     }
