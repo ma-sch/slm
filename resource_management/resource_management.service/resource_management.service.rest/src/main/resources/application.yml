@@ -176,6 +176,12 @@ aas:
     path:
     url: ${aas.concept-descriptions-repository.scheme}://${aas.concept-descriptions-repository.host}:${aas.concept-descriptions-repository.port}${aas.concept-descriptions-repository.path}
 
+### Discovery
+discovery:
+  driver-registry:
+    address: localhost
+    port: 50051
+
 ### Consul
 consul:
   scheme: http
@@ -188,9 +194,3 @@ consul:
 monitoring:
   service:
     url: http://localhost:9080
-
-### Discovery
-discovery:
-  driver-registry:
-    address: 10.17.167.87
-    port: 50051

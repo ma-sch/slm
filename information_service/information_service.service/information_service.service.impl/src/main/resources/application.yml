@@ -62,8 +62,6 @@ spring:
   rabbitmq:
     host: "localhost"
     port: 5672
-    username: "myuser"
-    password: "secret"
     username: "your-user"
     password: "your-password"
 
@@ -107,7 +105,6 @@ aas:
     port: 8081
     path:
     url: ${aas.concept-descriptions-repository.scheme}://${aas.concept-descriptions-repository.host}:${aas.concept-descriptions-repository.port}${aas.concept-descriptions-repository.path}
-
 
 ### Consul
 consul:
