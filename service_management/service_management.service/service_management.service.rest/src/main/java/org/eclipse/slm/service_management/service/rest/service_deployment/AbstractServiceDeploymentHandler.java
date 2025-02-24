@@ -67,7 +67,7 @@ public class AbstractServiceDeploymentHandler {
                 new AwxCredential(jwtAuthenticationToken),
                 awxCapabilityAction.getAwxRepo(), awxCapabilityAction.getAwxBranch(), awxCapabilityAction.getPlaybook(),
                 extraVars);
-        var awxJobObserver = awxJobObserverInitializer.init(awxJobId, jobTarget, jobGoal, listner);
+        var awxJobObserver = awxJobObserverInitializer.initNewObserver(awxJobId, jobTarget, jobGoal, listner);
 
         return awxJobObserver;
     }

@@ -247,7 +247,7 @@ public class CapabilitiesManagerTest {
                     capabilitiesManager
             );
 
-            Mockito.when(awxJobObserverInitializer.init(
+            Mockito.when(awxJobObserverInitializer.initNewObserver(
                     Mockito.anyInt(),
                     Mockito.any(),
                     Mockito.any(),
@@ -532,7 +532,7 @@ public class CapabilitiesManagerTest {
                     capabilitiesManager
             );
 
-            Mockito.when(awxJobObserverInitializer.init(
+            Mockito.when(awxJobObserverInitializer.initNewObserver(
                     Mockito.anyInt(),
                     Mockito.any(),
                     Mockito.any(),

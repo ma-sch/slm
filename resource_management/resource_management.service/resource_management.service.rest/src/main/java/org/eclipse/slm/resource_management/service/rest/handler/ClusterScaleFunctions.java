@@ -120,7 +120,7 @@ class ClusterScaleFunctions extends AbstractClusterFunctions implements IAwxJobO
                 scaleUpAction.getAwxRepo(), scaleUpAction.getAwxBranch(), scaleUpAction.getPlaybook(),
                 extraVars
         );
-        var awxJobObserver =this.awxJobObserverInitializer.init(
+        var awxJobObserver =this.awxJobObserverInitializer.initNewObserver(
                 jobId,
                 jobTarget,
                 jobGoal,
@@ -175,7 +175,7 @@ class ClusterScaleFunctions extends AbstractClusterFunctions implements IAwxJobO
                 extraVars
         );
 
-        var awxJobObserver = this.awxJobObserverInitializer.init(jobId, jobTarget, jobGoal, this);
+        var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(jobId, jobTarget, jobGoal, this);
         this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
 
         var clusterJob = new ClusterJob(service);

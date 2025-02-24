@@ -80,7 +80,7 @@ public class ObserverRestController implements IAwxJobObserverListener {
             @RequestParam(name="jobGoal", required = true) JobGoal jobGoal
     ) throws SSLException {
 
-        var awxJobObserver = this.awxJobObserverInitializer.init(jobId, jobTarget, jobGoal, this);
+        var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(jobId, jobTarget, jobGoal, this);
         if (!jobIdToNotifyUsers.containsKey(jobId))
         {
             jobIdToNotifyUsers.put(jobId, new ArrayList<>());

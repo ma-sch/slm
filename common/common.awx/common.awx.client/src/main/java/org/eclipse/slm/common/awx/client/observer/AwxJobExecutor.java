@@ -51,7 +51,7 @@ public class AwxJobExecutor {
                 extraVars
         );
 
-        var awxJobObserver = awxJobObserverInitializer.init(jobId, jobTarget, jobGoal, listener);
+        var awxJobObserver = awxJobObserverInitializer.initNewObserver(jobId, jobTarget, jobGoal, listener);
 
         return awxJobObserver;
     }

@@ -25,21 +25,19 @@
       :resource="selectedResource"
       @closed="selectedResource = null"
     />
-    <v-fab
-      :active="!showCreateButton"
-      class="mb-10"
-      elevation="15"
-      color="primary"
-      icon="mdi-plus"
-      location="top end"
-      absolute
-      offset
-      @click="showCreateDialog = true"
-    />
-
     <resources-create-dialog
       :show="showCreateDialog"
       @canceled="showCreateDialog = false"
+    />
+    <v-fab
+      :active="!showCreateButton"
+      class="mx-4"
+      elevation="15"
+      color="primary"
+      icon="mdi-plus"
+      location="right bottom"
+      :app="true"
+      @click="showCreateDialog = true"
     />
   </div>
 </template>

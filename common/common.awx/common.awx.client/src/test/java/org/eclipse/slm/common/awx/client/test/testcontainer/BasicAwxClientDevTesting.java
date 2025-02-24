@@ -1,6 +1,7 @@
 package org.eclipse.slm.common.awx.client.test.testcontainer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.websocket.DeploymentException;
 import org.eclipse.slm.common.awx.client.AwxClient;
 import org.eclipse.slm.common.awx.client.AwxCredential;
 import org.eclipse.slm.common.awx.client.AwxProjectUpdateFailedException;
@@ -29,6 +30,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -764,7 +766,7 @@ public class BasicAwxClientDevTesting {
 
             @Test
             @Order(42)
-            public void runAwxJobTemplateAndObserveTheJobStatus() throws JsonProcessingException, InterruptedException {
+            public void runAwxJobTemplateAndObserveTheJobStatus() throws IOException, InterruptedException, DeploymentException {
                 //Make sure default Inventory is available:
                 String port = String.valueOf(awxContainer.getServicePort(AWX_WEB_SERVICE, AWX_HTTPS_PORT));
                 awxClient.createDefaultInventory();

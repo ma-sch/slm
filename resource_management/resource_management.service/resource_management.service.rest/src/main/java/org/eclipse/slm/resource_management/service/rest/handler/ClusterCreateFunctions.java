@@ -108,7 +108,7 @@ class ClusterCreateFunctions extends AbstractClusterFunctions implements IAwxJob
                 extraVars
         );
 
-        var awxJobObserver = awxJobObserverInitializer.init(
+        var awxJobObserver = awxJobObserverInitializer.initNewObserver(
                 awxJobId,
                 JobTarget.RESOURCE,
                 JobGoal.CREATE,
