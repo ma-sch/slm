@@ -20,7 +20,6 @@ onMounted(() => {
   ResourceManagementClient.resourcesUpdatesApi.geAvailableUpdatesOfResource(props.resourceId)
       .then(
           response => {
-            console.log(response.data)
             updates.value = response.data;
             loading.value = false;
           }

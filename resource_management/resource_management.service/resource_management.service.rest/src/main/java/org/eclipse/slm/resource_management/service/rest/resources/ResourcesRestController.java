@@ -136,7 +136,12 @@ public class ResourcesRestController {
         @RequestParam(name = "resourceUsername", required = false)                              String resourceUsername,
         @RequestParam(name = "resourcePassword", required = false)                              String resourcePassword,
         @RequestParam(name = "resourceConnectionType", required = false)                        ConnectionType connectionType,
-        @RequestParam(name = "resourceConnectionPort", required = false, defaultValue = "0")    int connectionPort) {
+        @RequestParam(name = "resourceConnectionPort", required = false, defaultValue = "0")    int connectionPort)
+            throws ConsulLoginFailedException {
+
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        this.resourcesManager.setRemoteAccessOfResource(jwtAuthenticationToken,
+                resourceId, resourceUsername, resourcePassword, connectionType, connectionPort);
 
         return ResponseEntity.ok().build();
     }
@@ -146,6 +151,7 @@ public class ResourcesRestController {
     public @ResponseBody ResponseEntity setLocationOfResource(
             @PathVariable(name = "resourceId")  UUID resourceId,
             @RequestParam(name = "locationId", required = false)  UUID locationId) throws ConsulLoginFailedException {
+
         this.resourcesManager.setLocationOfResource(resourceId, locationId);
 
         return ResponseEntity.ok().build();

@@ -2,6 +2,7 @@ package org.eclipse.slm.common.consul.client.apis;
 
 import com.orbitz.consul.model.catalog.CatalogRegistration;
 import com.orbitz.consul.model.catalog.ImmutableCatalogDeregistration;
+import com.orbitz.consul.model.catalog.ImmutableCatalogRegistration;
 import com.orbitz.consul.model.catalog.TaggedAddresses;
 import com.orbitz.consul.option.ImmutableQueryOptions;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
@@ -106,7 +107,14 @@ public class ConsulNodesApiClient extends AbstractConsulApiClient {
             throws ConsulLoginFailedException {
         var node = this.getNodeById(consulCredential, nodeId).orElseThrow();
         node.getMeta().putAll(additionalMetaData);
-        var catalogRegistration = ConsulObjectMapper.map(node, CatalogRegistration.class);
+
+        var catalogRegistration = ImmutableCatalogRegistration.builder()
+                .putAllNodeMeta(node.getMeta())
+                .setNode(node.getNode())
+                .setAddress(node.getAddress())
+                .setDatacenter(node.getDatacenter())
+                .setId(node.getId().toString())
+                .build();
         this.getConsulClient(consulCredential).catalogClient().register(catalogRegistration);
 
     }

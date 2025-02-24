@@ -299,13 +299,13 @@ export default {
               let resourceId = response.data;
 
               if (this.resourceLocation !== '') {
-                ResourceManagementClient.resourcesApi.addResourceLocation(
+                ResourceManagementClient.resourcesApi.setLocationOfResource(
                     resourceId, this.resourceLocation
                 ).then().catch(logRequestError);
               }
 
               if (this.remoteAccess.available) {
-                ResourceManagementClient.resourcesApi.addResourceRemoteAccess(
+                ResourceManagementClient.resourcesApi.setRemoteAccessOfResource(
                     resourceId,
                     this.remoteAccess.connectionType,
                     this.remoteAccess.username,
