@@ -36,6 +36,7 @@
       set_fact:
         consul_compose: "{{ lookup('template', 'consul.yml') }}"
     - name: "Consul | Start containers"
+      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ consul_compose | from_yaml}}"

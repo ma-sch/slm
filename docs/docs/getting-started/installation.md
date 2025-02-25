@@ -30,6 +30,15 @@ docker run \
   ghcr.io/eclipse-slm/slm/installer:1.4.0-SNAPSHOT
 ```
 
+By default, the installer sets up the SLM on the host on which it is running. To install the SLM on a remote host, the 
+following environment variables must be set and added via the `--env` flag to the `docker run` command above:
+
+| Environment Variable     | Description                       |
+|--------------------------|-----------------------------------|
+| DEPLOYMENT_HOST_HOSTNAME | Hostname or ip of the remote host |
+| DEPLOYMENT_HOST_USER     | SSH username of remote host       |
+| DEPLOYMENT_HOST_PASSWORD | SSH password of remote host       |
+
 ## Uninstall
 Run the following command to start the SLM uninstaller:
 ```sh

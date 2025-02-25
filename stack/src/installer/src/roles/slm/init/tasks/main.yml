@@ -89,6 +89,7 @@
     - set_fact:
         slm_compose: "{{ lookup('template', 'slm.yml') }}"
     - name: "Start containers"
+      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ slm_compose | from_yaml}}"
@@ -106,6 +107,7 @@
     - set_fact:
         catalog_compose: "{{ lookup('template', 'catalog.yml') }}"
     - name: "Start containers"
+      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ catalog_compose | from_yaml }}"

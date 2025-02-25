@@ -1,3 +1,33 @@
+- name: "Define inventory"
+  hosts: localhost
+  pre_tasks:
+    - set_fact:
+        DEPLOYMENT_HOST_HOSTNAME: "{{ lookup('ansible.builtin.env', 'DEPLOYMENT_HOST_HOSTNAME') }}"
+        DEPLOYMENT_HOST_USER: "{{ lookup('ansible.builtin.env', 'DEPLOYMENT_HOST_USER') }}"
+        DEPLOYMENT_HOST_PASSWORD: "{{ lookup('ansible.builtin.env', 'DEPLOYMENT_HOST_PASSWORD') }}"
+  tasks:
+    - fail:
+        msg: "Deployment target is remote host, but environment variable 'DEPLOYMENT_HOST_HOSTNAME' is not set"
+      when: (DEPLOYMENT_HOST_HOSTNAME != 'localhost') and (DEPLOYMENT_HOST_HOSTNAME != '127.0.0.1') and (DEPLOYMENT_HOST_HOSTNAME != 'slm.local') 
+            and ((DEPLOYMENT_HOST_USER is not defined) or (DEPLOYMENT_HOST_USER|length == 0))
+    - fail:
+        msg: "Deployment target is remote host, but environment Variable 'DEPLOYMENT_HOST_PASSWORD' is not set"
+      when: (DEPLOYMENT_HOST_HOSTNAME != 'localhost') and (DEPLOYMENT_HOST_HOSTNAME != '127.0.0.1') and (DEPLOYMENT_HOST_HOSTNAME != 'slm.local')
+        and ((DEPLOYMENT_HOST_PASSWORD is not defined) or (DEPLOYMENT_HOST_PASSWORD|length == 0))
+    - ansible.builtin.add_host:
+        name: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+        groups: "slm"
+        ansible_host: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+        ansible_ssh_user: '{{ DEPLOYMENT_HOST_USER }}'
+        ansible_ssh_pass: '{{ DEPLOYMENT_HOST_PASSWORD }}'
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+      when: (DEPLOYMENT_HOST_HOSTNAME != 'localhost') and (DEPLOYMENT_HOST_HOSTNAME != '127.0.0.1') and (DEPLOYMENT_HOST_HOSTNAME != 'slm.local')
+            and (DEPLOYMENT_HOST_USER is defined) and (DEPLOYMENT_HOST_USER|length > 0)
+            and (DEPLOYMENT_HOST_PASSWORD is defined) and (DEPLOYMENT_HOST_PASSWORD|length > 0)
+    - ansible.builtin.group_by:
+        key: 'slm'
+      when: (DEPLOYMENT_HOST_HOSTNAME == 'localhost') or (DEPLOYMENT_HOST_HOSTNAME == '127.0.0.1') or (DEPLOYMENT_HOST_HOSTNAME == 'slm.local')
+
 - name: "Install Service Lifecycle Management"
   hosts: localhost
   gather_facts: yes
@@ -21,11 +51,6 @@
             AWX_URL: "{{ AWX_SCHEME }}://{{ AWX_HOST }}:{{ AWX_PORT }}"
             MINIO_API_URL: "{{ MINIO_SCHEME }}://{{ MINIO_HOST }}:{{ MINIO_API_PORT }}"
             MINIO_CONSOLE_URL: "{{ MINIO_SCHEME }}://{{ MINIO_HOST }}:{{ MINIO_CONSOLE_PORT }}"
-
-#    - name: Display all variables/facts known for a host
-#      debug:
-#        var: hostvars['localhost']
-#      tags: debug_info
 
     - name: "Start Consul"
       include_role:

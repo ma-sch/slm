@@ -17,6 +17,7 @@
     set_fact:
       vault_compose: "{{ lookup('template', 'vault.yml') }}"
   - name: "Start Vault containers"
+    delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
     community.docker.docker_compose_v2:
       project_name: eclipse-slm
       definition: "{{ vault_compose | from_yaml}}"
@@ -32,6 +33,7 @@
     retries: 120
     delay: 3
   - name: "Get Vault root token"
+    delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
     community.docker.docker_container_exec:
       container: "{{ vault_compose_start_output.images | community.general.json_query(query) | first }}"
       command: "grep 'Token' /vault/config/root/vault_init_msg"
@@ -55,7 +57,7 @@
     vars:
       _vault_token: "{{ vault_root_token }}"
 
-  - name: "Wait for Keycloak being up"
+  - name: "Wait for Keycloak ('{{ KEYCLOAK_AUTH_URL }}/realms/{{ KEYCLOAK_REALM }}/.well-known/openid-configuration') being up"
     uri:
       url: "{{ KEYCLOAK_AUTH_URL }}/realms/{{ KEYCLOAK_REALM }}/.well-known/openid-configuration"
       status_code: 200

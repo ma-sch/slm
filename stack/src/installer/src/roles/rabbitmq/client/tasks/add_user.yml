@@ -26,7 +26,7 @@
 - name: "RabbitMQ | Client | Add or update a user using the RabbitMQ Management API"
   community.rabbitmq.rabbitmq_user:
     login_protocol: http
-    login_host: rabbitmq
+    login_host: "{{ SLM_HOSTNAME }}"
     login_port: 15672
     login_user: "{{ app_configs.rabbitmq.users.admin.username }}"
     login_password: "{{ app_configs.rabbitmq.users.admin.password }}"

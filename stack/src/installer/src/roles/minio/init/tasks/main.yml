@@ -76,13 +76,14 @@
       set_fact:
         minio_compose: "{{ lookup('template', 'minio.yml') }}"
     - name: "MINIO | Start Minio containers"
+      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ minio_compose | from_yaml}}"
         state: present
         pull: "{{ PULL_DOCKER_IMAGES }}"
       register: minio_compose_start_output
-    - name: "MINIO | Wait for Minio being up"
+    - name: "MINIO | Wait for Minio ('{{ MINIO_CONSOLE_URL }}') being up"
       uri:
         url: "{{ MINIO_CONSOLE_URL }}"
         status_code: 200

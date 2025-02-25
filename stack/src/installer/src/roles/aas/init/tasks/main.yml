@@ -2,6 +2,7 @@
     aas_compose: "{{ lookup('template', 'aas.yml') }}"
 
 - name: "Start containers"
+  delegate_to: "{{ DEPLOYMENT_HOST_HOSTNAME }}"
   community.docker.docker_compose_v2:
     project_name: eclipse-slm
     definition: "{{ aas_compose | from_yaml}}"

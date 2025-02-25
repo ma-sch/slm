@@ -46,6 +46,7 @@
     rabbitmq_compose: "{{ lookup('template', 'rabbitmq.yml') }}"
 
 - name: "Start containers"
+  delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
   community.docker.docker_compose_v2:
     project_name: eclipse-slm
     definition: "{{ rabbitmq_compose | from_yaml}}"
