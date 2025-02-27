@@ -1,73 +1,46 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
+import java.util.List;
+
 public class UpdateInformation {
 
-    private String version;
+    private List<FirmwareVersionDetails> availableFirmwareVersions;
 
-    private String date;
+    private FirmwareVersionDetails currentFirmwareVersion;
 
-    private String installationUri;
+    private FirmwareVersionDetails latestFirmwareVersion;
 
-    private String installationChecksum;
+    private FirmwareUpdateStatus firmwareUpdateStatus;
 
-    public UpdateInformation(String version, String date, String installationUri, String installationChecksum) {
-        this.version = version;
-        this.date = date;
-        this.installationUri = installationUri;
-        this.installationChecksum = installationChecksum;
+    public List<FirmwareVersionDetails> getAvailableFirmwareVersions() {
+        return availableFirmwareVersions;
     }
 
-    private UpdateInformation(Builder builder) {
-        this.version = builder.version;
-        this.date = builder.date;
-        this.installationUri = builder.installationUri;
-        this.installationChecksum = builder.installationChecksum;
+    public void setAvailableFirmwareVersions(List<FirmwareVersionDetails> availableFirmwareVersions) {
+        this.availableFirmwareVersions = availableFirmwareVersions;
     }
 
-    public String getVersion() {
-        return version;
+    public FirmwareVersionDetails getCurrentFirmwareVersion() {
+        return currentFirmwareVersion;
     }
 
-    public String getDate() {
-        return date;
+    public void setCurrentFirmwareVersion(FirmwareVersionDetails currentFirmwareVersion) {
+        this.currentFirmwareVersion = currentFirmwareVersion;
     }
 
-    public String getInstallationUri() {
-        return installationUri;
+    public FirmwareVersionDetails getLatestFirmwareVersion() {
+        return latestFirmwareVersion;
     }
 
-    public String getInstallationChecksum() {
-        return installationChecksum;
+    public void setLatestFirmwareVersion(FirmwareVersionDetails latestFirmwareVersion) {
+        this.latestFirmwareVersion = latestFirmwareVersion;
     }
 
-    public static class Builder {
-        private String version;
-        private String date;
-        private String installationUri;
-        private String installationChecksum;
+    public FirmwareUpdateStatus getFirmwareUpdateStatus() {
+        return firmwareUpdateStatus;
+    }
 
-        public Builder setVersion(String version) {
-            this.version = version;
-            return this;
-        }
-
-        public Builder setDate(String date) {
-            this.date = date;
-            return this;
-        }
-
-        public Builder setInstallationUri(String installationUri) {
-            this.installationUri = installationUri;
-            return this;
-        }
-
-        public Builder setInstallationChecksum(String installationChecksum) {
-            this.installationChecksum = installationChecksum;
-            return this;
-        }
-
-        public UpdateInformation build() {
-            return new UpdateInformation(this);
-        }
+    public void setFirmwareUpdateStatus(FirmwareUpdateStatus firmwareUpdateStatus) {
+        this.firmwareUpdateStatus = firmwareUpdateStatus;
     }
 }

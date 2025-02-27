@@ -64,6 +64,10 @@ onMounted(() => {
         :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Id')"
       />
       <RowWithLabel
+        label="Asset Id"
+        :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.AssetId')"
+      />
+      <RowWithLabel
         label="Hostname"
         :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Hostname')"
       />

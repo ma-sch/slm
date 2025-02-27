@@ -42,10 +42,10 @@
               Hardware
             </v-tab>
 
-            <!-- Software -->
+            <!-- Firmware -->
             <v-tab :value="4">
-              <v-icon>mdi-apps</v-icon>
-              Software
+              <v-icon>mdi-cellphone-arrow-down</v-icon>
+              Firmware
             </v-tab>
 
             <!-- Submodels -->
@@ -79,11 +79,11 @@
               />
             </v-tabs-window-item>
 
-            <!-- Software -->
+            <!-- Firmware -->
             <v-tabs-window-item
               :value="4"
             >
-              <DeviceInfoSoftwareView
+              <DeviceInfoFirmwareView
                 :resource-id="resource.id"
               />
             </v-tabs-window-item>
@@ -118,7 +118,7 @@ import DeviceInfoSubmodelsView from "@/components/resources/deviceinfo/DeviceInf
 import DeviceInfoNameplateView from "@/components/resources/deviceinfo/DeviceInfoNameplateView";
 import DeviceInfoHardwareView from "@/components/resources/deviceinfo/DeviceInfoHardwareView";
 import DeviceInfoCommonView from "@/components/resources/deviceinfo/DeviceInfoCommonView.vue";
-import DeviceInfoSoftwareView from "@/components/resources/deviceinfo/DeviceInfoSoftwareView.vue";
+import DeviceInfoFirmwareView from "@/components/resources/deviceinfo/DeviceInfoFirmwareView.vue";
 
 const emit = defineEmits(['closed']);
 
