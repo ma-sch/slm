@@ -248,8 +248,10 @@ public class ResourcesManager {
     public BasicResource addExistingResource(
             JwtAuthenticationToken jwtAuthenticationToken,
             UUID resourceId,
+            String assetId,
             String resourceHostname,
             String resourceIp,
+            String firmwareVersion,
             DigitalNameplateV3 digitalNameplateV3
     ) throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
         /// Create realm role in Keycloak for new resource
@@ -257,6 +259,8 @@ public class ResourcesManager {
         this.keycloakUtil.createRealmRoleAndAssignToUser(jwtAuthenticationToken, resourceKeycloakRoleName);
 
         var resource = new BasicResource(resourceId, resourceHostname, resourceIp);
+        resource.setAssetId(assetId);
+        resource.setFirmwareVersion(firmwareVersion);
         resource = this.resourcesConsulClient.addResource(resource);
 
         //Add Health Checks if Capabilities with Health Checks are available:
@@ -278,7 +282,7 @@ public class ResourcesManager {
 
         notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.CREATE);
 
-        resourceMessageSender.sendResourceCreatedMessage(resource.getId());
+        resourceMessageSender.sendResourceCreatedMessage(resource.getId(), resource.getAssetId());
 
         return resource;
     }

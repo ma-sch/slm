@@ -51,18 +51,15 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
     }
 
     @Override
-    public void onResourceCreated(ResourceCreatedMessage resource) {
-        LOG.info("Received resource created message: {}", resource);
+    public void onResourceCreated(ResourceCreatedMessage resourceCreatedMessage) {
+        LOG.info("Received resource created message: {}", resourceCreatedMessage);
 
         try {
-
-            var aasId = "Resource_" + resource.resourceId();
+            var aasId = "Resource_" + resourceCreatedMessage.resourceId();
             var aas = aasRepositoryClient.getAas(aasId);
             var semanticIdToSubmodelDescriptors = new HashMap<String, List<SubmodelDescriptor>>();
 
             // Get all submodel descriptors of submodels contained in the AAS
-            // and ID Link from nameplate Submodel (UriOfTheProduct = ID Link)
-            var nameplateSubmodelId = "";
             for (var submodelRef : aas.getSubmodels()) {
                 var submodelRefKey = submodelRef.getKeys().get(0);
                 if (submodelRefKey.getType().equals(KeyTypes.SUBMODEL)) {
@@ -83,28 +80,15 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                             semanticIdToSubmodelDescriptors.computeIfAbsent(semanticIdKey.getValue(), k -> new ArrayList<>())
                                     .add(submodelDescriptor.get());
                         }
-
-                        if (semanticIdKey.getValue().equals(IDTASubmodelTemplates.NAMEPLATE_V3_SUBMODEL_SEMANTIC_ID)) {
-                            nameplateSubmodelId = submodelRefKey.getValue();
-                        }
                     }
                 }
             }
-            if (nameplateSubmodelId.isEmpty()) {
-                LOG.info("No Nameplate Submodel found in AAS '{}', unable to get further information from vendor", aasId);
+
+            var assetId = resourceCreatedMessage.assetId();
+            if (assetId == null) {
+                LOG.info("Asset id for created resource '{}' not available, skipping information retrieval", resourceCreatedMessage.resourceId());
                 return;
             }
-
-            var nameplateSubmodel = this.submodelRepositoryClient.getSubmodel(nameplateSubmodelId);
-            var smeUriOfTheProduct = nameplateSubmodel.getSubmodelElements().stream()
-                    .filter(sme -> sme.getIdShort().equals("URIOfTheProduct"))
-                    .findAny();
-            if (smeUriOfTheProduct.isEmpty()) {
-                LOG.info("No property 'URIOfTheProduct found in nameplate submodel '{}' found of AAS '{}', " +
-                        "unable to get further information from vendor", nameplateSubmodelId, aasId);
-            }
-
-            var uriOfTheProduct = ((Property) smeUriOfTheProduct.get()).getValue();
 
             // Get submodels of device via Update Hub Service using ID Link
             var webClientBuilder = WebClient.builder();
@@ -114,7 +98,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                             .maxInMemorySize(10000 * 1024))
                     .build();
 
-            var uriOfTheProductBase64Encoded = Base64.getEncoder().encodeToString(uriOfTheProduct.getBytes());
+            var uriOfTheProductBase64Encoded = Base64.getEncoder().encodeToString(assetId.getBytes());
             String[] shellIds = new String[0];
             try {
                 shellIds = webClient.get()
@@ -125,7 +109,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                         .bodyToMono(String[].class)
                         .block();
             } catch (WebClientResponseException.NotFound e) {
-                LOG.info("No shells found for asset id '{}', skipping information retrieval", uriOfTheProduct);
+                LOG.info("No shells found for asset id '{}', skipping information retrieval", assetId);
                 return;
             }
 
@@ -169,7 +153,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
                 // Add submodel to Submodel Repository
                 submodelRepositoryClient.createOrUpdateSubmodel(submodel);
-                // Add submodel refs to existing resource AAS
+                // Add submodel refs to existing resourceCreatedMessage AAS
                 aasRepositoryClient.addSubmodelReferenceToAas(aas.getId(), submodel.getId());
             }
 
@@ -181,10 +165,10 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
             LOG.info("Successfully added {} submodels to AAS '{}'", receivedSubmodels.length, aasId);
 
-            resourceMessageSender.sendResourceInformationMessage(resource.resourceId());
+            resourceMessageSender.sendResourceInformationMessage(resourceCreatedMessage.resourceId());
         }
         catch (Exception e) {
-            LOG.error("Error while processing resource created message: {}", e.getMessage());
+            LOG.error("Error while processing resourceCreatedMessage created message: {}", e.getMessage());
         }
     }
 

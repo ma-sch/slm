@@ -29,6 +29,8 @@ public class ResourcesConsulClient {
     public final static Logger LOG = LoggerFactory.getLogger(ResourcesConsulClient.class);
     private static final String META_KEY_LOCATION = "locationId";
     private static final String META_KEY_RESOURCE_ID = "resourceId";
+    private static final String META_KEY_ASSET_ID = "assetId";
+    private static final String META_KEY_FIRMWARE_VERSION = "firmwareVersion";
     private static final String META_KEY_CONNECTION_TYPE = "resourceConnectionType";
     private final ConsulNodesApiClient consulNodesApiClient;
     private final ConsulAclApiClient consulAclApiClient;
@@ -233,6 +235,13 @@ public class ResourcesConsulClient {
         meta.put("external-node", "true");
         meta.put("external-probe", "true");
         meta.put(META_KEY_RESOURCE_ID, resource.getId().toString());
+        if (resource.getAssetId() != null) {
+            meta.put(META_KEY_ASSET_ID, resource.getAssetId());
+        }
+        if (resource.getFirmwareVersion() != null) {
+            meta.put(META_KEY_FIRMWARE_VERSION, resource.getFirmwareVersion());
+        }
+        node.setNodeMeta(meta);
 
         this.consulNodesApiClient.registerNode(new ConsulCredential(), node);
 
@@ -343,6 +352,13 @@ public class ResourcesConsulClient {
         );
         basicResource.setHostname(node.getNode());
         basicResource.setIp(node.getAddress());
+        if (node.getMeta().containsKey(META_KEY_ASSET_ID)) {
+            basicResource.setAssetId(node.getMeta().get(META_KEY_ASSET_ID));
+        }
+        if (node.getMeta().containsKey(META_KEY_FIRMWARE_VERSION)) {
+            basicResource.setFirmwareVersion(node.getMeta().get(META_KEY_FIRMWARE_VERSION));
+        }
+
 
         return basicResource;
     }

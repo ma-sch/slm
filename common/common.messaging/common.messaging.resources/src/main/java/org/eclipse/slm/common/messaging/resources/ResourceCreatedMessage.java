@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public record ResourceCreatedMessage(
-        @JsonProperty("resourceId") UUID resourceId
+        @JsonProperty("resourceId") UUID resourceId,
+        @JsonProperty("assetId") String assetId
 ) implements Serializable {
 
     public static final String QUEUE_NAME_PREFIX_RESOURCE_CREATED = "resource.created_";
@@ -15,5 +16,9 @@ public record ResourceCreatedMessage(
 
     public UUID resourceId() {
         return resourceId;
+    }
+
+    public String assetId() {
+        return assetId;
     }
 }

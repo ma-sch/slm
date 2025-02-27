@@ -183,11 +183,11 @@ public class DiscoveryHandler implements DiscoveryJobListener {
 
                 resourcesManager.addExistingResource(jwtAuthenticationToken,
                         discoveredResource.getResourceId(),
+                        discoveredResource.getId(),
                         discoveredResource.getIpAddress(),
                         discoveredResource.getIpAddress(),
+                        discoveredResource.getFirmwareVersion(),
                         digitalNameplateV3.build());
-
-                int i = 0;
             }
         }
     }

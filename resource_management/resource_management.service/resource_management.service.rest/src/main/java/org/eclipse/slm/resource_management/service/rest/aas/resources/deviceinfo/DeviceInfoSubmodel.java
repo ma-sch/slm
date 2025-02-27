@@ -31,6 +31,8 @@ public class DeviceInfoSubmodel extends DefaultSubmodel {
         addIdProperty(resource);
         addIpProperty(resource);
         addHostnameProperty(resource);
+        addAssetIdProperty(resource);
+        addFirmwareVersionProperty(resource);
     }
 
     public void addIdProperty(BasicResource resource) {
@@ -54,6 +56,22 @@ public class DeviceInfoSubmodel extends DefaultSubmodel {
                 .idShort("Hostname")
                 .valueType(DataTypeDefXsd.STRING)
                 .value(resource.getHostname()).build();
+        this.submodelElements.add(hostnameProp);
+    }
+
+    public void addAssetIdProperty(BasicResource resource) {
+        var hostnameProp = new DefaultProperty.Builder()
+                .idShort("AssetId")
+                .valueType(DataTypeDefXsd.STRING)
+                .value(resource.getAssetId()).build();
+        this.submodelElements.add(hostnameProp);
+    }
+
+    public void addFirmwareVersionProperty(BasicResource resource) {
+        var hostnameProp = new DefaultProperty.Builder()
+                .idShort("FirmwareVersion")
+                .valueType(DataTypeDefXsd.STRING)
+                .value(resource.getFirmwareVersion()).build();
         this.submodelElements.add(hostnameProp);
     }
 }

@@ -182,8 +182,10 @@ public class ResourcesManagerITDev {
             BasicResource basicResourceSsh = resourcesManager.addExistingResource(
                     config.jwtAuthenticationToken,
                     basicResourceSshId,
+                    null,
                     "test-host-ssh",
                     "1.2.3.4",
+                    null,
                     digitalNameplate
             );
             resourcesManager.setRemoteAccessOfResource(
@@ -200,8 +202,10 @@ public class ResourcesManagerITDev {
             BasicResource basicResourceWinrm = resourcesManager.addExistingResource(
                     config.jwtAuthenticationToken,
                     basicResourceWinRmId,
+                    null,
                     "test-host-winrm",
                     "1.2.3.5",
+                    null,
                     digitalNameplate
             );
             resourcesManager.setRemoteAccessOfResource(
@@ -353,8 +357,10 @@ public class ResourcesManagerITDev {
             var basicResourceWithNoCredentials = resourcesManager.addExistingResource(
                     config.jwtAuthenticationToken,
                     uuid,
+                    null,
                     hostname,
                     ip,
+                    null,
                     digitalNameplate
             );
 
@@ -451,8 +457,10 @@ public class ResourcesManagerITDev {
             var basicResourceWithLocation = resourcesManager.addExistingResource(
                     config.jwtAuthenticationToken,
                     resourceId,
+                    null,
                     hostname,
                     ip,
+                    null,
                     digitalNameplate
             );
 
@@ -467,8 +475,10 @@ public class ResourcesManagerITDev {
             BasicResource basicResourceWithoutLocation = resourcesManager.addExistingResource(
                     config.jwtAuthenticationToken,
                     resourceId,
+                    null,
                     hostname,
                     ip,
+                    null,
                     digitalNameplate
             );
 
@@ -481,8 +491,10 @@ public class ResourcesManagerITDev {
             BasicResource basicResourceWithWrongLocationId = resourcesManager.addExistingResource(
                     config.jwtAuthenticationToken,
                     resourceId,
+                    null,
                     hostname,
                     ip,
+                    null,
                     digitalNameplate
             );
             resourcesManager.setLocationOfResource(resourceId, UUID.randomUUID());

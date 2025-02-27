@@ -27,8 +27,8 @@ public class ResourceMessageSender {
         return new TopicExchange(ResourceMessageSender.EXCHANGE_NAME);
     }
 
-    public void sendResourceCreatedMessage(UUID resourceId) {
-        var message = new ResourceCreatedMessage(resourceId);
+    public void sendResourceCreatedMessage(UUID resourceId, String assetId) {
+        var message = new ResourceCreatedMessage(resourceId, assetId);
         rabbitTemplate.convertAndSend(ResourceMessageSender.EXCHANGE_NAME, ResourceCreatedMessage.ROUTING_KEY, message);
         LOG.info("Sent resource created message: {}", message);
     }

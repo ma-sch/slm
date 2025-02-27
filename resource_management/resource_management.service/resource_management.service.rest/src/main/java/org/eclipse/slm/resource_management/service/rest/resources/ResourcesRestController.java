@@ -91,8 +91,10 @@ public class ResourcesRestController {
         this.resourcesManager.addExistingResource(
                 jwtAuthenticationToken,
                 resourceId,
+                null,
                 createResourceRequest.getResourceHostname(),
                 createResourceRequest.getResourceIp(),
+                null,
                 createResourceRequest.getDigitalNameplateV3()
         );
 
@@ -110,8 +112,10 @@ public class ResourcesRestController {
         this.resourcesManager.addExistingResource(
                 jwtAuthenticationToken,
                 resourceId,
+                null,
                 createResourceRequest.getResourceHostname(),
                 createResourceRequest.getResourceIp(),
+                null,
                 createResourceRequest.getDigitalNameplateV3()
         );
 
