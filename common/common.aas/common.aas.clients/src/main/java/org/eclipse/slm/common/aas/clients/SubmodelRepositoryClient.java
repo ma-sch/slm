@@ -9,6 +9,7 @@ import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierExceptio
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.eclipse.digitaltwin.basyx.submodelrepository.client.ConnectedSubmodelRepository;
 import org.eclipse.digitaltwin.basyx.submodelservice.value.SubmodelValueOnly;
+import org.eclipse.digitaltwin.basyx.submodelservice.value.exception.ValueMapperNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,9 +68,16 @@ public class SubmodelRepositoryClient {
     }
 
     public SubmodelValueOnly getSubmodelValueOnly(String submodelId) {
-        var submodelValueOnly = this.connectedSubmodelRepository.getSubmodelByIdValueOnly(submodelId);
+        try {
+            var submodelValueOnly = this.connectedSubmodelRepository.getSubmodelByIdValueOnly(submodelId);
 
-        return submodelValueOnly;
+            return submodelValueOnly;
+        }
+        catch (ValueMapperNotFoundException e) {
+            LOG.error("Value mapper not found for submodel with ID: " + submodelId);
+        }
+
+        return null;
     }
 
     public void createOrUpdateSubmodel(Submodel submodel) {

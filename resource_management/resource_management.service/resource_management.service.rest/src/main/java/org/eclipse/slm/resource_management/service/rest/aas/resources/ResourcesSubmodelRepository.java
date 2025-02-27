@@ -98,11 +98,13 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
                 if (!localSubmodelIds.contains(submodelId)) {
                     this.submodelRegistryClient.findSubmodelDescriptor(submodelId).ifPresent(submodelDescriptor -> {
                         var submodelValueOnlyBasyx = this.submodelRepositoryClient.getSubmodelValueOnly(submodelDescriptor.getId());
-                        var submodelValueOnly = new SubmodelValueOnly();
-                        submodelValueOnly.setValuesOnlyMap(submodelValueOnlyBasyx.getValuesOnlyMap());
-                        submodelValueOnly.setIdShort(submodelDescriptor.getIdShort());
+                        if (submodelValueOnlyBasyx != null) {
+                            var submodelValueOnly = new SubmodelValueOnly();
+                            submodelValueOnly.setValuesOnlyMap(submodelValueOnlyBasyx.getValuesOnlyMap());
+                            submodelValueOnly.setIdShort(submodelDescriptor.getIdShort());
 
-                        submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
+                            submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
+                        }
                     });
                 }
             } catch (ElementDoesNotExistException | org.eclipse.digitaltwin.basyx.client.internal.ApiException | IllegalStateException | NullPointerException e) {
