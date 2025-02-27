@@ -1,0 +1,298 @@
+<template>
+  <v-container fluid>
+    <v-row
+      dense
+      class="ml-8 mb-8"
+      align="center"
+    >
+      <v-text-field
+        v-model="searchResources"
+        label="Search resources"
+        append-inner-icon="mdi-magnify"
+        clearable
+        variant="underlined"
+      />
+      <v-spacer />
+      <v-spacer />
+      <v-tooltip
+        start
+        close-delay="2000"
+      >
+        <template #activator="{ props }">
+          <v-btn
+            v-if="profiler.length > 0"
+            color="secondary"
+            v-bind="props"
+            @click="runProfiler"
+          >
+            <v-icon
+              icon="mdi-tab-search"
+              color="white"
+            />
+          </v-btn>
+        </template>
+        <span>Run all available <a href="https://eclipse-slm.github.io/slm/docs/usage/profiler/">profilers</a> on all devices</span>
+      </v-tooltip>
+      <div v-if="resourcesHaveLocations()">
+        <div class="mr-10">
+          <v-btn-toggle
+            v-model="groupBy"
+            mandatory
+          >
+            <v-btn
+              size="small"
+              :model-value="null"
+              :color="groupBy == null ? 'secondary' : 'disabled'"
+              style="height:40px"
+            >
+              <v-icon>mdi-ungroup</v-icon>
+            </v-btn>
+            <v-btn
+              size="small"
+              model-value="location.name"
+              :color="groupBy === 'location.name' ? 'secondary' : 'disabled'"
+              style="height:40px"
+            >
+              <v-icon>mdi-group</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+        </div>
+        <div class="mr-10">
+          <v-select
+            v-model="filterResourcesByLocations"
+            :items="locations"
+            item-title="name"
+            item-value="id"
+            label="filter by location"
+            density="compact"
+            variant="outlined"
+            hide-details
+            closable-chips
+            multiple
+            clearable
+            @update:modelValue="filterResources"
+          />
+        </div>
+      </div>
+    </v-row>
+    <v-data-table
+      id="resource-table-devices"
+      :headers="tableHeaders"
+      :items="filteredResources"
+      :search="searchResources"
+      :sort-by.sync="sortBy"
+      :row-props="rowClass"
+      item-key="id"
+      @click:row="setSelectedResource"
+    >
+      <template #group.header="{items, isOpen, toggle}">
+        <th
+          :colspan="tableHeaders.length"
+        >
+          <v-icon @click="toggle">
+            {{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
+          </v-icon>
+          {{ getLocationNameForGroupHeader(items) }}
+        </th>
+      </template>
+
+      <template #item.product="{ item }">
+        <div>
+          {{ getProductOfResource(item.id) }}
+        </div>
+      </template>
+
+      <template #item.vendor="{ item }">
+        <div v-if="resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, 'Nameplate', '$.ManufacturerName..en') == 'N/A'">
+          {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..de") }}
+        </div>
+        <div v-else>
+          {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en") }}
+        </div>
+      </template>
+
+      <template #item.capabilityServices="{ item }">
+        <v-tooltip
+          v-for="capabilityService in getDeploymentCapabilityServices(item.capabilityServices)"
+          :key="capabilityService.capability.name"
+          location="top"
+        >
+          <template #activator="{ props }">
+            <CapabilityIcon
+              v-bind="props"
+              :capability-service="capabilityService"
+            />
+          </template>
+          <span>Status: {{ capabilityService.status }}</span>
+        </v-tooltip>
+      </template>
+
+      <template #item.firmware="{ item }">
+        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "DeviceInfo", "$.FirmwareVersion") }}
+      </template>
+
+      <!-- Column: Actions -->
+      <template
+        #item.actions="{ item }"
+      >
+        <v-row
+          v-if="!item.markedForDelete"
+          class="ma-2"
+        >
+          <CapabilitiesButton :resource="item" />
+          <v-btn
+            :disabled="item.clusterMember"
+            color="error"
+            class="mx-2"
+            size="small"
+            @click.stop="resourceToDelete = item"
+          >
+            <v-icon icon="mdi-delete" />
+          </v-btn>
+        </v-row>
+      </template>
+    </v-data-table>
+    <confirm-dialog
+      :show="resourceToDelete != null"
+      :title="'Delete resource ' + (resourceToDelete == null ? '' : resourceToDelete.hostname)"
+      text="Do you really want to delete this resource?"
+      :attention="true"
+      @confirmed="deleteResource(resourceToDelete)"
+      @canceled="resourceToDelete = null"
+    />
+  </v-container>
+</template>
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue';
+import ConfirmDialog from '@/components/base/ConfirmDialog';
+import { app } from "@/main";
+import { useResourcesStore } from "@/stores/resourcesStore";
+import ResourceManagementClient from "@/api/resource-management/resource-management-client";
+import logRequestError from "@/api/restApiHelper";
+import CapabilitiesButton from "@/components/resources/capabilities/CapabilitiesButton.vue";
+import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.vue";
+
+const resourceStore = useResourcesStore();
+
+const tableHeaders = [
+  { title: "Product", key: "product", width: "20%" },
+  { title: "Vendor", key: "vendor", width: "20%" },
+  { title: 'Capabilities', key: 'capabilityServices', value: 'capabilityServices', width: "10%" },
+  { title: 'Hostname', key: 'hostname', value: 'hostname', width: "10%" },
+  { title: 'IP', key: 'ip', value: 'ip', width: "10%" },
+  { title: 'Location', key: 'location.name', value: 'location.name', width: "10%"},
+  { title: 'Firmware', key: 'firmware', width: "10%" },
+  { title: 'Actions', value: 'actions', sortable: false, width: "10%" },
+];
+
+const groupBy = ref([]);
+const sortBy = ref([{ key: 'product', order: 'asc' }]);
+const resourceToDelete = ref(null);
+const filterResourcesByLocations = ref([]);
+const filteredResources = ref([]);
+const searchResources = ref(undefined);
+
+const resources = computed(() => resourceStore.resources);
+const locations = computed(() => resourceStore.locations);
+const profiler = computed(() => resourceStore.profiler);
+
+watch(resources, () => {
+  filterResources();
+});
+
+onMounted(() => {
+  resourceStore.getResourceAasValues();
+  filteredResources.value = resources.value;
+  resourceStore.getResourceAasValues();
+});
+
+const getDeploymentCapabilityServices = (capabilityServices) => {
+  return capabilityServices.filter(cs => cs.capability.capabilityClass !== "BaseConfigurationCapability");
+};
+
+const deleteResource = (resource) => {
+  const resourceId = resource.id;
+  ResourceManagementClient.resourcesApi.deleteResource(resourceId).then();
+  resourceStore.setResourceMarkedForDelete(resource);
+  resourceToDelete.value = null;
+};
+
+const setSelectedResource = (event, { item }) => {
+  emit('resource-selected', item);
+};
+
+const rowClass = (resource) => {
+  return {
+    class: {
+      'text-grey text--lighten-1 row-pointer': resource.markedForDelete,
+      'row-pointer': resource.markedForDelete
+    }
+  };
+};
+
+const getLocationNameForGroupHeader = (items) => {
+  if (items[0].location === null)
+    return "no location";
+
+  return items[0].location.name;
+};
+
+const resourcesHaveLocations = () => {
+  const locationNames = [...new Set(
+    resources.value.map(r => {
+      if (r.location == null)
+        return '';
+      else
+        return r.location.name;
+    })
+  )];
+  const hasLocations = locationNames.length > 1;
+
+  if (!hasLocations)
+    groupBy.value = null;
+
+  return hasLocations;
+};
+
+const filterResources = () => {
+  if (filterResourcesByLocations.value.length === 0) {
+    filteredResources.value = resources.value;
+    return;
+  }
+
+  filteredResources.value = resources.value.filter(r => {
+    if (r.location == null)
+      return false;
+
+    return filterResourcesByLocations.value.includes(r.location.id);
+  });
+};
+
+const runProfiler = () => {
+  ResourceManagementClient.profilerApi.runProfiler1().then().catch(logRequestError);
+  app.config.globalProperties.$toast.info('Started Profiler for all devices.');
+};
+
+const getProductOfResource = (resourceId) => {
+  let productValue = "N/A";
+  if ((productValue = resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+      'Nameplate', '$.ManufacturerProductType..en')) != 'N/A') {
+
+  }
+  else if ((productValue = resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+      'Nameplate', '$.ManufacturerProductType')) != 'N/A') {
+
+  }
+  else if ((productValue = resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+      'Nameplate', '$.OrderCodeOfManufacturer')) != 'N/A') {
+
+  }
+
+  return productValue;
+};
+</script>
+
+<style scoped>
+
+</style>

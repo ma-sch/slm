@@ -12,7 +12,7 @@
 
       <v-card-text v-else>
         <v-row>
-          <resources-table-single-hosts
+          <ResourcesTableDevices
             v-if="resources.length > 0"
             class="mt-0 flex"
             @resource-selected="onResourceSelected"
@@ -43,12 +43,12 @@
 </template>
 
 <script>
-import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
+import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView'
 import ResourcesCreateDialog from '@/components/resources/dialogs/create/ResourcesCreateDialog'
-import ResourcesTableSingleHosts from '@/components/resources/ResourcesTableSingleHosts'
-import OverviewHeading from "@/components/base/OverviewHeading.vue";
-import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
+import OverviewHeading from "@/components/base/OverviewHeading";
+import NoItemAvailableNote from "@/components/base/NoItemAvailableNote";
 import {useResourcesStore} from "@/stores/resourcesStore";
+import ResourcesTableDevices from "@/components/resources/ResourcesTableDevices";
 
 export default {
     name: 'ResourcesOverview',
@@ -56,7 +56,7 @@ export default {
       OverviewHeading,
       DeviceInfoView,
       ResourcesCreateDialog,
-      ResourcesTableSingleHosts,
+      ResourcesTableDevices,
       NoItemAvailableNote,
     },
     setup(){

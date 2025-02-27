@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="dialogActive"
-    width="400"
+    :width="width"
     @click:outside="$emit('canceled')"
   >
     <template #default="{isActive}">
@@ -13,27 +13,28 @@
           {{ title }}
         </v-toolbar>
         <v-card-text class="my-4">
-          {{ text }}
+          <slot name="content">
+            {{ text }}
+          </slot>
         </v-card-text>
         <v-card-actions class="justify-center">
+          <v-btn
+            id="button-confirm-dialog"
+            variant="text"
+            @click.native="$emit('canceled')"
+          >
+            {{ cancelButtonLabel }}
+          </v-btn>
+
           <v-spacer />
 
           <v-btn
-            id="confirm-dialog-button-yes"
-            variant="elevated"
-            color="error"
+            id="button-confirm-dialog"
+            variant="text"
+            :color="attention ? 'error' : ''"
             @click="$emit('confirmed')"
           >
-            Yes
-          </v-btn>
-
-          <v-btn
-            id="confirm-dialog-button-no"
-            variant="elevated"
-            color="info"
-            @click.native="$emit('canceled')"
-          >
-            No
+            {{ confirmButtonLabel }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -58,6 +59,22 @@ const props = defineProps({
   text: {
     type: String,
     default: ""
+  },
+  confirmButtonLabel: {
+    type: String,
+    default: "Yes"
+  },
+  cancelButtonLabel: {
+    type: String,
+    default: "No"
+  },
+  width: {
+    type: String,
+    default: "400"
+  },
+  attention: {
+    type: Boolean,
+    default: false
   }
 });
 
