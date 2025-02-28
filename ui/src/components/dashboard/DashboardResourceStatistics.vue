@@ -22,26 +22,26 @@
       v-if="!resourceStore.resourceAASs.length"
       item="Device statistics"
     />
-    <aas-circular-chart
-      v-else
-      chart-type="Doughnut"
-      :show-unknown="true"
-      :aas="resourceStore.resourceAASs"
-      submodel-id-short="operating_system"
-      :submodel-element-keys="['system', 'distribution', 'distribution_major_version']"
-    />
+    <!--    <aas-circular-chart-->
+    <!--      v-else-->
+    <!--      chart-type="Doughnut"-->
+    <!--      :show-unknown="true"-->
+    <!--      :aas="resourceStore.resourceAASs"-->
+    <!--      submodel-id-short="operating_system"-->
+    <!--      :submodel-element-keys="['system', 'distribution', 'distribution_major_version']"-->
+    <!--    />-->
   </base-material-card>
 </template>
 
 <script>
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 
-import AasCircularChart from "@/components/charts/AasCircularChart.vue";
+// import AasCircularChart from "@/components/charts/AasCircularChart.vue";
 import {useResourcesStore} from "@/stores/resourcesStore";
 
 export default {
     name: 'DashboardResourceStatistics',
-    components: {AasCircularChart, NoItemAvailableNote },
+    components: {NoItemAvailableNote },
     setup(){
       const resourceStore = useResourcesStore();
       return {resourceStore}

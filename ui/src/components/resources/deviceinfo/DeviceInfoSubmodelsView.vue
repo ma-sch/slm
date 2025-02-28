@@ -90,10 +90,10 @@
 <script setup lang="ts">
 import {ref, onMounted, computed} from 'vue'
 import ConfirmDialog from '@/components/base/ConfirmDialog.vue'
-import getEnv from '@/utils/env'
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import {AssetAdministrationShellDescriptor} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
+import {useEnvStore} from "@/stores/environmentStore";
 
 const props = defineProps({
   resourceId: {
@@ -102,12 +102,13 @@ const props = defineProps({
   }
 })
 
+const envStore = useEnvStore();
 
 const aasDescriptor = ref<AssetAdministrationShellDescriptor>({})
 const submodels = ref<any>([]);
 const submodelToDelete = ref<string|undefined>(undefined)
 const file = ref<File|undefined>(undefined)
-const aasGuiUrl = getEnv("VUE_APP_BASYX_AAS_GUI_URL")
+const aasGuiUrl = envStore.basyxAasGuiUrl;
 const headers = [
   { title: 'Id Short', value: 'idShort', sortable: true, width: '25%' },
   { title: 'Id', value: 'id', sortable: true, width: '30%' },

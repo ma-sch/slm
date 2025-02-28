@@ -87,13 +87,13 @@
                   <tr>
                     <th>{{ 'Created' }}</th>
                     <td colspan="3">
-                      {{ app.config.globalProperties.moment(String(serviceInstanceDetails.initialCreation)).format('DD.MM.YYYY - hh:mm') }}
+                      {{ moment(String(serviceInstanceDetails.initialCreation)).format('DD.MM.YYYY - hh:mm') }}
                     </td>
                   </tr>
                   <tr>
                     <th>{{ 'Last Update' }}</th>
                     <td colspan="3">
-                      {{ app.config.globalProperties.moment(String(serviceInstanceDetails.lastUpdate)).format('DD.MM.YYYY - hh:mm') }}
+                      {{ moment(String(serviceInstanceDetails.lastUpdate)).format('DD.MM.YYYY - hh:mm') }}
                     </td>
                   </tr>
                   <tr>
@@ -233,7 +233,7 @@
                       v-for="order in serviceInstanceDetails.orderHistory"
                       :key="order.id"
                     >
-                      <td>{{ app.config.globalProperties.moment(String(order.created)).format('DD.MM.YYYY - hh:mm') }}</td>
+                      <td>{{ moment(String(order.created)).format('DD.MM.YYYY - hh:mm') }}</td>
                       <td>{{ order.id }}</td>
                       <td>{{ order.serviceOrderResult }}</td>
                     </tr>
@@ -267,16 +267,15 @@
 import {serviceInstanceMixin} from "@/components/services/serviceInstanceMixin";
 import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
 import ApiState from "@/api/apiState";
-import ProgressCircular from "@/components/base/ProgressCircular";
-import getEnv from "@/utils/env";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 import {useServicesStore} from "@/stores/servicesStore";
 import {useResourcesStore} from "@/stores/resourcesStore";
 import {storeToRefs} from "pinia";
-import {app} from "@/main";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
+import {useEnvStore} from "@/stores/environmentStore";
 
 export default {
     name: 'ServiceInstanceDetailsDialog',
@@ -289,6 +288,7 @@ export default {
       }
     },
     setup(){
+      const envStore = useEnvStore();
       const servicesStore = useServicesStore();
       const resourceStore = useResourcesStore();
       const {serviceOfferingById, serviceInstanceGroupById} = storeToRefs(servicesStore)
@@ -334,7 +334,7 @@ export default {
                   ResourceManagementClient.submodelTemplatesRestControllerApi.getSubmodelTemplateInstancesBySemanticId(serviceOption.defaultValue, serviceOption.currentValue)
                       .then(res => {
                         let response = res.data;
-                    let aasGuiBaseUrl = getEnv("VUE_APP_BASYX_AAS_GUI_URL")
+                    let aasGuiBaseUrl = this.envStore.basyxAasGuiUrl
                     let smEndpoint = response[0].smEndpoint
                     let aasGuiUrl = `${aasGuiBaseUrl}/?aas=${smEndpoint.replace('aas/submodels', 'aas&path=submodels')}`
                     console.log(response)

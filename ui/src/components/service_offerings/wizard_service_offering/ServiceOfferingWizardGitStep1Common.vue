@@ -134,8 +134,7 @@
 <script>
   // import ServiceOfferingCardGrid from '@/components/service_offerings/ServiceOfferingCardGrid'
 
-  import ProgressCircular from "@/components/base/ProgressCircular";
-  import {app} from "@/main";
+  import ProgressCircular from "@/components/base/ProgressCircular.vue";
   import {Field, Form as ValidationForm} from "vee-validate";
   import * as yup from 'yup';
   import {useServicesStore} from "@/stores/servicesStore";
@@ -196,7 +195,7 @@
             response => {
               this.loading = false
               if (response.status === 200) {
-                app.config.globalProperties.$toast.info('Successfully created git-based service offering')
+                this.$toast.info('Successfully created git-based service offering')
                 this.servicesStore.getServiceOfferings();
                 this.$router.push({ path: `/services/vendors/${this.serviceVendorId}` })
               } else {
@@ -205,7 +204,7 @@
             })
             .catch(exception => {
               this.loading = false
-              app.config.globalProperties.$toast.error('Failed to create git-based service offering')
+              this.$toast.error('Failed to create git-based service offering')
               console.log('Service offering creation failed: ' + exception.response.data.message)
               console.log(exception)
             })

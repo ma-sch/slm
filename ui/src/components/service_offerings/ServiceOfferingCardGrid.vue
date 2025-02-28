@@ -85,7 +85,7 @@
 
 import TextWithLabel from '@/components/base/TextWithLabel'
 import getImageUrl from '@/utils/imageUtil'
-import ProgressCircular from "@/components/base/ProgressCircular";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import {useServicesStore} from "@/stores/servicesStore";
 import {storeToRefs} from "pinia";
 

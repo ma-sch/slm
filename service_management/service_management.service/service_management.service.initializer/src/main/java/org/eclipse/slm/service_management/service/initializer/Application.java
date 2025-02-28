@@ -34,7 +34,7 @@ import java.util.List;
                 DataSourceAutoConfiguration.class,
                 SecurityAutoConfiguration.class
         })
-@EnableDiscoveryClient(autoRegister=false)
+@EnableDiscoveryClient
 public class Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);

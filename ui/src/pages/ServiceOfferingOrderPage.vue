@@ -185,7 +185,7 @@
 
 import ApiState from '@/api/apiState'
 import logRequestError from '@/api/restApiHelper'
-import ProgressCircular from "@/components/base/ProgressCircular";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import {Field, Form as ValidationForm} from "vee-validate";
 import * as yup from 'yup';
 import {useServicesStore} from "@/stores/servicesStore";

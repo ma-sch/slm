@@ -1,8 +1,8 @@
-import {app} from "@/main";
+import {globals} from "@/main";
 
 export default async function () {
-    if(app.config.globalProperties.$keycloak?.keycloak?.updateToken !== undefined) {
-        await app.config.globalProperties.$keycloak.keycloak.updateToken(70);
+    if(globals.$keycloak?.keycloak?.updateToken !== undefined) {
+        await globals.$keycloak.keycloak.updateToken(70);
     }
-    return app.config.globalProperties.$keycloak;
+    return globals.$keycloak;
 }

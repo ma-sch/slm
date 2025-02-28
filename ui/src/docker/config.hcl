@@ -3,13 +3,9 @@ consul {
 }
 
 template {
-  source =        "/consul-template/default.ctmpl"
-  destination =   "/etc/nginx/conf.d/default.conf"
+  source =        "/consul-template/slm.ctmpl"
+  destination =   "/etc/nginx/conf.d/slm.conf"
   exec {
     command = ["nginx", "-s", "reload"]
   }
 }
-
-#exec {
-#  command = ["nginx", "-g", "daemon off;"]
-#}

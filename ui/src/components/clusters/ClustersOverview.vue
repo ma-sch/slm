@@ -20,13 +20,12 @@
 
     <v-fab
       id="resources-button-add-resource"
-      class="mb-10"
+      icon="mdi-plus"
+      class="mx-4"
       elevation="15"
       color="primary"
-      icon="mdi-plus"
-      location="top end"
-      absolute
-      offset
+      location="right bottom"
+      :app="true"
       @click="showCreateDialog = true"
     />
 

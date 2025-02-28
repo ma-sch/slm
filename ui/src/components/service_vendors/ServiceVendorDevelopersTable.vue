@@ -88,7 +88,6 @@
 <script>
 
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
-import {app} from "@/main";
 import {useUserStore} from "@/stores/userStore";
 import {useServicesStore} from "@/stores/servicesStore";
 import {storeToRefs} from "pinia";
@@ -156,14 +155,14 @@ export default {
     methods: {
       onDeleteDeveloperClicked (deletedDeveloper) {
         if (this.developersOfServiceVendor.length === 1) {
-          app.config.globalProperties.$toast.warning('Last developer of service vendor cannot be deleted')
+          this.$toast.warning('Last developer of service vendor cannot be deleted')
         } else {
           ServiceManagementClient.serviceVendorsApi.removeDeveloperFromServiceVendor(this.serviceVendor.id, deletedDeveloper.id).then(() => {
-            app.config.globalProperties.$toast.info(`Successfully removed developer '${deletedDeveloper.username}'`)
+            this.$toast.info(`Successfully removed developer '${deletedDeveloper.username}'`)
             this.loadDevelopersOfServiceVendor()
           })
             .catch(() => {
-              app.config.globalProperties.$toast.error(`Failed to remove developer '${deletedDeveloper.username}'`)
+              this.$toast.error(`Failed to remove developer '${deletedDeveloper.username}'`)
             })
         }
       },
@@ -172,8 +171,8 @@ export default {
         this.addedDevelopers.forEach(developer => {
           ServiceManagementClient.serviceVendorsApi.addDeveloperToServiceVendor(this.serviceVendor.id, developer.id).then(() => {
             this.developersOfServiceVendor.push(developer)
-            app.config.globalProperties.$toast.info(`Successfully added developer '${developer.username}'`)
-            app.config.globalProperties.$keycloak.keycloak.updateToken(100000) // Force refresh of token
+            this.$toast.info(`Successfully added developer '${developer.username}'`)
+            this.$keycloak.keycloak.updateToken(100000) // Force refresh of token
           }).catch(logRequestError)
         })
         this.addedDevelopers = []

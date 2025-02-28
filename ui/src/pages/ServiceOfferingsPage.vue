@@ -84,7 +84,7 @@
 import ApiState from '@/api/apiState.js'
 import ServiceOfferingCardGrid from '@/components/service_offerings/ServiceOfferingCardGrid'
 import ServiceOfferingOverviewToolbar from '@/components/service_offerings/ServiceOfferingToolbar'
-import ProgressCircular from "@/components/base/ProgressCircular";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 import {useServicesStore} from "@/stores/servicesStore";
 

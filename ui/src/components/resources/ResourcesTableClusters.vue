@@ -95,8 +95,8 @@
 
 <script>
 
-import ClusterScaleDialog from '@/components/resources/dialogs/ClusterScaleDialog'
-import ClusterDeleteDialog from '@/components/resources/dialogs/ClusterDeleteDialog'
+import ClusterScaleDialog from '@/components/resources/dialogs/ClusterScaleDialog.vue'
+import ClusterDeleteDialog from '@/components/resources/dialogs/ClusterDeleteDialog.vue'
 import {useResourcesStore} from "@/stores/resourcesStore";
 
 export default {

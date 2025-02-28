@@ -73,10 +73,9 @@
 
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
-import getEnv from '@/utils/env'
 import {useJobsStore} from "@/stores/jobsStore";
-import ServiceInstancesOverview from "@/components/services/ServiceInstancesOverview.vue";
 import ApiState from "@/api/apiState";
+import {useEnvStore} from "@/stores/environmentStore";
 
 export default {
     name: 'JobsOverview',
@@ -85,6 +84,7 @@ export default {
       NoItemAvailableNote
     },
     setup(){
+      const envStore = useEnvStore();
       const jobsStore = useJobsStore();
       return {jobsStore}
     },
@@ -128,7 +128,7 @@ export default {
         ]
       },
       awxURL () {
-        return getEnv('VUE_APP_AWX_URL')
+        return envStore.awxUrl
       }
     },
     methods: {

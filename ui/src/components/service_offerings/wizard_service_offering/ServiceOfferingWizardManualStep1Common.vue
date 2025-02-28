@@ -136,7 +136,7 @@
 </template>
 
 <script>
-import ServiceOfferingCardGrid from "@/components/service_offerings/ServiceOfferingCardGrid";
+import ServiceOfferingCardGrid from "@/components/service_offerings/ServiceOfferingCardGrid.vue";
 
 import {Field, Form as ValidationForm} from "vee-validate";
 import * as yup from 'yup';

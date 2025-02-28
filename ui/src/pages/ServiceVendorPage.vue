@@ -237,12 +237,11 @@ import ServiceVendorsDevelopersTable from '@/components/service_vendors/ServiceV
 import ServiceVendorCreateOrEditDialog from '@/components/service_vendors/ServiceVendorCreateOrEditDialog'
 import logRequestError from '@/api/restApiHelper'
 import getImageUrl from '@/utils/imageUtil'
-import ServiceOfferingTable from "@/components/service_offerings/ServiceOfferingTable";
-import ConfirmDialog from "@/components/base/ConfirmDialog";
-import ServiceOfferingCreateDialog from "@/components/service_offerings/dialogs/ServiceOfferingCreateDialog";
-import ProgressCircular from "@/components/base/ProgressCircular";
+import ServiceOfferingTable from "@/components/service_offerings/ServiceOfferingTable.vue";
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
+import ServiceOfferingCreateDialog from "@/components/service_offerings/dialogs/ServiceOfferingCreateDialog.vue";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
-import {app} from "@/main";
 import {useServicesStore} from "@/stores/servicesStore";
 import {useStore} from "@/stores/store";
 import {useUserStore} from "@/stores/userStore";
@@ -361,7 +360,7 @@ export default {
       },
       onDeleteServiceOfferingConfirmed () {
         ServiceManagementClient.serviceOfferingsApi.deleteServiceOffering(this.serviceOfferingToDelete.id).then(response => {
-          app.config.globalProperties.$toast.info(`Successfully delete service offering '${this.serviceOfferingToDelete.name}'`)
+          this.$toast.info(`Successfully delete service offering '${this.serviceOfferingToDelete.name}'`)
           this.serviceOfferingDeleteDialog = false
           this.servicesStore.getServiceOfferings();
           ServiceManagementClient.serviceOfferingsApi.getServiceOfferings(false, this.selectedServiceVendor.id).then(
@@ -382,7 +381,7 @@ export default {
         ServiceManagementClient.serviceOfferingVersionsApi.deleteServiceOfferingVersion(
             this.serviceOfferingVersionToDelete.serviceOfferingId, this.serviceOfferingVersionToDelete.id)
         .then(response => {
-          app.config.globalProperties.$toast.info(`Successfully delete service offering version '${this.serviceOfferingVersionToDelete.version}'`)
+          this.$toast.info(`Successfully delete service offering version '${this.serviceOfferingVersionToDelete.version}'`)
           this.serviceOfferingVersionDeleteDialog = false
           this.serviceOfferingVersionToDelete = undefined
           this.$options.serviceOfferingTableInterface.updateExpanded()
@@ -412,18 +411,18 @@ export default {
 
         api.then(response => {
           this.loadRepositories()
-          app.config.globalProperties.$toast.info(`Successfully created repository '${repository.address}'`)
+          this.$toast.info(`Successfully created repository '${repository.address}'`)
           this.serviceRepositoryCreateDialog = false
         })
           .catch((error) => {
-            app.config.globalProperties.$toast.error(`Failed to created repository '${repository.address}'`)
+            this.$toast.error(`Failed to created repository '${repository.address}'`)
             logRequestError(error)
           })
       },
       onDeleteRepositoryClicked (repository) {
         ServiceManagementClient.serviceRepositoriesApi.deleteRepository(this.selectedServiceVendor.id, repository.id).then(() => {
           this.loadRepositories()
-          app.config.globalProperties.$toast.info(`Successfully removed repository '${repository.address}'`)
+          this.$toast.info(`Successfully removed repository '${repository.address}'`)
         }).catch(logRequestError)
       },
 

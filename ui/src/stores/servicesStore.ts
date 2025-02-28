@@ -1,6 +1,5 @@
 import ApiState from '@/api/apiState.js'
 import {UUID} from "vue-uuid";
-import {app} from "@/main";
 import {defineStore} from "pinia";
 import logRequestError from "@/api/restApiHelper";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
@@ -185,7 +184,7 @@ export const useServicesStore = defineStore('servicesStore', {
             this.services_.forEach(service => {
                 if (service.id === serviceToDelete.id) {
                     // Vue.set(service, 'markedForDelete', true)
-                    // app.config.globalProperties
+                    // this
 
                     console.info("Service '" + service.id + "' marked for delete")
                 }
@@ -278,12 +277,7 @@ export const useServicesStore = defineStore('servicesStore', {
         },
 
         updateServicesStore () {
-            this.getServices().then()
-            // assure token gets refreshed
-            app.config.globalProperties.$keycloak.keycloak?.updateToken(1000000)
-                .then(refreshed => {
-                    this.getServices().then();
-                })
+            this.getServices().then();
         },
 
         async getServiceInstanceGroups () {

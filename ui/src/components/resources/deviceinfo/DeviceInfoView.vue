@@ -114,9 +114,9 @@
 
 <script setup>
 import {computed, ref} from 'vue';
-import DeviceInfoSubmodelsView from "@/components/resources/deviceinfo/DeviceInfoSubmodelsView";
-import DeviceInfoNameplateView from "@/components/resources/deviceinfo/DeviceInfoNameplateView";
-import DeviceInfoHardwareView from "@/components/resources/deviceinfo/DeviceInfoHardwareView";
+import DeviceInfoSubmodelsView from "@/components/resources/deviceinfo/DeviceInfoSubmodelsView.vue";
+import DeviceInfoNameplateView from "@/components/resources/deviceinfo/DeviceInfoNameplateView.vue";
+import DeviceInfoHardwareView from "@/components/resources/deviceinfo/DeviceInfoHardwareView.vue";
 import DeviceInfoCommonView from "@/components/resources/deviceinfo/DeviceInfoCommonView.vue";
 import DeviceInfoFirmwareView from "@/components/resources/deviceinfo/DeviceInfoFirmwareView.vue";
 

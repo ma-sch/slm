@@ -6,7 +6,7 @@
       </template>
 
       <no-item-available-note
-        v-if="!resources.length"
+        v-if="resources.length == 0"
         item="Resource"
       />
 
@@ -31,10 +31,10 @@
     />
     <v-fab
       :active="!showCreateButton"
+      icon="mdi-plus"
       class="mx-4"
       elevation="15"
       color="primary"
-      icon="mdi-plus"
       location="right bottom"
       :app="true"
       @click="showCreateDialog = true"
@@ -43,12 +43,12 @@
 </template>
 
 <script>
-import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView'
-import ResourcesCreateDialog from '@/components/resources/dialogs/create/ResourcesCreateDialog'
-import OverviewHeading from "@/components/base/OverviewHeading";
-import NoItemAvailableNote from "@/components/base/NoItemAvailableNote";
+import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
+import ResourcesCreateDialog from '@/components/resources/dialogs/create/ResourcesCreateDialog.vue'
+import OverviewHeading from "@/components/base/OverviewHeading.vue";
+import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 import {useResourcesStore} from "@/stores/resourcesStore";
-import ResourcesTableDevices from "@/components/resources/ResourcesTableDevices";
+import ResourcesTableDevices from "@/components/resources/ResourcesTableDevices.vue";
 
 export default {
     name: 'ResourcesOverview',

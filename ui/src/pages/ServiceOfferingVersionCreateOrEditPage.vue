@@ -148,7 +148,6 @@ import ServiceOfferingVersionWizardStep4Requirements
   from '@/components/service_offerings/wizard_service_offering_version/ServiceOfferingVersionWizardStep4Requirements'
 
 import ApiState from '@/api/apiState'
-import {app} from "@/main";
 import {useServicesStore} from "@/stores/servicesStore";
 import {storeToRefs} from "pinia";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
@@ -363,11 +362,11 @@ export default {
                           response.data.serviceOfferingVersionId,
                           this.newServiceOfferingVersion.deploymentDefinition.codesysFile
                       ).then(uploadFileResponse => {
-                        app.config.globalProperties.$toast.info('Successfully uploaded file for offering')
+                        this.$toast.info('Successfully uploaded file for offering')
                       }).catch(error => console.log(error));
                     }
 
-                    app.config.globalProperties.$toast.info('Successfully updated service offering version')
+                    this.$toast.info('Successfully updated service offering version')
                     this.servicesStore.getServiceOfferings();
                     this.$router.push({ path: `/services/vendors/${this.serviceVendorId}` })
                   } else {
@@ -405,11 +404,11 @@ export default {
                           response.data.serviceOfferingVersionId,
                           this.newServiceOfferingVersion.deploymentDefinition.codesysFile
                       ).then(uploadFileResponse => {
-                        app.config.globalProperties.$toast.info('Successfully uploaded file for offering')
+                        this.$toast.info('Successfully uploaded file for offering')
                       }).catch(error => console.log(error));
                     }
 
-                    app.config.globalProperties.$toast.info('Successfully created service offering version')
+                    this.$toast.info('Successfully created service offering version')
                     this.servicesStore.getServiceOfferings();
                     this.$router.push({ path: `/services/vendors/${this.serviceVendorId}` })
                   } else {
@@ -417,7 +416,7 @@ export default {
                   }
                 })
                 .catch(exception => {
-                  app.config.globalProperties.$toast.error('Failed to create service offering version')
+                  this.$toast.error('Failed to create service offering version')
                   console.log('Service offering version creation failed: ' + exception?.response?.data?.message)
                   console.log(exception)
                 })

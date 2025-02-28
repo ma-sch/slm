@@ -1,31 +1,28 @@
-import {createApp} from 'vue'
+import {createApp} from 'vue';
 import App from './App.vue'
-import router from './pages/router'
-import 'chartist/dist/chartist.min.css'
-import 'material-design-icons-iconfont/dist/material-design-icons.css'
-import setupTokenInterceptor from '@/utils/tokenInterceptor'
-import VueKeycloakJs from '@dsb-norge/vue-keycloak-js'
-import getEnv from '@/utils/env'
-import VueToast from 'vue-toast-notification'
-import 'vue-toast-notification/dist/theme-sugar.css'
-import enums from 'vue-enums'
-import moment from 'moment'
 
-import {Chart, registerables} from 'chart.js'
+import router from './pages/router';
+import 'chartist/dist/chartist.min.css';
+import 'material-design-icons-iconfont/dist/material-design-icons.css';
+import setupTokenInterceptor from '@/utils/tokenInterceptor';
+import VueKeycloakJs from '@dsb-norge/vue-keycloak-js'
+import VueToast from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+import enums from 'vue-enums';
+import moment from 'moment';
+
+import {Chart, registerables} from 'chart.js';
 import {createVuetify} from "vuetify";
-import VueAxios from "vue-axios";
-import axios from "axios";
 import cors from "cors";
 import NotificationServiceWebsocketClient from "@/api/notification-service/notificationServiceWebsocketClient";
 
 import 'vuetify/styles';
 import '@/design/overrides.sass';
-import withUUID from "vue-uuid";
-import upperFirst from 'lodash/upperFirst'
-import camelCase from 'lodash/camelCase'
+import upperFirst from 'lodash/upperFirst';
+import camelCase from 'lodash/camelCase';
 
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
-import {createPinia} from 'pinia'
+import {createPinia} from 'pinia';
 import {useUserStore} from "@/stores/userStore";
 import {useCatalogStore} from "@/stores/catalogStore";
 import {useServicesStore} from "@/stores/servicesStore";
@@ -36,26 +33,29 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import * as yup from "yup";
 import {createI18n} from "vue-i18n";
 import {de, en} from "vuetify/locale";
+import yupValidateIPv4 from "@/utils/yup.custom";
+import {VueKeycloakInstance} from "@dsb-norge/vue-keycloak-js/dist/types";
+import {useEnvStore} from "@/stores/environmentStore";
 
-export let app = withUUID(createApp(App)) ;
+const app = createApp(App);
 
-const requireComponent = require.context(
-    '@/components/base', true, /\.vue$/,
-)
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+app.use(pinia);
 
+const envStore = useEnvStore();
 
-requireComponent.keys().forEach(fileName => {
-    const componentConfig = requireComponent(fileName)
-
-    const componentName = upperFirst(
-        camelCase(fileName.replace(/^\.\//, '').replace(/\.\w+$/, '')),
-    )
-
-    app.component(`Base${componentName}`, componentConfig.default || componentConfig)
-})
+const components = import.meta.glob('@/components/base/*.vue');
+for (const path in components) {
+    components[path]().then((module) => {
+        const componentName = upperFirst(
+            camelCase(path.replace(/^.*[\\\/]/, '').replace(/\.\w+$/, ''))
+        );
+        app.component(`Base${componentName}`, module.default);
+    });
+}
 
 app.component('NoItemAvailableNote', NoItemAvailableNote);
-
 
 app.use(VueKeycloakJs, {
     init: {
@@ -63,12 +63,15 @@ app.use(VueKeycloakJs, {
         checkLoginIframe: false,
     },
     config: {
-        url: getEnv('VUE_APP_KEYCLOAK_URL'),
-        realm: getEnv('VUE_APP_KEYCLOAK_REALM'),
-        clientId: getEnv('VUE_APP_KEYCLOAK_CLIENT_ID'),
+        url: envStore.keycloakUrl,
+        realm: envStore.keycloakRealm,
+        clientId: envStore.keycloakClientId,
+    },
+    onInitError(error, keycloakError) {
+        console.error('Keycloak init error', error, keycloakError);
     },
     onReady (keycloak) {
-        keycloak.updateToken(70).then((r) => console.log(r))
+        keycloak.updateToken(70).then();
         setupTokenInterceptor();
         NotificationServiceWebsocketClient.connect();
         const userStore = useUserStore();
@@ -97,7 +100,14 @@ app.use(VueKeycloakJs, {
         const notificationStore = useNotificationStore();
         notificationStore.getNotifications();
     },
-})
+});
+
+//  Allow usage of this.$keycloak in components
+declare module '@vue/runtime-core' {
+    interface ComponentCustomProperties  {
+        $keycloak: VueKeycloakInstance
+    }
+}
 
 Chart.register(...registerables);
 
@@ -121,13 +131,10 @@ const theme = {
     }
 };
 
-
-
-
-const v = createVuetify({
-    lang: {
-        t: (key, ...params) => i18n.t(key, params),
-    },
+const vuetify = createVuetify({
+    // lang: {
+    //     t: (key, ...params) => i18n.t(key, params),
+    // },
     theme: {
         defaultTheme: 'light',
         themes: {
@@ -136,17 +143,12 @@ const v = createVuetify({
         },
     },
 });
+app.use(vuetify);
 
-app.use(VueAxios, axios)
 app.use(cors)
 
 app.use(router);
 
-const pinia = createPinia();
-pinia.use(piniaPluginPersistedstate);
-app.use(pinia);
-
-app.use(v);
 
 const messages = {
     en: {
@@ -162,16 +164,13 @@ const messages = {
 const i18n = createI18n({
     globalInjection: true,
     legacy: false,
-    locale: process.env.VUE_APP_I18N_LOCALE || 'en',
-    fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+    locale: envStore.i18nLocale,
+    fallbackLocale: envStore.i18nLocaleFallback,
     silentTranslationWarn: true,
     messages
 });
 
 app.use(i18n);
-
-app.use(require('vue-chartist'));
-
 
 app.use(VueToast,{
     position: 'bottom',
@@ -181,15 +180,7 @@ app.use(VueToast,{
 
 app.mount('#app');
 
+yup.addMethod(yup.string, 'ipv4', yupValidateIPv4);
 
-function ipv4(message = 'Invalid IP address') {
-    return this.matches(/(^(\d{1,3}\.){3}(\d{1,3})$)/, {
-        message,
-        excludeEmptyString: true
-    }).test('ip', message, value => {
-        return value === undefined || value.trim() === '' ? true
-            : value.split('.').find(i => parseInt(i, 10) > 255) === undefined;
-    });
-}
-
-yup.addMethod(yup.string, 'ipv4', ipv4);
+const globals = app.config.globalProperties
+export { globals }

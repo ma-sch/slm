@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import ResourcesOverview from '@/components/resources/ResourcesOverview'
+import ResourcesOverview from '@/components/resources/ResourcesOverview.vue'
 import ApiState from '@/api/apiState'
 import {useStore} from "@/stores/store";
 import {useResourcesStore} from "@/stores/resourcesStore";

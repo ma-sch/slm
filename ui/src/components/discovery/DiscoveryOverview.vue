@@ -18,30 +18,28 @@
             @selected-discovered-resources-changed="onSelectedDiscoveredResourcesChanged"
           />
         </v-row>
+        <v-fab
+          icon="mdi-magnify"
+          elevation="15"
+          color="primary"
+          location="right bottom"
+          absolute
+          offset
+          @click="showDiscoverDialog = true"
+        />
+        <v-fab
+          icon="mdi-database-plus"
+          class="mx-16"
+          color="primary"
+          location="right bottom"
+          absolute
+          offset
+          appear
+          :active="selectedDiscoveredResourceIds.length > 0"
+          @click="showOnboardingDialog = true"
+        />
       </v-card-text>
     </base-material-card>
-
-    <v-fab
-      elevation="15"
-      color="primary"
-      icon="mdi-magnify"
-      location="top end"
-      absolute
-      offset
-      @click="showDiscoverDialog = true"
-    />
-
-    <v-fab
-      class="mx-16"
-      color="primary"
-      icon="mdi-database-plus"
-      location="top end"
-      absolute
-      offset
-      appear
-      :active="selectedDiscoveredResourceIds.length > 0"
-      @click="showOnboardingDialog = true"
-    />
 
     <discover-dialog
       :show="showDiscoverDialog"

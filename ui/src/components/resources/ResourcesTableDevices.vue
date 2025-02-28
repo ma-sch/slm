@@ -166,12 +166,14 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import ConfirmDialog from '@/components/base/ConfirmDialog';
-import { app } from "@/main";
 import { useResourcesStore } from "@/stores/resourcesStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
 import CapabilitiesButton from "@/components/resources/capabilities/CapabilitiesButton.vue";
 import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.vue";
+
+
+const emit = defineEmits(['resource-selected']);
 
 const resourceStore = useResourcesStore();
 
@@ -202,7 +204,6 @@ watch(resources, () => {
 });
 
 onMounted(() => {
-  resourceStore.getResourceAasValues();
   filteredResources.value = resources.value;
   resourceStore.getResourceAasValues();
 });
@@ -271,7 +272,7 @@ const filterResources = () => {
 
 const runProfiler = () => {
   ResourceManagementClient.profilerApi.runProfiler1().then().catch(logRequestError);
-  app.config.globalProperties.$toast.info('Started Profiler for all devices.');
+  this.$toast.info('Started Profiler for all devices.');
 };
 
 const getProductOfResource = (resourceId) => {

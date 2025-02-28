@@ -75,7 +75,6 @@
 import ServiceVendorCreateOrEditDialog from '@/components/service_vendors/ServiceVendorCreateOrEditDialog'
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
-import {app} from "@/main";
 import {useServicesStore} from "@/stores/servicesStore";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 
@@ -120,11 +119,11 @@ export default {
         this.editServiceVendor = false
         ServiceManagementClient.serviceVendorsApi.deleteServiceVendor(serviceVendor.id).then(
           response => {
-            app.config.globalProperties.$toast.info('Service vendor successfully deleted')
+            this.$toast.info('Service vendor successfully deleted')
             this.servicesStore.getServiceVendors();
           })
           .catch(exception => {
-            app.config.globalProperties.$toast.error('Failed to create service offering')
+            this.$toast.error('Failed to create service offering')
             console.log('Service vendor deletion failed: ' + exception.response.data.message)
             console.log(exception)
           })

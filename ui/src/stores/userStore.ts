@@ -1,6 +1,6 @@
 import ApiState from '@/api/apiState'
-import {app} from "@/main";
 import {defineStore} from "pinia";
+import {globals} from "@/main";
 
 interface UserStoreState {
     apiStateUser_: number,
@@ -31,8 +31,7 @@ export const useUserStore = defineStore('userStore', {
         },
 
         userRoles(state) {
-
-            const roles = app.config.globalProperties.$keycloak?.realmAccess?.roles
+            const roles = globals.$keycloak?.realmAccess?.roles;
             if(roles === undefined){
                 return [];
             }
@@ -53,24 +52,26 @@ export const useUserStore = defineStore('userStore', {
         },
         userGroups(): any[]{
 
-            const groups = app.config.globalProperties.$keycloak?.tokenParsed?.groups
+            const groups = globals.$keycloak?.tokenParsed?.groups
             if (groups === undefined) {
                 return []
             } else {
                 return groups
             }
+
+            return []
         },
     },
     actions: {
         async getUserDetails () {
             this.apiStateUser_ = ApiState.LOADING;
 
-            // console.log('MyLOG', app.config.globalProperties.$keycloak.ready);
-
-            if (app.config.globalProperties.$keycloak.keycloak.authenticated){
-                await app.config.globalProperties.$keycloak.keycloak.loadUserInfo().then(userInfo => {
-                    this.userInfo_ = userInfo;
-                })
+            if (globals.$keycloak?.keycloak != undefined) {
+                if (globals.$keycloak.keycloak.authenticated) {
+                    await globals.$keycloak?.keycloak.loadUserInfo().then(userInfo => {
+                        this.userInfo_ = userInfo;
+                    })
+                }
             }
 
             this.apiStateUser_ = ApiState.LOADED;

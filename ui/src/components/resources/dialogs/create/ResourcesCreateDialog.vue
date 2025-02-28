@@ -83,17 +83,17 @@
 
 <script>
 import ResourcesCreateDialogPage from "@/components/resources/dialogs/create/ResourcesCreateDialogPage";
-import ResourcesCreateDialogPageStart from "@/components/resources/dialogs/create/ResourcesCreateDialogPageStart";
+import ResourcesCreateDialogPageStart from "@/components/resources/dialogs/create/ResourcesCreateDialogPageStart.vue";
 import ResourcesCreateDialogPageAddExistingResourceDevice
-  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResourceDevice";
+  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResourceDevice.vue";
 import ResourcesCreateDialogPageAddExistingResource
-  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResource";
+  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResource.vue";
 import ResourcesCreateDialogPageAddExistingResourceCluster
-  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResourceCluster";
+  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageAddExistingResourceCluster.vue";
 import ResourcesCreateDialogPageCreateNewResource
-  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageCreateNewResource";
+  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageCreateNewResource.vue";
 import ResourcesCreateDialogPageCreateNewResourceCluster
-  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageCreateNewResourceCluster";
+  from "@/components/resources/dialogs/create/ResourcesCreateDialogPageCreateNewResourceCluster.vue";
 import {toRef} from "vue";
 
 export default {

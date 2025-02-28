@@ -1,4 +1,3 @@
-import {app} from "@/main";
 import {defineStore} from "pinia";
 import {useJobsStore} from "@/stores/jobsStore";
 import {useResourcesStore} from "@/stores/resourcesStore";
@@ -6,7 +5,6 @@ import {useServicesStore} from "@/stores/servicesStore";
 import NotificationServiceClient from "@/api/notification-service/notification-service-client";
 import logRequestError from "@/api/restApiHelper";
 import {useDiscoveryStore} from "@/stores/discoveryStore";
-import {no} from "vuetify/locale";
 
 export interface NotificationStoreState{
   notifications_: any[],
@@ -44,7 +42,7 @@ export const useNotificationStore = defineStore('notificationStore', {
       this.getNotifications();
 
       if (notification.category !== undefined) {
-        app.config.globalProperties.$toast.info(notification.text)
+        // this.$toast.info(notification.text)
         const resourcesStore = useResourcesStore();
         const servicesStore = useServicesStore();
         const discoveryStore = useDiscoveryStore();

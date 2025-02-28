@@ -1,5 +1,4 @@
 import ApiState from '@/api/apiState'
-import {app} from "@/main";
 import {defineStore} from "pinia";
 import {useProviderStore} from "@/stores/providerStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
@@ -202,18 +201,22 @@ export const useResourcesStore = defineStore('resourcesStore', {
     actions: {
 
         setResources(resources){
-            if (this.resources_ !== undefined) {
-                const markedForDeleteResources = this.resources_.filter((res) => res.markedForDelete === true)
+            try {
+                if (this.resources_ !== undefined) {
+                    const markedForDeleteResources = this.resources_.filter((res) => res.markedForDelete === true)
 
-                // Assure markedForDelete Property is not overwritten by polling
-                for (const markedForDeleteResource of markedForDeleteResources) {
-                    const resourceToUpdate = resources.find((res) => res.id === markedForDeleteResource.id)
-                    if (resourceToUpdate !== undefined) {
-                        resourceToUpdate.markedForDelete = true
+                    // Assure markedForDelete Property is not overwritten by polling
+                    for (const markedForDeleteResource of markedForDeleteResources) {
+                        const resourceToUpdate = resources.find((res) => res.id === markedForDeleteResource.id)
+                        if (resourceToUpdate !== undefined) {
+                            resourceToUpdate.markedForDelete = true
+                        }
                     }
                 }
-                this.resources_ = resources
+            } catch (e) {
+                console.log(e)
             }
+            this.resources_ = resources
         },
 
         setClusters(clusters: any[] | undefined = undefined){
@@ -271,11 +274,6 @@ export const useResourcesStore = defineStore('resourcesStore', {
                 .then(
                     response => {
                         if (response.data){
-                            /*response.data.forEach(resource => {
-                                // MetricsRestApi.getMetricsOfResource(resource.id).then(metrics => {
-                                //     resource.metrics = metrics
-                                // })
-                            })*/
                             this.setResources(response.data)
                             this.setAvailableResourceTypes(response.data);
                             this.apiStateResources_ = ApiState.LOADED;
@@ -283,7 +281,7 @@ export const useResourcesStore = defineStore('resourcesStore', {
 
                     })
                 .catch(e => {
-                    console.debug(e)
+                    console.log(e)
                     this.setResources([]);
                     this.setAvailableResourceTypes([]);
                     this.apiStateResources_ = ApiState.ERROR;
@@ -428,17 +426,14 @@ export const useResourcesStore = defineStore('resourcesStore', {
 
         updateResourcesStore () {
             // assure token gets refreshed
-            app.config.globalProperties.$keycloak.keycloak.updateToken(1000000)
-                .then(refreshed => {
-                    this.getCluster().then();
-                    this.getResourcesFromBackend().then();
-                    this.getResourceAASFromBackend().then();
-                    this.getResourceConnectionTypes().then();
-                    useProviderStore().getVirtualResourceProviders().then();
-                    const providerStore = useProviderStore();
-                    providerStore.getServiceHosters().then();
-                    this.getProfiler().then();
-                })
+            this.getCluster().then();
+            this.getResourcesFromBackend().then();
+            this.getResourceAASFromBackend().then();
+            this.getResourceConnectionTypes().then();
+            useProviderStore().getVirtualResourceProviders().then();
+            const providerStore = useProviderStore();
+            providerStore.getServiceHosters().then();
+            this.getProfiler().then();
         },
 
         async setSelectedResource (resource) {

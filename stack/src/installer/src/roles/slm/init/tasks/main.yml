@@ -117,7 +117,7 @@
 - name: "Store resulting compose file"
   template:
     src: "catalog.yml"
-    dest: "{{ _store_compose_file }}"
+    dest: "{{ _store_compose_file }}_catalog"
   when: (_store_compose_file is defined) and (_store_compose_file|length > 0)
 
 

@@ -1,7 +1,5 @@
 import ApiState from '@/api/apiState'
-import {app} from "@/main";
 import {defineStore} from "pinia";
-import {useProviderStore} from "@/stores/providerStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
 
@@ -35,13 +33,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
 
     actions: {
         async updateDiscoveryStore () {
-            // assure token gets refreshed
-            app.config.globalProperties.$keycloak.keycloak.updateToken(1000000)
-                .then(refreshed => {
-                    console.log("Update discovery store")
-                    this.getDrivers().then();
-                    this.getDiscoveredResources().then();
-                })
+            console.log("Update discovery store")
+            this.getDrivers().then();
+            this.getDiscoveredResources().then();
         },
 
         async getDrivers () {

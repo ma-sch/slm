@@ -73,7 +73,6 @@
 import ServiceCategoryCreateOrEditDialog from '@/components/service_offerings/ServiceCategoryCreateOrEditDialog'
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
-import {app} from "@/main";
 import {useServicesStore} from "@/stores/servicesStore";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 
@@ -118,12 +117,12 @@ export default {
         this.editServiceCategory = false
         ServiceManagementClient.serviceCategoriesApi.deleteServiceCategories(serviceVendor.id).then(
           response => {
-            app.config.globalProperties.$toast.info('Service category successfully deleted')
+            this.$toast.info('Service category successfully deleted')
 
             this.servicesStore.getServiceOfferingCategories();
           })
           .catch(exception => {
-            app.config.globalProperties.$toast.error('Failed to create service category')
+            this.$toast.error('Failed to create service category')
             console.log('Service category deletion failed: ' + exception.response.data.message)
             console.log(exception)
           })

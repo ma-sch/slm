@@ -197,9 +197,9 @@
 </template>
 
 <script>
-import ServiceInstanceDeleteDialog from '@/components/services/ServiceInstanceDeleteDialog'
+import ServiceInstanceDeleteDialog from '@/components/services/ServiceInstanceDeleteDialog.vue'
 import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
-import ConfirmDialog from "@/components/base/ConfirmDialog";
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 import {serviceInstanceMixin} from "@/components/services/serviceInstanceMixin";
 import {useServicesStore} from "@/stores/servicesStore";
 import {useResourcesStore} from "@/stores/resourcesStore";

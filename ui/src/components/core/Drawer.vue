@@ -284,7 +284,7 @@ export default {
 </style>
 
 <style lang="sass">
-  @import '~vuetify/lib/styles/tools/_rtl.sass'
+  @use 'vuetify/lib/styles/tools/_rtl.sass' as *
 
   #core-navigation-drawer
     .v-list-group__header.v-list-item--active:before
@@ -296,7 +296,6 @@ export default {
         justify-content: center
         text-align: center
         width: 20px
-
 
         +ltr()
           margin-right: 24px

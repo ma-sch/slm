@@ -2,9 +2,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "sourceMap": true,
-    "target": "es2016",
+    "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowJs": true,
     "strict": true,
     "noImplicitThis": true,

@@ -56,7 +56,7 @@ import java.util.concurrent.Executor;
         "org.eclipse.slm.resource_management.persistence"
 })
 @EnableAsync
-@EnableDiscoveryClient(autoRegister=false)
+@EnableDiscoveryClient
 public class Application {
 
     public static void main(String[] args) {
