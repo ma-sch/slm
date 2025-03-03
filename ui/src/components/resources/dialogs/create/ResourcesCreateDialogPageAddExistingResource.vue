@@ -74,9 +74,6 @@ export default {
       return {resourceStore};
     },
     computed: {
-      ResourcesCreateDialogPage() {
-        return ResourcesCreateDialogPage
-      },
       availableClusterTypes() {
         return this.resourceStore.availableClusterTypes
       },

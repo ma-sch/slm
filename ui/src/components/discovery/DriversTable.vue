@@ -43,11 +43,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useDiscoveryStore } from "@/stores/discoveryStore";
 import {storeToRefs} from "pinia";
 import ApiState from "@/api/apiState";
-import DiscoveredResourcesTable from "@/components/discovery/DiscoveredResourcesTable.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 

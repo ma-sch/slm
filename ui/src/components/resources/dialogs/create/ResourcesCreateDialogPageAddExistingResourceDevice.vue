@@ -69,25 +69,6 @@
           item-value="id"
           clearable
         />
-        <v-tooltip
-          v-if="showBaseConfigurationSwitch()"
-          location="right"
-        >
-          <template #activator="{ props }">
-            <div
-              style="width:min-content;border: 1px solid white"
-              v-bind="props"
-            >
-              <v-switch
-                id="resource-base-configuration-switch"
-                v-model="addBaseConfigurationToResource"
-                label=""
-                prepend-icon="mdi-factory"
-              />
-            </div>
-          </template>
-          <span>Convert Target Host to FabOS Device</span>
-        </v-tooltip>
 
         <v-row>
           <v-col cols="9">
@@ -108,6 +89,7 @@
                 item-title="prettyName"
                 item-value="name"
                 :error-messages="errors"
+                persistent-placeholder
 
                 @update:modelValue="updateConnectionPort"
               />
@@ -127,6 +109,7 @@
                 required
                 label="Connection Port"
                 prepend-icon="mdi-counter"
+                persistent-placeholder
                 :error-messages="errors"
               />
             </Field>
@@ -240,17 +223,19 @@ export default {
       availableConnectionTypes() {
         return this.resourceStore.resourceConnectionTypes
       },
+      remoteAccessAvailable() {
+        return this.remoteAccess.available
+      },
       locations () {
         return this.resourceStore.locations
       },
-      availableBaseConfigurationCapabilities() {
-        return this.resourceStore.availableBaseConfigurationCapabilities
-      },
-
-      resourceBaseConfigurationId() {
-        if(this.availableBaseConfigurationCapabilities.length === 0 || !this.addBaseConfigurationToResource)
-          return ''
-        return this.availableBaseConfigurationCapabilities[0].id
+    },
+    watch: {
+      remoteAccessAvailable (newVal, oldVal) {
+        if (oldVal === false && newVal === true) {
+          this.remoteAccess.connectionType = this.availableConnectionTypes[0].name
+          this.remoteAccess.connectionPort = this.availableConnectionTypes[0].defaultPort
+        }
       }
     },
     mounted() {
@@ -275,10 +260,6 @@ export default {
         this.remoteAccess.password = ''
         this.remoteAccess.connectionType = ''
         this.remoteAccess.connectionPort = 0
-        this.addBaseConfigurationToResource = false
-      },
-      showBaseConfigurationSwitch() {
-        return this.availableBaseConfigurationCapabilities.length > 0 && this.remoteAccess.available
       },
       onBackButtonClicked () {
         this.clearForm()

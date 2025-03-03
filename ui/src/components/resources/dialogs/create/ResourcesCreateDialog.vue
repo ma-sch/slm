@@ -125,11 +125,6 @@ export default {
         dialog: this.active
       }
     },
-    computed: {
-      ResourcesCreateDialogPage() {
-        return ResourcesCreateDialogPage
-      }
-    },
     enums: {
       ResourcesCreateDialogPage,
     },

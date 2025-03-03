@@ -78,9 +78,6 @@ export default {
       return {providerStore, resourceStore};
     },
     computed: {
-      ResourcesCreateDialogPage() {
-        return ResourcesCreateDialogPage
-      },
       virtualResourceProviders() {
         return this.providerStore.virtualResourceProviders
       },
