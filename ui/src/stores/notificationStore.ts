@@ -7,6 +7,7 @@ import NotificationServiceClient from "@/api/notification-service/notification-s
 import logRequestError from "@/api/restApiHelper";
 import {useDiscoveryStore} from "@/stores/discoveryStore";
 import ApiState from "@/api/apiState";
+import {useToast} from "vue-toast-notification";
 
 export interface NotificationStoreState {
   apiState: number,
@@ -35,10 +36,12 @@ export const useNotificationStore = defineStore('notificationStore', {
     },
 
     processIncomingNotification (notification: any) {
+      const $toast = useToast();
+
       this.getNotifications();
 
       if (notification.category !== undefined) {
-        // this.$toast.info(notification.text)
+        $toast.info(notification.text)
         const resourceDevicesStore = useResourceDevicesStore();
         const resourceClustersStore = useResourceClustersStore();
         const serviceInstancesStore = useServiceInstancesStore();
