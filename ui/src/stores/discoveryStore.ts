@@ -4,31 +4,21 @@ import ResourceManagementClient from "@/api/resource-management/resource-managem
 import logRequestError from "@/api/restApiHelper";
 
 interface DiscoveryStoreState{
-    apiStateDiscovery_: number,
-
-    drivers_: any[],
-    discoveredResources_: any[],
+    apiState: number,
+    drivers: any[],
+    discoveredResources: any[],
 }
 
 export const useDiscoveryStore = defineStore('discoveryStore', {
-
     persist: true,
-    state:():DiscoveryStoreState => ({
-        apiStateDiscovery_: ApiState.INIT,
 
-        drivers_: [],
-        discoveredResources_: [],
+    state:():DiscoveryStoreState => ({
+        apiState: ApiState.INIT,
+        drivers: [],
+        discoveredResources: [],
     }),
+
     getters: {
-        apiStateDiscovery(state) {
-            return state.apiStateDiscovery_
-        },
-        drivers: (state) => {
-            return state.drivers_
-        },
-        discoveredResources: (state) => {
-            return state.discoveredResources_
-        },
     },
 
     actions: {
@@ -39,33 +29,39 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
         },
 
         async getDrivers () {
-            if (this.apiStateDiscovery_ === ApiState.INIT) {
-                this.apiStateDiscovery_ = ApiState.LOADING;
-            } else {
-                this.apiStateDiscovery_ = ApiState.UPDATING;
-            }
 
             return await ResourceManagementClient.discoveryApi.getRegisteredDrivers().then(
                 response => {
-                    this.drivers_ = response.data;
-                    this.apiStateDiscovery_ = ApiState.LOADED;
+                    this.drivers = response.data;
                 }
             ).catch(logRequestError)
         },
 
         async getDiscoveredResources (removeDuplicate = false, onlyLatestJobs = false, includeIgnored = false) {
-            if (this.apiStateDiscovery_ === ApiState.INIT) {
-                this.apiStateDiscovery_ = ApiState.LOADING;
-            } else {
-                this.apiStateDiscovery_ = ApiState.UPDATING;
-            }
-
             return await ResourceManagementClient.discoveryApi.getDiscoveredResources(removeDuplicate, onlyLatestJobs, includeIgnored).then(
                 response => {
-                    this.discoveredResources_ = response.data;
-                    this.apiStateDiscovery_ = ApiState.LOADED;
+                    this.discoveredResources = response.data;
                 }
             ).catch(logRequestError)
+        },
+
+        async updateStore () {
+            if (this.apiState === ApiState.INIT) {
+                this.apiState = ApiState.LOADING;
+            } else {
+                this.apiState = ApiState.UPDATING;
+            }
+
+            return Promise.all([
+                this.getDrivers(),
+                this.getDiscoveredResources(),
+            ]).then(() => {
+                this.apiState = ApiState.LOADED;
+                console.log("discoveryStore updated")
+            }).catch((e) => {
+                this.apiState = ApiState.ERROR;
+                console.log("Failed to update discoveryStore: ", e)
+            });
         },
     },
 });

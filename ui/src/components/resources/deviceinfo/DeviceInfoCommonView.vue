@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import { useClipboard } from '@vueuse/core'
 import {onMounted, ref} from "vue";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
@@ -16,7 +16,7 @@ const props = defineProps({
   }
 });
 
-const resourceStore = useResourcesStore();
+const resourceDevicesStore = useResourceDevicesStore();
 const $toast = useToast();
 
 const resource = ref<BasicResource|undefined>(undefined)
@@ -61,19 +61,19 @@ onMounted(() => {
     <div v-else>
       <RowWithLabel
         label="Resource Id"
-        :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Id')"
+        :text="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Id')"
       />
       <RowWithLabel
         label="Asset Id"
-        :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.AssetId')"
+        :text="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.AssetId')"
       />
       <RowWithLabel
         label="Hostname"
-        :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Hostname')"
+        :text="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Hostname')"
       />
       <RowWithLabel
         label="IP"
-        :text="resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.IP')"
+        :text="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.IP')"
       />
       <RowWithLabel
         label="Remote Access"

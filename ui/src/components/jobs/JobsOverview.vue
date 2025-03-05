@@ -86,7 +86,7 @@ export default {
     setup(){
       const envStore = useEnvStore();
       const jobsStore = useJobsStore();
-      return {jobsStore}
+      return {envStore, jobsStore}
     },
     data: function () {
       return {
@@ -97,14 +97,14 @@ export default {
     },
     computed: {
       apiStateJobs() {
-        return this.jobsStore.apiStateJobs
+        return this.jobsStore.apiState
       },
       apiStateLoaded () {
         return this.apiStateJobs === ApiState.LOADED
       },
       apiStateLoading () {
         if (this.apiStateJobs === ApiState.INIT) {
-          this.jobsStore.updateJobsStore();
+          this.jobsStore.updateStore();
         }
         return this.apiStateJobs === ApiState.LOADING || this.apiStateJobs === ApiState.INIT
       },
@@ -128,7 +128,7 @@ export default {
         ]
       },
       awxURL () {
-        return envStore.awxUrl
+        return this.envStore.awxUrl
       }
     },
     methods: {

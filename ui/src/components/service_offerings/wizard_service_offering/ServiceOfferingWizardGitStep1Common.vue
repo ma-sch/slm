@@ -137,7 +137,7 @@
   import ProgressCircular from "@/components/base/ProgressCircular.vue";
   import {Field, Form as ValidationForm} from "vee-validate";
   import * as yup from 'yup';
-  import {useServicesStore} from "@/stores/servicesStore";
+  import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
   import ServiceManagementClient from "@/api/service-management/service-management-client";
 
   export default {
@@ -156,10 +156,10 @@
     },
     setup(){
       const required = yup.string().required();
-      const servicesStore = useServicesStore();
+      const serviceOfferingsStore = useServiceOfferingsStore();
 
       return {
-        required, servicesStore
+        required, serviceOfferingsStore
       }
     },
     data () {
@@ -179,10 +179,10 @@
     },
     computed: {
       serviceOfferingCategories() {
-        return this.servicesStore.serviceOfferingCategories
+        return this.serviceOfferingsStore.serviceOfferingCategories
       },
       serviceOfferingDeploymentTypes () {
-        return this.servicesStore.serviceOfferingDeploymentTypes
+        return this.serviceOfferingsStore.serviceOfferingDeploymentTypes
       },
     },
     mounted() {
@@ -196,7 +196,7 @@
               this.loading = false
               if (response.status === 200) {
                 this.$toast.info('Successfully created git-based service offering')
-                this.servicesStore.getServiceOfferings();
+                this.serviceOfferingsStore.getServiceOfferings();
                 this.$router.push({ path: `/services/vendors/${this.serviceVendorId}` })
               } else {
                 console.log(response)

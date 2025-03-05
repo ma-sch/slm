@@ -25,10 +25,14 @@ import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 import {createPinia} from 'pinia';
 import {useUserStore} from "@/stores/userStore";
 import {useCatalogStore} from "@/stores/catalogStore";
-import {useServicesStore} from "@/stores/servicesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
+import {useServiceInstancesStore} from "@/stores/serviceInstancesStore";
 import {useProviderStore} from "@/stores/providerStore";
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
+import {useResourceClustersStore} from "@/stores/resourceClustersStore";
+import {useDiscoveryStore} from "@/stores/discoveryStore";
 import {useNotificationStore} from "@/stores/notificationStore";
+import {useJobsStore} from "@/stores/jobsStore";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import * as yup from "yup";
 import {createI18n} from "vue-i18n";
@@ -73,32 +77,31 @@ app.use(VueKeycloakJs, {
     onReady (keycloak) {
         keycloak.updateToken(70).then();
         setupTokenInterceptor();
+
+        // Connect to notification service via WebSocket
         NotificationServiceWebsocketClient.connect();
+
+        // Update stores
         const userStore = useUserStore();
-        userStore.getUserDetails().then();
-
+        userStore.updateStore();
         const catalogStore = useCatalogStore();
-        catalogStore.updateCatalogStore().then();
-
-        const serviceStore = useServicesStore();
-        serviceStore.initServiceStore().then();
-        serviceStore.getServiceInstanceGroups().then();
-
+        catalogStore.updateStore();
+        const serviceOfferingsStore = useServiceOfferingsStore();
+        serviceOfferingsStore.updateStore();
+        const serviceInstancesStore = useServiceInstancesStore();
+        serviceInstancesStore.updateStore();
         const providerStore = useProviderStore();
-        providerStore.getVirtualResourceProviders().then();
-        providerStore.getServiceHosters().then();
-
-        const resourceStore = useResourcesStore();
-        resourceStore.getDeploymentCapabilities().then();
-        resourceStore.getResourcesFromBackend().then();
-        resourceStore.getResourceAASFromBackend().then();
-        resourceStore.getLocations().then();
-        resourceStore.getProfiler().then();
-        resourceStore.getCluster().then();
-        resourceStore.getClusterTypes().then();
-
+        providerStore.updateStore();
+        const resourceDevicesStore = useResourceDevicesStore();
+        resourceDevicesStore.updateStore();
+        const resourceClustersStore = useResourceClustersStore();
+        resourceClustersStore.updateStore();
+        const discoveryStore = useDiscoveryStore();
+        discoveryStore.updateStore();
         const notificationStore = useNotificationStore();
-        notificationStore.getNotifications();
+        notificationStore.updateStore();
+        const jobsStore = useJobsStore();
+        jobsStore.updateStore();
     },
 });
 

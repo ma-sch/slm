@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
 import {useCapabilityUtils} from "@/utils/capabilityUtils";
@@ -20,7 +20,7 @@ const selectedCapabilityId = ref(undefined)
 const selectedSkipInstall = ref(false)
 const showCapabilityParamsDialog = ref(false)
 
-const resourceStore = useResourcesStore();
+const resourceDevicesStore = useResourceDevicesStore();
 const capabilityUtils = useCapabilityUtils();
 
 const insertWhiteSpaceInCamelCase = (string) => {
@@ -28,9 +28,6 @@ const insertWhiteSpaceInCamelCase = (string) => {
 }
 
 const addCapability = (capabilityId, skipInstall, configParameterMap) => {
-  console.log(capabilityId)
-  console.log(skipInstall)
-  console.log(configParameterMap)
   ResourceManagementClient.capabilityApi.installCapabilityOnSingleHost(props.resource.id, capabilityId, configParameterMap, skipInstall)
       .then()
       .catch(logRequestError)
@@ -72,7 +69,7 @@ const onCapabilityParamsDialogConfirmed = (capabilityParametersMap) => {
           color="info"
           size="small"
           v-bind="props"
-          :disabled="resource.clusterMember || resourceStore.availableSingleHostCapabilitiesNoDefault.length === 0"
+          :disabled="resource.clusterMember || resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.length === 0"
         >
           <v-icon
             color="white"

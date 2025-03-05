@@ -19,7 +19,7 @@
       </v-container>
     </template>
     <no-item-available-note
-      v-if="!resourceStore.resourceAASs.length"
+      v-if="!resourceDevicesStore.resourceAasDescriptors.length"
       item="Device statistics"
     />
     <!--    <aas-circular-chart-->
@@ -37,17 +37,17 @@
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 
 // import AasCircularChart from "@/components/charts/AasCircularChart.vue";
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 
 export default {
     name: 'DashboardResourceStatistics',
     components: {NoItemAvailableNote },
     setup(){
-      const resourceStore = useResourcesStore();
-      return {resourceStore}
+      const resourceDevicesStore = useResourceDevicesStore();
+      return {resourceDevicesStore}
     },
     mounted () {
-      this.resourceStore.getResourceAASFromBackend();
+      this.resourceDevicesStore.getResourceAasDescriptors();
     }
   }
 </script>

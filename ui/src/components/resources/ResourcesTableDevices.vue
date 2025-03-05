@@ -103,11 +103,15 @@
       </template>
 
       <template #item.vendor="{ item }">
-        <div v-if="resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, 'Nameplate', '$.ManufacturerName..en') == 'N/A'">
-          {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..de") }}
+        <div v-if="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, 'Nameplate', '$.ManufacturerName..en') == 'N/A'">
+          {{
+            resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..de")
+          }}
         </div>
         <div v-else>
-          {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en") }}
+          {{
+            resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en")
+          }}
         </div>
       </template>
 
@@ -128,7 +132,7 @@
       </template>
 
       <template #item.firmware="{ item }">
-        {{ resourceStore.getSubmodelElementValueOfResourceSubmodel(item.id, "DeviceInfo", "$.FirmwareVersion") }}
+        {{ resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, "DeviceInfo", "$.FirmwareVersion") }}
       </template>
 
       <!-- Column: Actions -->
@@ -166,7 +170,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import ConfirmDialog from '@/components/base/ConfirmDialog';
-import { useResourcesStore } from "@/stores/resourcesStore";
+import { useResourceDevicesStore } from "@/stores/resourceDevicesStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
 import CapabilitiesButton from "@/components/resources/capabilities/CapabilitiesButton.vue";
@@ -175,7 +179,7 @@ import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.v
 
 const emit = defineEmits(['resource-selected']);
 
-const resourceStore = useResourcesStore();
+const resourceDevicesStore = useResourceDevicesStore();
 
 const tableHeaders = [
   { title: "Product", key: "product", width: "20%" },
@@ -195,9 +199,9 @@ const filterResourcesByLocations = ref([]);
 const filteredResources = ref([]);
 const searchResources = ref(undefined);
 
-const resources = computed(() => resourceStore.resources);
-const locations = computed(() => resourceStore.locations);
-const profiler = computed(() => resourceStore.profiler);
+const resources = computed(() => resourceDevicesStore.resources);
+const locations = computed(() => resourceDevicesStore.locations);
+const profiler = computed(() => resourceDevicesStore.profiler);
 
 watch(resources, () => {
   filterResources();
@@ -205,7 +209,7 @@ watch(resources, () => {
 
 onMounted(() => {
   filteredResources.value = resources.value;
-  resourceStore.getResourceAasValues();
+  resourceDevicesStore.getResourceAasValues();
 });
 
 const getDeploymentCapabilityServices = (capabilityServices) => {
@@ -215,7 +219,7 @@ const getDeploymentCapabilityServices = (capabilityServices) => {
 const deleteResource = (resource) => {
   const resourceId = resource.id;
   ResourceManagementClient.resourcesApi.deleteResource(resourceId).then();
-  resourceStore.setResourceMarkedForDelete(resource);
+  resourceDevicesStore.setResourceMarkedForDelete(resource);
   resourceToDelete.value = null;
 };
 
@@ -277,15 +281,15 @@ const runProfiler = () => {
 
 const getProductOfResource = (resourceId) => {
   let productValue = "N/A";
-  if ((productValue = resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+  if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
       'Nameplate', '$.ManufacturerProductType..en')) != 'N/A') {
 
   }
-  else if ((productValue = resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+  else if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
       'Nameplate', '$.ManufacturerProductType')) != 'N/A') {
 
   }
-  else if ((productValue = resourceStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+  else if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
       'Nameplate', '$.OrderCodeOfManufacturer')) != 'N/A') {
 
   }

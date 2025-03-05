@@ -1,11 +1,11 @@
-import { useResourcesStore } from "@/stores/resourcesStore";
+import { useResourceDevicesStore } from "@/stores/resourceDevicesStore";
 
 export function useCapabilityUtils() {
-  const resourceStore = useResourcesStore();
+  const resourceDevicesStore = useResourceDevicesStore();
 
   const getCapability = (capabilityId) => {
     try {
-      return resourceStore.availableSingleHostCapabilitiesNoDefault.find(
+      return resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.find(
           cap => cap.id === capabilityId
       );
     } catch (e) {
@@ -27,7 +27,7 @@ export function useCapabilityUtils() {
   };
 
   const getCapabilitiesByCapabilityClass = (capabilityClass) => {
-    return resourceStore.availableSingleHostCapabilitiesNoDefault.filter(shc => shc.capabilityClass === capabilityClass)
+    return resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.filter(shc => shc.capabilityClass === capabilityClass)
   };
 
   const isCapabilityInstalledOnResource = (resource, capability) => {
@@ -39,7 +39,7 @@ export function useCapabilityUtils() {
 
   const getUniqueCapabilityClasses = () => {
     return [...new Set(
-        resourceStore.availableSingleHostCapabilitiesNoDefault.map(shc => shc.capabilityClass)
+        resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.map(shc => shc.capabilityClass)
     )].sort();
   };
 

@@ -186,7 +186,7 @@ import ResourcesCreateDialogPage from "@/components/resources/dialogs/create/Res
 
 import {Field, Form as ValidationForm} from "vee-validate";
 import * as yup from 'yup';
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
 
@@ -201,9 +201,9 @@ export default {
       const string_required = yup.string().required();
       const ip_required = yup.string().ipv4();
 
-      const resourceStore = useResourcesStore();
+      const resourceDevicesStore = useResourceDevicesStore();
 
-      return {string_required, ip_required, resourceStore}
+      return {string_required, ip_required, resourceDevicesStore}
     },
     data () {
       return {
@@ -221,13 +221,13 @@ export default {
     },
     computed: {
       availableConnectionTypes() {
-        return this.resourceStore.resourceConnectionTypes
+        return this.resourceDevicesStore.resourceConnectionTypes
       },
       remoteAccessAvailable() {
         return this.remoteAccess.available
       },
       locations () {
-        return this.resourceStore.locations
+        return this.resourceDevicesStore.locations
       },
     },
     watch: {
@@ -240,7 +240,7 @@ export default {
     },
     mounted() {
       this.$emit('title-changed', 'Add existing host resource')
-      this.resourceStore.getResourceConnectionTypes();
+      this.resourceDevicesStore.getResourceConnectionTypes();
     },
     methods: {
       updateConnectionPort(connectionTypeName) {

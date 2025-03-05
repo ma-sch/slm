@@ -269,8 +269,9 @@ import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue
 import ApiState from "@/api/apiState";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
-import {useServicesStore} from "@/stores/servicesStore";
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useServiceInstancesStore} from "@/stores/serviceInstancesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import {storeToRefs} from "pinia";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
@@ -289,11 +290,13 @@ export default {
     },
     setup(){
       const envStore = useEnvStore();
-      const servicesStore = useServicesStore();
-      const resourceStore = useResourcesStore();
-      const {serviceOfferingById, serviceInstanceGroupById} = storeToRefs(servicesStore)
-      const {resourceById} = storeToRefs(resourceStore)
-      return {servicesStore, resourceStore, serviceOfferingById, serviceInstanceGroupById, resourceById};
+      const serviceInstancesStore = useServiceInstancesStore();
+      const serviceOfferingsStore = useServiceOfferingsStore();
+      const resourceDevicesStore = useResourceDevicesStore();
+      const {serviceInstanceGroupById} = storeToRefs(serviceInstancesStore)
+      const {serviceOfferingById} = storeToRefs(serviceOfferingsStore)
+      const {resourceById} = storeToRefs(resourceDevicesStore)
+      return {envStore, serviceInstancesStore, resourceDevicesStore, serviceOfferingById, serviceInstanceGroupById, resourceById};
     },
     data () {
       return {

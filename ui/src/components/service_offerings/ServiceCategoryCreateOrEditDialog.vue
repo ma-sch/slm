@@ -52,7 +52,7 @@
 <script>
 
 import {toRef} from 'vue'
-import {useServicesStore} from "@/stores/servicesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 
 export default {
@@ -102,8 +102,8 @@ export default {
             this.$toast.info('Service category successfully created')
           }
 
-          const serviceStore = useServicesStore();
-          serviceStore.getServiceOfferingCategories();
+          const serviceOfferingsStore = useServiceOfferingsStore();
+          serviceOfferingsStore.getServiceOfferingCategories();
 
           this.$emit('confirmed', this.serviceVendorUpdate)
         }).catch(exception => {

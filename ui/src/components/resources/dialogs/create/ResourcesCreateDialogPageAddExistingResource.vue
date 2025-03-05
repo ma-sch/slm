@@ -62,7 +62,7 @@
 <script>
 
 import ResourcesCreateDialogPage from '@/components/resources/dialogs/create/ResourcesCreateDialogPage'
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useResourceClustersStore} from "@/stores/resourceClustersStore";
 
 export default {
     name: 'ResourcesCreateDialogPageAddExistingResource',
@@ -70,12 +70,12 @@ export default {
       ResourcesCreateDialogPage,
     },
     setup(){
-      const resourceStore = useResourcesStore();
-      return {resourceStore};
+      const resourceClustersStore = useResourceClustersStore();
+      return {resourceClustersStore};
     },
     computed: {
       availableClusterTypes() {
-        return this.resourceStore.availableClusterTypes
+        return this.resourceClustersStore.availableClusterTypes
       },
     },
     mounted() {

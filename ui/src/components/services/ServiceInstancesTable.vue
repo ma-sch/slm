@@ -201,8 +201,9 @@ import ServiceInstanceDeleteDialog from '@/components/services/ServiceInstanceDe
 import DeviceInfoView from '@/components/resources/deviceinfo/DeviceInfoView.vue'
 import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 import {serviceInstanceMixin} from "@/components/services/serviceInstanceMixin";
-import {useServicesStore} from "@/stores/servicesStore";
-import {useResourcesStore} from "@/stores/resourcesStore";
+import {useServiceInstancesStore} from "@/stores/serviceInstancesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import {storeToRefs} from "pinia";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 import logRequestError from "@/api/restApiHelper";
@@ -215,11 +216,13 @@ export default {
     components: { ServiceInstanceDeleteDialog, DeviceInfoView, ConfirmDialog },
     mixins: [ serviceInstanceMixin ],
     setup(){
-      const servicesStore = useServicesStore();
-      const resourceStore = useResourcesStore();
-      const {serviceOfferingById, serviceInstanceGroupById} = storeToRefs(servicesStore)
-      const {resourceById} = storeToRefs(resourceStore)
-      return {servicesStore, resourceStore, serviceOfferingById, serviceInstanceGroupById, resourceById};
+      const serviceInstancesStore = useServiceInstancesStore();
+      const serviceOfferingsStore = useServiceOfferingsStore();
+      const resourceDevicesStore = useResourceDevicesStore();
+      const {serviceInstanceGroupById} = storeToRefs(serviceInstancesStore)
+      const {serviceOfferingById} = storeToRefs(serviceOfferingsStore)
+      const {resourceById} = storeToRefs(resourceDevicesStore)
+      return {serviceInstancesStore, resourceDevicesStore, serviceOfferingById, serviceInstanceGroupById, resourceById};
     },
     data () {
       return {
@@ -248,7 +251,7 @@ export default {
     },
     computed: {
       services () {
-        return this.servicesStore.services
+        return this.serviceInstancesStore.services
       },
 
     },
@@ -273,7 +276,7 @@ export default {
       },
       onServiceDeleteConfirmed () {
         ServiceManagementClient.serviceInstancesApi.deleteServiceInstance(this.serviceToDelete.id).then().catch(logRequestError)
-        this.servicesStore.setServiceMarkedForDelete(this.serviceToDelete);
+        this.serviceInstancesStore.setServiceMarkedForDelete(this.serviceToDelete);
         this.serviceToDelete = null
         this.$toast.info('Service deletion started')
       },

@@ -86,7 +86,7 @@
 
 import {toRef} from 'vue'
 import getImageUrl from '@/utils/imageUtil'
-import {useServicesStore} from "@/stores/servicesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 
 export default {
@@ -157,8 +157,8 @@ export default {
             this.$toast.info('Service vendor successfully created')
           }
 
-          const serviceStore = useServicesStore();
-          serviceStore.getServiceVendors();
+          const serviceOfferingsStore = useServiceOfferingsStore();
+          serviceOfferingsStore.getServiceVendors();
           this.$emit('confirmed', this.serviceVendorUpdate)
         }).catch(exception => {
           this.$toast.error('Failed to create service vendor')

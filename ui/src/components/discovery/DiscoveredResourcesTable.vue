@@ -109,7 +109,7 @@ import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 const emit = defineEmits(['selectedDiscoveredResourcesChanged'])
 
 const discoveryStore = useDiscoveryStore();
-const { discoveredResources, apiStateDiscovery } = storeToRefs(discoveryStore);
+const { discoveredResources, apiState } = storeToRefs(discoveryStore);
 
 const selectedDiscoveredResourceIds = ref([]);
 const searchDiscoveredResources = ref(undefined);

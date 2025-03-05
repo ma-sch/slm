@@ -58,10 +58,11 @@ ui
 │       └── catalogStore.ts
 │       └── jobsStore.ts
 │       └── notificationStore.ts
-│       └── overviewStore.ts
 │       └── providerStore.ts
-│       └── resourcesStore.ts
-│       └── servicesStore.ts
+│       └── resourceDevicesStore.ts
+│       └── resourceClustersStore.ts
+│       └── serviceOfferingsStore.ts
+│       └── serviceInstancesStore.ts
 │       └── store.ts
 │       └── userStore.ts
 │   └── views

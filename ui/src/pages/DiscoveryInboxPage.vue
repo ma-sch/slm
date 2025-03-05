@@ -2,67 +2,37 @@
   <v-container
     id="discovery"
     fluid
-    tag="section"
   >
     <div
-      v-if="apiStateLoading"
+      v-if="apiState === ApiState.LOADING || apiState === ApiState.INIT || apiState === ApiState.UPDATING"
       class="text-center"
     >
-      <v-progress-circular
-        :size="70"
-        :width="7"
-        color="primary"
-        indeterminate
-      />
+      <ProgressCircular />
     </div>
-    <div v-if="apiStateError">
+    <div v-if="apiState === ApiState.ERROR">
       Error
     </div>
 
-    <div v-if="apiStateLoaded">
+    <div v-if="apiState === ApiState.LOADED">
       <discovery-overview />
     </div>
   </v-container>
 </template>
 
-<script>
-import ApiState from '@/api/apiState'
+<script setup>
+import { onMounted } from 'vue';
+import ApiState from '@/api/apiState';
 import DiscoveryOverview from "@/components/discovery/DiscoveryOverview.vue";
-import {useDiscoveryStore} from "@/stores/discoveryStore";
+import { useDiscoveryStore } from "@/stores/discoveryStore";
+import {storeToRefs} from "pinia";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 
-export default {
-    components: {
-      DiscoveryOverview,
-    },
-    setup(){
-      const discoveryStore = useDiscoveryStore();
-      return {discoveryStore};
-    },
-    data () {
-      return {
-      }
-    },
-    computed: {
-      apiStateDiscovery() {
-        return this.discoveryStore.apiStateDiscovery
-      },
-      apiStateLoaded () {
-        return (this.apiStateDiscovery === ApiState.LOADED || this.apiStateDiscovery === ApiState.UPDATING)
-      },
-      apiStateLoading () {
-        return this.apiStateDiscovery === ApiState.LOADING || this.apiStateDiscovery === ApiState.INIT
-      },
-      apiStateError () {
-        return this.apiStateDiscovery === ApiState.ERROR
-      },
-    },
-  mounted () {
-    this.discoveryStore.getDrivers();
-    this.discoveryStore.getDiscoveredResources();
-  },
-    methods: {
-    },
-  }
+const discoveryStore = useDiscoveryStore();
+const {apiState} = storeToRefs(discoveryStore);
+
+onMounted(() => {
+  discoveryStore.updateStore();
+});
 </script>
 
 <style scoped />

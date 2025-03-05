@@ -5,69 +5,37 @@
     tag="section"
   >
     <div
-      v-if="apiStateLoading"
+      v-if="apiState === ApiState.LOADING || apiState === ApiState.INIT || apiState === ApiState.UPDATING"
       class="text-center"
     >
-      <v-progress-circular
-        :size="70"
-        :width="7"
-        color="primary"
-        indeterminate
-      />
+      <ProgressCircular />
     </div>
-    <div v-if="apiStateError">
+    <div v-if="apiState === ApiState.ERROR">
       Error
     </div>
 
-    <div v-if="apiStateLoaded">
-      <drivers-table
+    <div v-if="apiState === ApiState.LOADED">
+      <DriversTable
         :drivers="drivers"
       />
     </div>
   </v-container>
 </template>
 
-<script>
-import ApiState from '@/api/apiState'
-import DiscoveryOverview from "@/components/discovery/DiscoveryOverview.vue";
-import {useDiscoveryStore} from "@/stores/discoveryStore";
+<script setup>
+import { onMounted } from 'vue';
+import {storeToRefs} from "pinia";
+import { useDiscoveryStore } from "@/stores/discoveryStore";
+import ApiState from '@/api/apiState';
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import DriversTable from "@/components/discovery/DriversTable.vue";
 
-export default {
-    components: {
-      DriversTable
-    },
-    setup(){
-      const discoveryStore = useDiscoveryStore();
-      return {discoveryStore};
-    },
-    data () {
-      return {
-      }
-    },
-    computed: {
-      apiStateDiscovery() {
-        return this.discoveryStore.apiStateDiscovery
-      },
-      apiStateLoaded () {
-        return (this.apiStateDiscovery === ApiState.LOADED || this.apiStateDiscovery === ApiState.UPDATING)
-      },
-      apiStateLoading () {
-        return this.apiStateDiscovery === ApiState.LOADING || this.apiStateDiscovery === ApiState.INIT
-      },
-      apiStateError () {
-        return this.apiStateDiscovery === ApiState.ERROR
-      },
-      drivers() {
-        return this.discoveryStore.drivers
-      },
-    },
-  mounted () {
-    this.discoveryStore.getDrivers();
-  },
-    methods: {
-    },
-  }
+const discoveryStore = useDiscoveryStore();
+const {apiState, drivers} = storeToRefs(discoveryStore);
+
+onMounted(() => {
+  discoveryStore.updateStore();
+});
 </script>
 
 <style scoped />

@@ -89,7 +89,7 @@
 
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 import {useUserStore} from "@/stores/userStore";
-import {useServicesStore} from "@/stores/servicesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
 import {storeToRefs} from "pinia";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 import logRequestError from "@/api/restApiHelper";
@@ -105,9 +105,9 @@ export default {
     },
     setup(){
       const userStore = useUserStore();
-      const servicesStore = useServicesStore();
-      const {serviceOfferingCategoryNameById, serviceVendorById} = storeToRefs(servicesStore)
-      return {userStore, servicesStore, serviceOfferingCategoryNameById, serviceVendorById}
+      const serviceOfferingsStore = useServiceOfferingsStore();
+      const {serviceOfferingCategoryNameById, serviceVendorById} = storeToRefs(serviceOfferingsStore)
+      return {userStore, serviceOfferingsStore, serviceOfferingCategoryNameById, serviceVendorById}
     },
     data () {
       return {
@@ -167,7 +167,6 @@ export default {
         }
       },
       onSaveDevelopersClicked () {
-        console.log(this.addedDevelopers)
         this.addedDevelopers.forEach(developer => {
           ServiceManagementClient.serviceVendorsApi.addDeveloperToServiceVendor(this.serviceVendor.id, developer.id).then(() => {
             this.developersOfServiceVendor.push(developer)

@@ -33,7 +33,7 @@
               :headers="tableHeaders"
               :items="drivers"
               :search="searchDrivers"
-              :loading="apiStateDiscovery === ApiState.LOADING || apiStateDiscovery === ApiState.UPDATING"
+              :loading="apiState === ApiState.INIT || apiState === ApiState.LOADING || apiState === ApiState.UPDATING"
             />
           </v-row>
         </v-card-text>
@@ -51,7 +51,7 @@ import NoItemAvailableNote from "@/components/base/NoItemAvailableNote.vue";
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 
 const discoveryStore = useDiscoveryStore();
-const { drivers, apiStateDiscovery } = storeToRefs(discoveryStore);
+const { drivers, apiState } = storeToRefs(discoveryStore);
 
 const selectedDiscoveredResourceIds = ref([]);
 const searchDrivers = ref(undefined);

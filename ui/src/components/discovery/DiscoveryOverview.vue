@@ -5,13 +5,15 @@
         <overview-heading text="Discovery" />
       </template>
 
-      <no-item-available-note
-        v-if="!discoveredResources.length"
-        item="discovered resources"
-      />
 
-      <v-card-text v-else>
-        <v-row>
+
+      <v-card-text>
+        <no-item-available-note
+          v-if="!discoveredResources.length"
+          item="discovered resources"
+        />
+
+        <v-row v-else>
           <discovered-resources-table
             v-if="discoveredResources.length > 0"
             class="mt-0 flex"

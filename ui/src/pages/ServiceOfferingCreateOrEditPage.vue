@@ -1,35 +1,25 @@
 <template>
   <div>
     <v-row
-      v-if="apiStateLoading"
+      v-if="apiState === ApiState.INIT || apiState === ApiState.LOADING || apiState === ApiState.UPDATING"
       align="center"
       justify="center"
       class="text-center"
     >
-      <v-progress-circular
-        :size="70"
-        :width="7"
-        color="secondary"
-        indeterminate
-      />
+      <progress-circular />
     </v-row>
 
-    <div v-if="apiStateError">
+    <div v-if="apiState === ApiState.ERROR">
       Error
     </div>
 
-    <div v-if="apiStateLoaded">
+    <div v-if="apiState === ApiState.LOADED">
       <v-row
         v-if="editMode == true && !newServiceOffering"
         align="center"
         justify="center"
       >
-        <v-progress-circular
-          :size="70"
-          :width="7"
-          color="secondary"
-          indeterminate
-        />
+        <progress-circular />
       </v-row>
 
       <v-stepper 
@@ -74,15 +64,17 @@ import ServiceOfferingWizardGitStep1Common
   from "@/components/service_offerings/wizard_service_offering/ServiceOfferingWizardGitStep1Common";
 
 import ApiState from '@/api/apiState'
-import {useServicesStore} from "@/stores/servicesStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
 import {storeToRefs} from "pinia";
 import ServiceManagementClient from "@/api/service-management/service-management-client";
 import logRequestError from "@/api/restApiHelper";
+import ProgressCircular from "@/components/base/ProgressCircular.vue";
 
 export default {
     name: 'ServiceOfferingCreatePage',
 
     components: {
+      ProgressCircular,
       ServiceOfferingWizardManualStep1Common,
       ServiceOfferingWizardGitStep1Common
     },
@@ -104,11 +96,10 @@ export default {
         default: null
       },
     },
-        // ['editMode', 'creationType', 'serviceOfferingId', 'serviceVendorId'],
     setup(){
-      const servicesStore = useServicesStore();
-      const {serviceOfferingById} = storeToRefs(servicesStore);
-      return {servicesStore, serviceOfferingById}
+      const serviceOfferingsStore = useServiceOfferingsStore();
+      const {apiState, serviceOfferingById} = storeToRefs(serviceOfferingsStore);
+      return {apiState, serviceOfferingsStore, serviceOfferingById}
     },
     data () {
       return {
@@ -130,31 +121,9 @@ export default {
     },
 
     computed: {
-      apiStateServices () {
-        return this.servicesStore.apiStateServices
-      },
-      serviceOfferingCategories () {
-        return this.servicesStore.serviceOfferingCategories
-      },
-
-      apiStateLoaded () {
-        return this.apiStateServices.serviceOfferingCategories === ApiState.LOADED &&
-          this.apiStateServices.serviceVendors === ApiState.LOADED
-      },
-      apiStateLoading () {
-        if (this.apiStateServices.serviceOfferingCategories === ApiState.INIT) {
-          this.servicesStore.getServiceOfferingCategories();
-        }
-        if (this.apiStateServices.serviceVendors === ApiState.INIT) {
-          this.servicesStore.getServiceVendors();
-        }
-        return this.apiStateServices.serviceOfferingCategories === ApiState.LOADING || this.apiStateServices.serviceOfferingCategories === ApiState.INIT ||
-          this.apiStateServices.serviceVendors === ApiState.LOADING || this.apiStateServices.serviceVendors === ApiState.INIT
-      },
-      apiStateError () {
-        return this.apiStateServices.serviceOfferingCategories === ApiState.ERROR &&
-          this.apiStateServices.serviceVendors === ApiState.ERROR
-      },
+      ApiState() {
+        return ApiState
+      }
     },
 
     created () {
@@ -190,7 +159,7 @@ export default {
                 response => {
                   if (response.status === 200) {
                     this.$toast.info('Successfully updated service offering')
-                    this.servicesStore.getServiceOfferings();
+                    this.serviceOfferingsStore.getServiceOfferings();
                     this.$router.push({ path: `/services/vendors/${this.serviceVendorId}` })
                   } else {
                     console.log(response)
@@ -205,7 +174,7 @@ export default {
                 response => {
                   if (response.status === 200) {
                     this.$toast.info('Successfully created service offering')
-                    this.servicesStore.getServiceOfferings();
+                    this.serviceOfferingsStore.getServiceOfferings();
                     this.$router.push({ path: `/services/vendors/${this.serviceVendorId}` })
                   } else {
                     console.log(response)
