@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {globals} from "@/main";
 import {useEnvStore} from "@/stores/environmentStore";
+import updateToken from "@/utils/updateToken";
 
 export default function setup () {
     const envStore = useEnvStore();
@@ -9,8 +10,7 @@ export default function setup () {
         if (globals.$keycloak.authenticated) {
             // Refresh token before call
             return new Promise((resolve, reject) => {
-                globals.$keycloak.keycloak.updateToken(-1)
-                    .then(() => {
+                updateToken().then(() => {
                         config.headers.Authorization = `Bearer ${globals.$keycloak.token}`;
                         config.headers.RefreshToken = globals.$keycloak.refreshToken;
                         config.headers.Realm = envStore.keycloakRealm;
@@ -37,7 +37,7 @@ export default function setup () {
                     originalConfig._retry = true;
 
                     try {
-                        const refreshed = await globals.$keycloak.keycloak.updateToken(60);
+                        const refreshed = await updateToken();
                         if (refreshed) {
                             console.log('Token refreshed' + refreshed);
                         } else {

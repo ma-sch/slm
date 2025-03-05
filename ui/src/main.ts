@@ -40,6 +40,7 @@ import {de, en} from "vuetify/locale";
 import yupValidateIPv4 from "@/utils/yup.custom";
 import {VueKeycloakInstance} from "@dsb-norge/vue-keycloak-js/dist/types";
 import {useEnvStore} from "@/stores/environmentStore";
+import updateToken from "@/utils/updateToken";
 
 const app = createApp(App);
 
@@ -75,7 +76,7 @@ app.use(VueKeycloakJs, {
         console.error('Keycloak init error', error, keycloakError);
     },
     onReady (keycloak) {
-        keycloak.updateToken(70).then();
+        updateToken();
         setupTokenInterceptor();
 
         // Connect to notification service via WebSocket

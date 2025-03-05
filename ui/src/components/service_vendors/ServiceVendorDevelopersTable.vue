@@ -171,7 +171,6 @@ export default {
           ServiceManagementClient.serviceVendorsApi.addDeveloperToServiceVendor(this.serviceVendor.id, developer.id).then(() => {
             this.developersOfServiceVendor.push(developer)
             this.$toast.info(`Successfully added developer '${developer.username}'`)
-            this.$keycloak.keycloak.updateToken(100000) // Force refresh of token
           }).catch(logRequestError)
         })
         this.addedDevelopers = []
