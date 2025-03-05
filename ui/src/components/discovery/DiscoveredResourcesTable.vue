@@ -70,7 +70,7 @@
       item-value="resultId"
       show-select
       :row-props="colorRowItem"
-      :loading="apiStateDiscovery === ApiState.LOADING || apiStateDiscovery === ApiState.UPDATING"
+      :loading="apiState === ApiState.LOADING || apiState === ApiState.UPDATING"
       @click:row="onRowClick"
     >
       <template

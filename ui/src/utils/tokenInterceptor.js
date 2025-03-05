@@ -5,14 +5,20 @@ import {useEnvStore} from "@/stores/environmentStore";
 export default function setup () {
     const envStore = useEnvStore();
 
-    axios.interceptors.request.use(config => {
-
+    axios.interceptors.request.use( async (config) => {
         if (globals.$keycloak.authenticated) {
-            config.headers.Authorization = `Bearer ${globals.$keycloak.token}`;
-            config.headers.RefreshToken = globals.$keycloak.refreshToken;
-            config.headers.Realm = envStore.keycloakRealm;
+            // Refresh token before call
+            return new Promise((resolve, reject) => {
+                globals.$keycloak.keycloak.updateToken(-1)
+                    .then(() => {
+                        config.headers.Authorization = `Bearer ${globals.$keycloak.token}`;
+                        config.headers.RefreshToken = globals.$keycloak.refreshToken;
+                        config.headers.Realm = envStore.keycloakRealm;
+
+                        resolve (config);
+                    });
+            });
         }
-        return config;
     }, error => {
         return Promise.reject(error);
     });

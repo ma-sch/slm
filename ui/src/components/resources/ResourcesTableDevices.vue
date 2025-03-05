@@ -70,7 +70,6 @@
             closable-chips
             multiple
             clearable
-            @update:modelValue="filterResources"
           />
         </div>
       </div>
@@ -175,11 +174,13 @@ import ResourceManagementClient from "@/api/resource-management/resource-managem
 import logRequestError from "@/api/restApiHelper";
 import CapabilitiesButton from "@/components/resources/capabilities/CapabilitiesButton.vue";
 import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.vue";
+import {storeToRefs} from "pinia";
 
 
 const emit = defineEmits(['resource-selected']);
 
 const resourceDevicesStore = useResourceDevicesStore();
+const {resources} = storeToRefs(resourceDevicesStore);
 
 const tableHeaders = [
   { title: "Product", key: "product", width: "20%" },
@@ -196,19 +197,26 @@ const groupBy = ref([]);
 const sortBy = ref([{ key: 'product', order: 'asc' }]);
 const resourceToDelete = ref(null);
 const filterResourcesByLocations = ref([]);
-const filteredResources = ref([]);
 const searchResources = ref(undefined);
 
-const resources = computed(() => resourceDevicesStore.resources);
+const filteredResources = computed(() => {
+  if (filterResourcesByLocations.value.length === 0) {
+    return resources.value
+  }
+
+  return resources.value.filter(r => {
+    if (r.location == null)
+      return false;
+
+    return filterResourcesByLocations.value.includes(r.location.id);
+  });
+});
+
+
 const locations = computed(() => resourceDevicesStore.locations);
 const profiler = computed(() => resourceDevicesStore.profiler);
 
-watch(resources, () => {
-  filterResources();
-});
-
 onMounted(() => {
-  filteredResources.value = resources.value;
   resourceDevicesStore.getResourceAasValues();
 });
 
@@ -258,20 +266,6 @@ const resourcesHaveLocations = () => {
     groupBy.value = null;
 
   return hasLocations;
-};
-
-const filterResources = () => {
-  if (filterResourcesByLocations.value.length === 0) {
-    filteredResources.value = resources.value;
-    return;
-  }
-
-  filteredResources.value = resources.value.filter(r => {
-    if (r.location == null)
-      return false;
-
-    return filterResourcesByLocations.value.includes(r.location.id);
-  });
 };
 
 const runProfiler = () => {

@@ -113,9 +113,11 @@ export default {
         this.$emit('canceled')
       },
       onAddButtonClicked () {
-        ResourceManagementClient.discoveryApi.onboardDiscoveredResources({ 'resultIds': this.discoveredResourcesIds })
-
-        this.$emit('completed' )
+        ResourceManagementClient.discoveryApi
+            .onboardDiscoveredResources({ 'resultIds': this.discoveredResourcesIds })
+            .then(() => {
+          this.$emit('completed')
+        })
       }
     }
   }

@@ -107,9 +107,8 @@ export default {
       this.$toast.info(`Scan started by driver '${driver.instanceId}'`)
     },
     triggerOnboarding() {
-      console.log("Onboarding triggered")
       this.showOnboardingDialog = false;
-      this.discoveryStore.getDiscoveredResources();
+      this.discoveryStore.updateStore();
     },
     onSelectedDiscoveredResourcesChanged: function(selectedDiscoveredResourceIds) {
       this.selectedDiscoveredResourceIds = selectedDiscoveredResourceIds
