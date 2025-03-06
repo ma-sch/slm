@@ -44,6 +44,7 @@
 
         <DeviceInfoView
           :resource="selectedResource"
+          :section="selectedSection"
           @closed="selectedResource = null"
         />
         <resources-create-dialog
@@ -78,6 +79,7 @@ import ResourcesTableDevices from "@/components/resources/ResourcesTableDevices.
 const resourceDevicesStore = useResourceDevicesStore();
 
 const selectedResource = ref(null);
+const selectedSection = ref("common");
 const showCreateDialog = ref(false);
 const showCreateButton = ref(false);
 
@@ -88,8 +90,9 @@ const apiStateLoaded = computed(() => apiStateResources.value === ApiState.LOADE
 const apiStateLoading = computed(() => apiStateResources.value === ApiState.LOADING || apiStateResources.value === ApiState.INIT);
 const apiStateError = computed(() => apiStateResources.value === ApiState.ERROR);
 
-const onResourceSelected = (resource) => {
+const onResourceSelected = (resource, section) => {
   selectedResource.value = resource;
+  selectedSection.value = section;
 };
 
 onMounted(() => {

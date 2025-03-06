@@ -161,7 +161,9 @@ public class UpdatesRestController {
             updateInformation.setCurrentFirmwareVersion(currentFirmwareVersion);
         }
 
-        updateInformation.setLatestFirmwareVersion(availableFirmwareVersions.get(0));
+        if (!availableFirmwareVersions.isEmpty()) {
+            updateInformation.setLatestFirmwareVersion(availableFirmwareVersions.get(0));
+        }
 
         return ResponseEntity.ok(updateInformation);
     }

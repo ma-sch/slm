@@ -17,6 +17,8 @@ interface ResourceDevicesStoreState{
     profiler: any[],
 
     availableCapabilities: any[],
+
+    firmwareUpdateInformationOfResources: {}
 }
 
 export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
@@ -32,6 +34,8 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
         profiler: [],
 
         availableCapabilities: [],
+
+        firmwareUpdateInformationOfResources: {},
     }),
     getters: {
         resourceById: (state) => (id) => {
@@ -96,6 +100,7 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
                         if (response.data){
                             const resources = response.data
                             this.setResources(resources)
+                            return this.getFirmwareUpdateInformationOfAllResources();
                         }
 
                     })
@@ -126,6 +131,20 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
             } catch (e) {
                 return "N/A"
             }
+        },
+
+        async getFirmwareUpdateInformationOfAllResources() {
+            return await Promise.all(this.resources.map(async (resource) => {
+                await ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResource(resource.id).then(
+                    response => {
+                        this.firmwareUpdateInformationOfResources[resource.id] = response.data;
+                    }
+                ).catch(logRequestError)
+            }));
+        },
+
+        getFirmwareUpdateInformationOfResource (resourceId) {
+            return this.firmwareUpdateInformationOfResources[resourceId]
         },
 
         async getResourceAasDescriptors () {

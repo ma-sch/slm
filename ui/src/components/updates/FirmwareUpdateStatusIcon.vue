@@ -1,19 +1,31 @@
 <script setup lang="ts">
 
 import {FirmwareUpdateStatus} from "@/api/resource-management/client";
-import {PropType} from "vue";
+
+const emit = defineEmits(['click']);
 
 const props = defineProps({
   firmwareUpdateStatus: {
     type: String,
-    required: true,
+    required: false,
+    default: FirmwareUpdateStatus.Unknown,
+  },
+  clickable: {
+    type: Boolean,
+    default: true,
   },
 });
 
 </script>
 
 <template>
-  <div>
+  <v-btn
+    variant="text"
+    size="x-small"
+    :class="{ 'non-clickable': !clickable }"
+    :tabindex="clickable ? 0 : -1"
+    @click.stop="$emit('click')"
+  >
     <v-icon
       v-if="firmwareUpdateStatus === FirmwareUpdateStatus.UpToDate"
       color="green"
@@ -32,9 +44,11 @@ const props = defineProps({
     >
       mdi-help-circle-outline
     </v-icon>
-  </div>
+  </v-btn>
 </template>
 
 <style scoped>
-
+.non-clickable {
+  pointer-events: none;
+}
 </style>

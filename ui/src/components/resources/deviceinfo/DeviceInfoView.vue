@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import {computed, ref} from 'vue';
+import {computed, ref, watch} from 'vue';
 import DeviceInfoSubmodelsView from "@/components/resources/deviceinfo/DeviceInfoSubmodelsView.vue";
 import DeviceInfoNameplateView from "@/components/resources/deviceinfo/DeviceInfoNameplateView.vue";
 import DeviceInfoHardwareView from "@/components/resources/deviceinfo/DeviceInfoHardwareView.vue";
@@ -126,14 +126,40 @@ const props = defineProps({
   resource: {
     type: Object,
     default: null,
+  },
+  section: {
+    type: String,
+    default: 'common',
   }
 });
 
 
 const tab = ref(null);
+const show = ref(false);
 
+watch(() => props.resource, () => {
+  show.value = props.resource !== null;
 
-const show = computed(() => props.resource !== null);
+  switch (props.section) {
+    case 'common':
+      tab.value = 1;
+      break;
+    case 'nameplate':
+      tab.value = 2;
+      break;
+    case 'hardware':
+      tab.value = 3;
+      break;
+    case 'firmware':
+      tab.value = 4;
+      break;
+    case 'submodels':
+      tab.value = 5;
+      break;
+    default:
+      tab.value = 1;
+  }
+});
 
 const onCloseButtonClicked = () => {
   emit('closed');

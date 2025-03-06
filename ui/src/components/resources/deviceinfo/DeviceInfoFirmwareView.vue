@@ -2,11 +2,12 @@
 
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
-import {onMounted, ref} from "vue";
-import {FirmwareUpdateStatus, UpdateInformation} from "@/api/resource-management/client";
+import {computed, onMounted, ref} from "vue";
+import {UpdateInformation} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import FirmwareUpdateStatusIcon from "@/components/updates/FirmwareUpdateStatusIcon.vue";
+import formatDate from "@/utils/dateUtils";
 
 const props = defineProps({
   resourceId: {
@@ -39,6 +40,15 @@ const tableHeaders = [
   { title: 'Installation Checksum', key: 'installationChecksum', value: 'installationChecksum' },
 ];
 
+const installedVersionText = computed(() => {
+  const version = updateInformation.value.currentFirmwareVersion?.version;
+  if (!version) {
+    return "N/A"
+  }
+  const date = updateInformation.value.currentFirmwareVersion?.date;
+  return date ? `${version} (${formatDate(date)})` : version;
+});
+
 </script>
 
 <template>
@@ -47,12 +57,10 @@ const tableHeaders = [
       <progress-circular />
     </div>
 
-
-
     <div v-else>
       <RowWithLabel
         label="Installed version"
-        :text="`${updateInformation.currentFirmwareVersion?.version} (${updateInformation.currentFirmwareVersion?.date})`"
+        :text="installedVersionText"
       />
 
       <RowWithLabel
@@ -60,7 +68,10 @@ const tableHeaders = [
         :text="updateInformation.firmwareUpdateStatus"
       >
         <template #content>
-          <FirmwareUpdateStatusIcon :firmware-update-status="updateInformation.firmwareUpdateStatus" />
+          <FirmwareUpdateStatusIcon
+            :firmware-update-status="updateInformation.firmwareUpdateStatus"
+            :clickable="false"
+          />
         </template>
       </RowWithLabel>
 

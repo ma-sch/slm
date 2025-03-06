@@ -258,7 +258,6 @@ export default {
     created() {
 
       this.groupedServices = this.services
-      console.log('SERVICES',this.services);
       this.services.forEach(service => {
         ServiceManagementClient.serviceInstancesApi.getAvailableVersionChangesForServiceInstance(service.id).then(response => {
           if (response.data && response.data.length > 0) {
@@ -303,7 +302,6 @@ export default {
       },
 
       onServiceInstanceClicked (event, serviceInstance) {
-        console.log(serviceInstance)
         this.$emit('service-instance-clicked', serviceInstance.item)
       },
 
@@ -311,7 +309,6 @@ export default {
         if (this.groupByServiceInstanceGroups === 1) {
           this.groupedServices = []
           this.services.forEach(service => {
-            console.log('service:', service)
             if (service.groupIds.length === 0) {
               let serviceWithGroup = JSON.parse(JSON.stringify(service))
               serviceWithGroup.groupName = 'No group'

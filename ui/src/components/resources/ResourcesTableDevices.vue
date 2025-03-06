@@ -131,7 +131,10 @@
       </template>
 
       <template #item.firmware="{ item }">
-        {{ resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, "DeviceInfo", "$.FirmwareVersion") }}
+        <FirmwareUpdateVersion
+          :resource-id="item.id"
+          @click="setSelectedResource( undefined, { item, section: 'firmware' })"
+        />
       </template>
 
       <!-- Column: Actions -->
@@ -175,6 +178,7 @@ import logRequestError from "@/api/restApiHelper";
 import CapabilitiesButton from "@/components/resources/capabilities/CapabilitiesButton.vue";
 import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.vue";
 import {storeToRefs} from "pinia";
+import FirmwareUpdateVersion from "@/components/updates/FirmwareUpdateVersion.vue";
 
 
 const emit = defineEmits(['resource-selected']);
@@ -231,8 +235,8 @@ const deleteResource = (resource) => {
   resourceToDelete.value = null;
 };
 
-const setSelectedResource = (event, { item }) => {
-  emit('resource-selected', item);
+const setSelectedResource = (event, { item, section }) => {
+  emit('resource-selected', item, section);
 };
 
 const rowClass = (resource) => {
