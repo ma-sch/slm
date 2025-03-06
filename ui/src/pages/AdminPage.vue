@@ -24,13 +24,13 @@ import VersionsOverview from '@/components/admin/VersionsOverview'
 import ServiceCategoriesTable from '@/components/service_offerings/ServiceCategoriesTable'
 import ServiceVendorsDevelopersTable from '@/components/service_vendors/ServiceVendorDevelopersTable'
 import ServiceVendorTable from '@/components/service_vendors/ServiceVendorTable'
-import {useserviceOfferingsStore} from "@/stores/serviceOfferingsStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
 
 export default {
     name: 'AdminPage',
     components: { ServiceCategoriesTable, ServiceVendorTable, ServiceVendorsDevelopersTable, VersionsOverview, },
     setup(){
-      const serviceOfferingsStore = useserviceOfferingsStore();
+      const serviceOfferingsStore = useServiceOfferingsStore();
       return {serviceOfferingsStore};
     },
     data () {

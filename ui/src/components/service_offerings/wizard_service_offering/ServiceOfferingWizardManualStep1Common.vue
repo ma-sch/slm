@@ -140,7 +140,7 @@ import ServiceOfferingCardGrid from "@/components/service_offerings/ServiceOffer
 
 import {Field, Form as ValidationForm} from "vee-validate";
 import * as yup from 'yup';
-import {useServiceOfferingsStore} from "@/stores/serviceofferingsStore";
+import {useServiceOfferingsStore} from "@/stores/serviceOfferingsStore";
 
 export default {
   name: "ServiceOfferingWizardManualStep1Common",
