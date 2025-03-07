@@ -1,0 +1,18 @@
+services:
+
+  discovery:
+    image: "ghcr.io/industrial-asset-hub/asset-link-sdk/registry:{{ DRIVER_REGISTRY_VERSION }}"
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "{{ LOGGING_MAX_FILE }}"
+        max-size: "{{ LOGGING_MAX_SIZE }}"
+    ports:
+      - "{{ DRIVER_REGISTRY_PORT }}:50051"
+    networks:
+      default:
+        aliases:
+          - driver-registry
+    extra_hosts:
+      - "{{ SLM_HOSTNAME }}:172.17.0.1"

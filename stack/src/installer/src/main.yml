@@ -117,6 +117,13 @@
         _consul_token: "{{ CONSUL_MASTER_TOKEN }}"
         _store_compose_file: /compose/monitoring.yml
 
+    - name: "Start discovery"
+      ansible.builtin.include_role:
+        name: discovery/init
+      vars:
+        _consul_token: "{{ CONSUL_MASTER_TOKEN }}"
+        _store_compose_file: /compose/discovery.yml
+
     - name: "Start internal SLM components"
       include_role:
         name: slm/init
