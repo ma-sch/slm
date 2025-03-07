@@ -228,6 +228,32 @@ services:
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
+  information-service:
+    image: "ghcr.io/eclipse-slm/slm/information-service:{{ SLM_VERSION }}"
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "{{ LOGGING_MAX_FILE }}"
+        max-size: "{{ LOGGING_MAX_SIZE }}"
+    ports:
+      - "{{ INFORMATION_SERVICE_PORT }}:9002"
+    environment:
+      DEPLOYMENT_HOSTNAME: "{{ INFORMATION_SERVICE_HOST }}"
+      CONSUL_SCHEME: "{{ app_configs['information_service']['consul']['scheme'] }}"
+      CONSUL_HOST: "{{ app_configs['information_service']['consul']['host'] }}"
+      CONSUL_PORT: "{{ app_configs['information_service']['consul']['port'] }}"
+      CONSUL_ACLTOKEN: "{{ app_configs['information_service']['consul']['acl-token'] }}"
+      KEYCLOAK_AUTHSERVERURL: "{{ KEYCLOAK_AUTH_URL }}"
+    networks:
+      default:
+        aliases:
+          - information-service
+    extra_hosts:
+      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:9002/swagger-ui/index.html" ]
+
 networks:
   default:
 
