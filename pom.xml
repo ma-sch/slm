@@ -689,11 +689,4 @@
         </plugins>
     </reporting>
 
-    <distributionManagement>
-        <site>
-            <id>cloud-edge-deployment</id>
-            <url>http://10.3.7.149/</url>
-        </site>
-    </distributionManagement>
-
 </project>
