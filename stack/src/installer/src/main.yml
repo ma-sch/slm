@@ -39,6 +39,8 @@
   pre_tasks:
     - name: "Import config from env.yml"
       include_vars: "/env/env.yml"
+    - name: "Import override config from env.override.yml"
+      include_vars: "/env/env.override.yml"
     - set_fact:
         SLM_HOSTNAME: "{{ lookup('ansible.builtin.env', 'SLM_HOSTNAME') }}"
   tasks:

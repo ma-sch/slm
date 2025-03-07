@@ -15,6 +15,7 @@ RUN chmod +x /usr/local/bin/mc
 
 COPY src /src
 COPY env.yml /env/env.yml
+COPY env.override.yml /env/env.override.yml
 
 WORKDIR src
 
