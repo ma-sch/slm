@@ -6,6 +6,7 @@
 
     <artifactId>service_management.persistence.mariadb</artifactId>
     <version>${revision}</version>
+    <packaging>pom</packaging>
 
     <parent>
         <groupId>org.eclipse.slm</groupId>
