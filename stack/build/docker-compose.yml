@@ -22,10 +22,6 @@ services:
     environment:
       - AWX_TAG=22.7.0
 
-  awx-web-no-jwt:
-    image: ghcr.io/eclipse-slm/awx/awx-web-no-jwt:${AWX_VERSION}
-    build: ../src/awx/awx-web-no-jwt
-
   awx-postgres:
     image: ghcr.io/eclipse-slm/awx/awx-postgres:12-awx-${AWX_VERSION}
     build: ../src/awx/awx-postgres

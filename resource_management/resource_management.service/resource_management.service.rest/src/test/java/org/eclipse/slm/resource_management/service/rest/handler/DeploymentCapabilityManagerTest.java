@@ -138,7 +138,7 @@
 //    static DockerComposeContainer dockerComposeWorkload;
 //
 //    private static int AWX_PORT = 8013;
-//    private static String AWX_WEB_SERVICE = "awx-web-no-jwt";
+//    private static String AWX_WEB_SERVICE = "awx-task";
 //
 //    private AwxCredential awxCredential = new AwxCredential("admin", "password");
 //
