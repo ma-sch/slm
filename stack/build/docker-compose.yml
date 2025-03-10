@@ -16,20 +16,6 @@ services:
     image: ghcr.io/eclipse-slm/aas/gui:${AAS_GUI_VERSION}
     build: ../src/aas-gui
 
-  awx-task:
-    image: ghcr.io/eclipse-slm/awx/awx-task:${AWX_VERSION}
-    build: ../src/awx/awx-task
-    environment:
-      - AWX_TAG=22.7.0
-
-  awx-web-no-jwt:
-    image: ghcr.io/eclipse-slm/awx/awx-web-no-jwt:${AWX_VERSION}
-    build: ../src/awx/awx-web-no-jwt
-
-  awx-postgres:
-    image: ghcr.io/eclipse-slm/awx/awx-postgres:12-awx-${AWX_VERSION}
-    build: ../src/awx/awx-postgres
-
   keycloak:
     image: ghcr.io/eclipse-slm/keycloak:${KEYCLOAK_VERSION}
     build: ../src/keycloak/keycloak
