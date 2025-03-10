@@ -6,7 +6,6 @@
 
     <artifactId>resource_management.persistence.mariadb</artifactId>
     <version>${revision}</version>
-    <packaging>pom</packaging>
 
     <parent>
         <artifactId>resource_management.persistence</artifactId>
