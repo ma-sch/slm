@@ -22,11 +22,6 @@
             MINIO_API_URL: "{{ MINIO_SCHEME }}://{{ MINIO_HOST }}:{{ MINIO_API_PORT }}"
             MINIO_CONSOLE_URL: "{{ MINIO_SCHEME }}://{{ MINIO_HOST }}:{{ MINIO_CONSOLE_PORT }}"
 
-#    - name: Display all variables/facts known for a host
-#      debug:
-#        var: hostvars['localhost']
-#      tags: debug_info
-
     - name: "Start Consul"
       include_role:
         name: consul/init
