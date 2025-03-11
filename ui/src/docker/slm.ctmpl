@@ -50,7 +50,7 @@ server {
     }
 
     location /slm-catalog/ {
-    {{ $services := service "slm-catalog" }}
+    {{ $services := service "catalog-service" }}
     {{ if $services }}
         {{ range $index, $instance := $services }}
         {{ if eq $index 0 }}
