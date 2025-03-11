@@ -112,7 +112,7 @@ consul:
   host: localhost
   port: 8500
   datacenter: fabos
-  acl-token: your-consul-acl-tokenupdate-hub:
+  acl-token: your-consul-acl-token
 
 update-hub:
   scheme: http
