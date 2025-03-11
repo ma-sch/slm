@@ -3,6 +3,7 @@ FROM ghcr.io/eclipse-slm/ansible:2.17.2
 ENV CONSUL_URL=http://consul:8500 \
     CONSUL_TOKEN=bOKGjerhQcCsjphbg3Wqg40r \
     VAULT_URL=http://vault:8200 \
+    DEPLOYMENT_HOST_HOSTNAME=localhost \
     ANSIBLE_CMD_PARAMETERS="-v"
 
 RUN mkdir /compose

@@ -54,6 +54,16 @@
             MINIO_API_URL: "{{ MINIO_SCHEME }}://{{ MINIO_HOST }}:{{ MINIO_API_PORT }}"
             MINIO_CONSOLE_URL: "{{ MINIO_SCHEME }}://{{ MINIO_HOST }}:{{ MINIO_CONSOLE_PORT }}"
 
+    - name: "Login to private docker registry (if credentials are defined)"
+      community.docker.docker_login:
+        registry_url: "{{ DOCKER_IMAGE_REGISTRY_LOGIN_URL }}"
+        username: "{{ DOCKER_IMAGE_REGISTRY_USERNAME }}"
+        password: "{{ DOCKER_IMAGE_REGISTRY_PASSWORD }}"
+      when: > 
+        ((DOCKER_IMAGE_REGISTRY_LOGIN_URL is defined) and (DOCKER_IMAGE_REGISTRY_LOGIN_URL|length > 0)) and 
+        ((DOCKER_IMAGE_REGISTRY_USERNAME is defined) and (DOCKER_IMAGE_REGISTRY_USERNAME|length > 0)) and 
+        ((DOCKER_IMAGE_REGISTRY_PASSWORD) is defined and (DOCKER_IMAGE_REGISTRY_PASSWORD|length > 0))
+
     - name: "Start Consul"
       include_role:
         name: consul/init

@@ -1,7 +1,7 @@
 services:
 
   vault:
-    image: "ghcr.io/eclipse-slm/vault:{{ VAULT_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/vault:{{ VAULT_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"

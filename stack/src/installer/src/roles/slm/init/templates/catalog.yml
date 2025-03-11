@@ -1,7 +1,7 @@
 services:
 
   catalog:
-    image: "ghcr.io/eclipse-slm/slm/catalog:{{ SLM_CATALOG_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/catalog:{{ SLM_CATALOG_VERSION }}"
     restart: unless-stopped
     depends_on:
       - catalog-database
@@ -28,7 +28,7 @@ services:
       test: [ "CMD", "curl", "http://localhost:10000/swagger-ui/index.html" ]
 
   catalog-database:
-    image: "ghcr.io/eclipse-slm/mariadb:{{ SLM_CATALOG_SERVICE_DATABASE_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/mariadb:{{ SLM_CATALOG_SERVICE_DATABASE_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"

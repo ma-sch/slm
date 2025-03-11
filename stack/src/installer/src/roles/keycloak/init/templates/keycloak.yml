@@ -1,6 +1,6 @@
 services:
   keycloak:
-    image: "ghcr.io/eclipse-slm/keycloak:{{ KEYCLOAK_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/keycloak:{{ KEYCLOAK_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"

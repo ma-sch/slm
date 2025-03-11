@@ -1,7 +1,7 @@
 services:
 
   ui:
-    image: "ghcr.io/eclipse-slm/slm/ui:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/ui:{{ SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -23,7 +23,7 @@ services:
       CONSUL_TOKEN: "{{ app_configs['resource_management']['consul']['acl-token'] }}"
 
   resource-management:
-    image: "ghcr.io/eclipse-slm/slm/resource-management:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/resource-management:{{ SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -79,7 +79,7 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   resource-management-init:
-    image: "ghcr.io/eclipse-slm/slm/resource-management-init:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/resource-management-init:{{ SLM_VERSION }}"
     restart: "no"
     depends_on:
       - resource-management
@@ -98,7 +98,7 @@ services:
       - "{{ SLM_HOSTNAME }}:172.17.0.1"
 
   service-management:
-    image: "ghcr.io/eclipse-slm/slm/service-management:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/service-management:{{ SLM_VERSION }}"
     restart: unless-stopped
     depends_on:
       - service-management-database
@@ -133,7 +133,7 @@ services:
       test: [ "CMD", "curl", "http://localhost:9020/swagger-ui/index.html" ]
 
   service-management-init:
-    image: "ghcr.io/eclipse-slm/slm/service-management-init:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/service-management-init:{{ SLM_VERSION }}"
     restart: "no"
     logging:
       driver: "json-file"
@@ -179,7 +179,7 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   notification-service:
-    image: "ghcr.io/eclipse-slm/slm/notification-service:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/notification-service:{{ SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -229,7 +229,7 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   information-service:
-    image: "ghcr.io/eclipse-slm/slm/information-service:{{ SLM_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/information-service:{{ SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
