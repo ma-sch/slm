@@ -3,7 +3,6 @@ package org.eclipse.slm.information_service.service.impl;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonDeserializer;
 import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
-import org.eclipse.digitaltwin.aas4j.v3.model.Property;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultSubmodel;
 import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
@@ -21,6 +20,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -168,7 +170,10 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
             resourceMessageSender.sendResourceInformationMessage(resourceCreatedMessage.resourceId());
         }
         catch (Exception e) {
-            LOG.error("Error while processing resourceCreatedMessage created message: {}", e.getMessage());
+            Writer buffer = new StringWriter();
+            PrintWriter pw = new PrintWriter(buffer);
+            e.printStackTrace(pw);
+            LOG.error("Error while processing resourceCreatedMessage created message: {} | Stack Trace: {}", e.getMessage(),  buffer);
         }
     }
 
