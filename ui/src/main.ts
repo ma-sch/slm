@@ -42,6 +42,8 @@ import {VueKeycloakInstance} from "@dsb-norge/vue-keycloak-js/dist/types";
 import {useEnvStore} from "@/stores/environmentStore";
 import updateToken from "@/utils/updateToken";
 
+console.log("App Mode: " + import.meta.env.MODE)
+
 const app = createApp(App);
 
 const pinia = createPinia();
