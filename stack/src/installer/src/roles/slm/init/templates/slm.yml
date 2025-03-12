@@ -244,6 +244,14 @@ services:
       CONSUL_HOST: "{{ app_configs['information_service']['consul']['host'] }}"
       CONSUL_PORT: "{{ app_configs['information_service']['consul']['port'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['information_service']['consul']['acl-token'] }}"
+      AAS_AASREGISTRY_URL: "{{ AAS_AAS_REGISTRY_URL }}"
+      AAS_AASREPOSITORY_URL: "{{ AAS_AAS_REPOSITORY_URL }}"
+      AAS_SUBMODELREGISTRY_URL: "{{ AAS_SUBMODEL_REGISTRY_URL }}"
+      AAS_SUBMODELREPOSITORY_URL: "{{ AAS_SUBMODEL_REPOSITORY_URL }}"
+      AAS_CONCEPTDESCRIPTIONSREPOSITORY_URL: "{{ AAS_CONCEPTDESCRIPTIONS_REPOSITORY_URL }}"
+      UPDATE_HUB_SCHEME: "{{ UPDATE_HUB_SCHEME }}"
+      UPDATE_HUB_HOST: "{{ UPDATE_HUB_HOST }}"
+      UPDATE_HUB_PORT: "{{ UPDATE_HUB_PORT }}"
       KEYCLOAK_AUTHSERVERURL: "{{ KEYCLOAK_AUTH_URL }}"
     networks:
       default:
