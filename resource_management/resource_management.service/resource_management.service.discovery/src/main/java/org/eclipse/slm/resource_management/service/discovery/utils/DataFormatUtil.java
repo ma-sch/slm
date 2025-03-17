@@ -17,7 +17,14 @@ public class DataFormatUtil {
         var discoveredResourceBuilder = new DiscoveredResource.Builder();
 
         var id = jsonNode.get("product_instance_identifier").get("manufacturer_product").get("id").asText();
-        var name = jsonNode.get("name").get("name").asText();
+        if (jsonNode.has("name")) {
+            var name = jsonNode.get("name").get("name").asText();
+            discoveredResourceBuilder.name(name);
+        }
+        if (!jsonNode.has("name") && jsonNode.has("@type")) {
+            var name = jsonNode.get("@type").get("@type").asText();
+            discoveredResourceBuilder.name(name);
+        }
         var manufacturer = jsonNode.get("product_instance_identifier").get("manufacturer_product").get("manufacturer").get("name").asText();
         var productId = jsonNode.get("product_instance_identifier").get("manufacturer_product").get("product_id").asText();
         var serialNumber = jsonNode.get("product_instance_identifier").get("serial_number").asText();
@@ -26,9 +33,17 @@ public class DataFormatUtil {
             var macAddress = jsonNode.get("mac_address").asText();
             discoveredResourceBuilder.macAddress(macAddress);
         }
+        if (jsonNode.has("mac_identifiers")) {
+            var macAddress = jsonNode.get("mac_identifiers").get("mac_address").asText();
+            discoveredResourceBuilder.macAddress(macAddress);
+        }
         if (jsonNode.has("software_components")) {
             if (jsonNode.get("software_components").has("firmware")) {
                 var firmwareVersion = jsonNode.get("software_components").get("firmware").asText();
+                discoveredResourceBuilder.firmwareVersion(firmwareVersion);
+            }
+            if (jsonNode.get("software_components").has("Firmware Version")) {
+                var firmwareVersion = jsonNode.get("software_components").get("Firmware Version").asText();
                 discoveredResourceBuilder.firmwareVersion(firmwareVersion);
             }
         }
@@ -39,7 +54,6 @@ public class DataFormatUtil {
         var discoveredResource = discoveredResourceBuilder
                 .id(id)
                 .resourceId(resourceId)
-                .name(name)
                 .serialNumber(serialNumber)
                 .manufacturerName(manufacturer)
                 .productName(productId)

@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.discovery.driver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -115,7 +116,12 @@ public class DiscoverResponseStreamObserver implements StreamObserver<IahDiscove
 
     @Override
     public void onCompleted() {
-        LOG.info("Discovery completed");
+        try {
+            LOG.info("Discovery completed: Found {} resources: {}", this.discoveredResources.size(),
+                    objectMapper.writeValueAsString(this.discoveredResources));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         this.discoveryJob.setFinishDate(Calendar.getInstance().getTime());
         this.discoveryJob.setState(DiscoveryJobState.COMPLETED);
         this.discoveryJob.setDiscoveryResult(this.discoveredResources);
