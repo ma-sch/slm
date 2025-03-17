@@ -57,7 +57,7 @@ public class AasRepositoryClient {
                     .build();
             this.connectedAasRepository.addSubmodelReference(aasId, submodelReference);
         } catch (CollidingSubmodelReferenceException e) {
-            LOG.warn(e.getMessage());
+            LOG.debug("Submodel reference already exists");
         }
     }
 

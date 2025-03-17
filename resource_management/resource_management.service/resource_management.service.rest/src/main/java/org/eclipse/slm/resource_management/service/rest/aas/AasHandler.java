@@ -6,10 +6,7 @@ import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiException;
-import org.eclipse.slm.common.aas.clients.AasRegistryClient;
-import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
-import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
-import org.eclipse.slm.common.aas.clients.SubmodelRepositoryClient;
+import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
@@ -30,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.annotation.PostConstruct;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class AasHandler implements ApplicationListener<ResourceEvent> {
@@ -120,10 +118,24 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
             var resourceAASIdEncoded = new Base64UrlEncodedIdentifier(resourceAAS.getId());
 
             // Create submodel DigitalNameplate (if it does not exist)
-            var digitalNameplateSubmodelOptional = resourceAAS.getSubmodels().stream()
-                    .filter(reference -> reference.getKeys().stream()
-                            .anyMatch(key -> key.getType().equals(KeyTypes.SUBMODEL) && key.getValue().contains("Nameplate"))).findAny();
-            if (digitalNameplateSubmodelOptional.isEmpty()) {
+            var digitalNameplateSubmodelExists = new AtomicBoolean(false);
+            for (var submodelRef : resourceAAS.getSubmodels()) {
+                var submodelId = submodelRef.getKeys().get(0).getValue();
+                var optionalSubmodelDescriptor = this.submodelRegistryClient.findSubmodelDescriptor(submodelId);
+                optionalSubmodelDescriptor.ifPresent(submodelDescriptor -> {
+                    if (submodelDescriptor.getSemanticId() != null) {
+                        var semanticId = submodelDescriptor.getSemanticId().getKeys().get(0).getValue();
+                        if (semanticId.equals(IDTASubmodelTemplates.NAMEPLATE_V2_SUBMODEL_SEMANTIC_ID)
+                                || semanticId.equals(IDTASubmodelTemplates.NAMEPLATE_V3_SUBMODEL_SEMANTIC_ID)) {
+                            digitalNameplateSubmodelExists.set(true);
+                            LOG.info("DigitalNameplate submodel already exists for resource [id='" + resource.getId() + "'], " +
+                                    "skipping registration of digital nameplate submodel");
+                        }
+                    }
+                });
+            }
+
+            if (!digitalNameplateSubmodelExists.get()) {
                 var digitalNameplateSubmodelId = DigitalNameplateV3Submodel.SUBMODEL_IDSHORT + "-" + resource.getId();
                 var digitalNameplateSubmodel = new DigitalNameplateV3Submodel(digitalNameplateSubmodelId, digitalNameplateV3);
                 this.submodelRepositoryClient.createOrUpdateSubmodel(digitalNameplateSubmodel);
