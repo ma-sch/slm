@@ -108,6 +108,6 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       with_items:
-        - src: /templates/ui/.env.develop
-          dest: /project/ui/.env.develop
+        - src: /templates/ui/.env.development
+          dest: /project/ui/.env.development
       when: CONFIGURE_CORE_PROJECT|default(false)|bool == true
