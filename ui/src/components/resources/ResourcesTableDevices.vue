@@ -279,17 +279,23 @@ const runProfiler = () => {
 
 const getProductOfResource = (resourceId) => {
   let productValue = "N/A";
-  if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.ManufacturerProductType..en')) != 'N/A') {
-
+  let productValueChecked = "";
+  let manufacturerProductDesignation = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+      'Nameplate', '$.ManufacturerProductDesignation..en');
+  if (manufacturerProductDesignation !== 'N/A' && manufacturerProductDesignation.length < 40) {
+    productValue = manufacturerProductDesignation;
+  }
+  else if ((productValueChecked = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
+      'Nameplate', '$.ManufacturerProductType..en')) !== 'N/A') {
+    productValue = productValueChecked;
   }
   else if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.ManufacturerProductType')) != 'N/A') {
-
+      'Nameplate', '$.ManufacturerProductType')) !== 'N/A') {
+    productValue = productValueChecked;
   }
   else if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.OrderCodeOfManufacturer')) != 'N/A') {
-
+      'Nameplate', '$.OrderCodeOfManufacturer')) !== 'N/A') {
+    productValue = productValueChecked;
   }
 
   return productValue;
