@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '')
     return {
         server: {
-            host: 'localhost',
+            host: '0.0.0.0',
+            allowedHosts: ['slm.local'],
             port: 8080,
             proxy: {
                 '/notification-service': {
