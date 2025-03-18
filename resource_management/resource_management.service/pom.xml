@@ -19,6 +19,7 @@
         <module>resource_management.service.client</module>
         <module>resource_management.service.discovery</module>
         <module>resource_management.service.initializer</module>
+        <module>resource_management.service.importer</module>
     </modules>
 
 </project>

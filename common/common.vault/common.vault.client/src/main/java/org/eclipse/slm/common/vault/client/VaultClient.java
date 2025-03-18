@@ -190,11 +190,6 @@ public class VaultClient {
 
             String url = "/" + kvPath.getFullPath();
             ResponseEntity<Response> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, Response.class);
-            try {
-                LOG.info(this.objectMapper.writeValueAsString(responseEntity));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
             var secretsData = (Map<String, String>)responseEntity.getBody().getData().get("data");
 
             return secretsData;

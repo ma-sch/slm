@@ -63,8 +63,13 @@ public class SubmodelRepositoryClient {
     }
 
     public Submodel getSubmodel(String submodelId) {
-        var submodel = this.connectedSubmodelRepository.getSubmodel(submodelId);
-        return submodel;
+        try {
+            var submodel = this.connectedSubmodelRepository.getSubmodel(submodelId);
+            return submodel;
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            return null;
+        }
     }
 
     public SubmodelValueOnly getSubmodelValueOnly(String submodelId) {

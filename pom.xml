@@ -63,7 +63,7 @@
         <springaddons-c4-soft.version>7.8.10</springaddons-c4-soft.version>
         <springdoc.openapi.version>2.5.0</springdoc.openapi.version>
         <swagger.version>2.2.22</swagger.version>
-        <keycloak.version>19.0.3</keycloak.version>
+        <keycloak.version>25.0.3</keycloak.version>
         <migbase.version>2.2</migbase.version>
         <joda-time.version>2.12.7</joda-time.version>
         <mariadb.client.version>3.4.1</mariadb.client.version>
@@ -78,7 +78,7 @@
         <basyx.version>2.0.0-milestone-04</basyx.version>
         <aas.aas4j.version>1.0.2</aas.aas4j.version>
         <minio.version>8.5.7</minio.version>
-        <commons.io.version>2.11.0</commons.io.version>
+        <commons.io.version>2.18.0</commons.io.version>
         <hypersistence-utils-version>3.8.2</hypersistence-utils-version>
         <uuid.generator.version>5.0.0</uuid.generator.version>
 

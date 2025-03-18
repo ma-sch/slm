@@ -34,4 +34,8 @@ public class ResourceAas extends DefaultAssetAdministrationShell {
     public static String createAasIdFromResourceId(UUID resourceId) {
         return AAS_ID_PREFIX + resourceId;
     }
+
+    public static String getResourceIdFromAasId(String aasId) {
+        return aasId.replace(AAS_ID_PREFIX, "");
+    }
 }
