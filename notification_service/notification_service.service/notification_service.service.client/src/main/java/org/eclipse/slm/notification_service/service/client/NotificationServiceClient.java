@@ -82,7 +82,12 @@ public class NotificationServiceClient {
     }
 
     public void postNotification(JwtAuthenticationToken jwtAuthenticationToken, Category category, JobTarget jobTarget, JobGoal jobGoal) {
-        this.postNotification(jwtAuthenticationToken, category, jobTarget, jobGoal, "");
+        try {
+            this.postNotification(jwtAuthenticationToken, category, jobTarget, jobGoal, "");
+        } catch (Exception e) {
+            LOG.error("Error with Notification Service, skipping post of notification: {}", e.getMessage());
+
+        }
     }
 
     public void postNotification(JwtAuthenticationToken jwtAuthenticationToken, Category category, JobTarget jobTarget, JobGoal jobGoal, String text) {
