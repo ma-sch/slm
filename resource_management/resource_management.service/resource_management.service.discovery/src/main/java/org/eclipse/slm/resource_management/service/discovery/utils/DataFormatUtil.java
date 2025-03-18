@@ -6,17 +6,35 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.uuid.Generators;
 import org.eclipse.slm.resource_management.model.discovery.DiscoveredResource;
 import org.eclipse.slm.resource_management.model.discovery.DriverInfo;
+import org.eclipse.slm.resource_management.model.discovery.exceptions.DiscoveryResponseParsingFailed;
 import siemens.common.identifiers.v1.CommonIdentifiers;
 
 public class DataFormatUtil {
 
-    public final static String CLASSIFIER_PREFIX = "https://schema.industrial-assets.io/base/v0.8.3/Asset#";
+    public final static String CLASSIFIER_PREFIX = "https://schema.industrial-assets.io/base/v\\d+.\\d+.\\d+/Asset#";
 
-    public static DiscoveredResource convertFromJsonToDiscoveredResource(DriverInfo driverInfo, JsonNode jsonNode) {
+    public static DiscoveredResource convertFromJsonToDiscoveredResource(DriverInfo driverInfo, JsonNode jsonNode) throws DiscoveryResponseParsingFailed {
 
         var discoveredResourceBuilder = new DiscoveredResource.Builder();
 
-        var id = jsonNode.get("product_instance_identifier").get("manufacturer_product").get("id").asText();
+        var id = "";
+        if (jsonNode.has("product_instance_identifier")) {
+            if (jsonNode.get("product_instance_identifier").has("manufacturer_product")) {
+                if (jsonNode.get("product_instance_identifier").get("manufacturer_product").has("id")) {
+                    id = jsonNode.get("product_instance_identifier").get("manufacturer_product").get("id").asText();
+                    discoveredResourceBuilder.id(id);
+                }
+            }
+        }
+        if (jsonNode.has("id_link")) {
+            id = jsonNode.get("id_link").asText();
+            discoveredResourceBuilder.id(id);
+        }
+
+        if (id.isEmpty()) {
+            throw new DiscoveryResponseParsingFailed(jsonNode, "Failed to find property for asset id");
+        }
+
         if (jsonNode.has("name")) {
             var name = jsonNode.get("name").get("name").asText();
             discoveredResourceBuilder.name(name);
@@ -38,13 +56,13 @@ public class DataFormatUtil {
             discoveredResourceBuilder.macAddress(macAddress);
         }
         if (jsonNode.has("software_components")) {
-            if (jsonNode.get("software_components").has("firmware")) {
-                var firmwareVersion = jsonNode.get("software_components").get("firmware").asText();
-                discoveredResourceBuilder.firmwareVersion(firmwareVersion);
-            }
-            if (jsonNode.get("software_components").has("Firmware Version")) {
-                var firmwareVersion = jsonNode.get("software_components").get("Firmware Version").asText();
-                discoveredResourceBuilder.firmwareVersion(firmwareVersion);
+            var fieldsIterator = jsonNode.get("software_components").fields();
+            while (fieldsIterator.hasNext()) {
+                var field = fieldsIterator.next();
+                if (field.getKey().toLowerCase().contains("firmware")) {
+                    var firmwareVersion = jsonNode.get("software_components").get(field.getKey()).asText();
+                    discoveredResourceBuilder.firmwareVersion(firmwareVersion);
+                }
             }
         }
 
@@ -52,7 +70,6 @@ public class DataFormatUtil {
         var resourceId = Generators.nameBasedGenerator(uuidNamespace).generate(id);
 
         var discoveredResource = discoveredResourceBuilder
-                .id(id)
                 .resourceId(resourceId)
                 .serialNumber(serialNumber)
                 .manufacturerName(manufacturer)
@@ -66,7 +83,7 @@ public class DataFormatUtil {
     public static JsonNode convertToJson(CommonIdentifiers.DeviceIdentifier deviceIdentifier) {
         var classifier = deviceIdentifier.getClassifiers(0);
         var classifierValue = classifier.getValue();
-        var jsonPropName = classifierValue.replace(CLASSIFIER_PREFIX, "");
+        var jsonPropName = classifierValue.replaceAll(CLASSIFIER_PREFIX, "");
 
         var objectMapper = new ObjectMapper();
         var json = objectMapper.createObjectNode();
@@ -78,7 +95,7 @@ public class DataFormatUtil {
 
 
             for (var childDeviceIdentifier : children ) {
-                var childName = childDeviceIdentifier.getClassifiers(0).getValue().replace(CLASSIFIER_PREFIX, "");
+                var childName = childDeviceIdentifier.getClassifiers(0).getValue().replaceAll(CLASSIFIER_PREFIX, "");
                 childName = childName.replace(jsonPropName + "/", "");
 
                 if (childDeviceIdentifier.hasChildren()) {

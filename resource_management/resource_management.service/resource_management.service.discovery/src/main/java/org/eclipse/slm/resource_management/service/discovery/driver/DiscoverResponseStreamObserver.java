@@ -10,6 +10,7 @@ import org.eclipse.slm.resource_management.model.discovery.DiscoveredResource;
 import org.eclipse.slm.resource_management.model.discovery.DiscoveryJob;
 import org.eclipse.slm.resource_management.model.discovery.DiscoveryJobState;
 import org.eclipse.slm.resource_management.model.discovery.DriverInfo;
+import org.eclipse.slm.resource_management.model.discovery.exceptions.DiscoveryResponseParsingFailed;
 import org.eclipse.slm.resource_management.persistence.api.DiscoveryJobRepository;
 import org.eclipse.slm.resource_management.service.discovery.utils.DataFormatUtil;
 import org.eclipse.slm.resource_management.service.discovery.utils.JsonUtil;
@@ -65,7 +66,7 @@ public class DiscoverResponseStreamObserver implements StreamObserver<IahDiscove
             for (var deviceIdentifier : discoveredDevice.getIdentifiersList()) {
                 var json = DataFormatUtil.convertToJson(deviceIdentifier);
 
-                var identifierName = deviceIdentifier.getClassifiers(0).getValue().replace(DataFormatUtil.CLASSIFIER_PREFIX, "");
+                var identifierName = deviceIdentifier.getClassifiers(0).getValue().replaceAll(DataFormatUtil.CLASSIFIER_PREFIX, "");
                 if (identifierName.contains("/")) {
                     jsonIdentifiers.add(json);
                 } else {
@@ -98,8 +99,12 @@ public class DiscoverResponseStreamObserver implements StreamObserver<IahDiscove
                 }
             }
 
-            var discoveredResource = DataFormatUtil.convertFromJsonToDiscoveredResource(this.driverInfo, deviceJson);
-            discoveredResources.add(discoveredResource);
+            try {
+                var discoveredResource = DataFormatUtil.convertFromJsonToDiscoveredResource(this.driverInfo, deviceJson);
+                discoveredResources.add(discoveredResource);
+            } catch (DiscoveryResponseParsingFailed e) {
+                LOG.error("Failed to parse discovery response", e);
+            }
         }
 
     }
