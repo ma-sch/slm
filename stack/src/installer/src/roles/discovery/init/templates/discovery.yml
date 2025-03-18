@@ -1,6 +1,6 @@
 services:
 
-  discovery:
+  driver-registry:
     image: "ghcr.io/industrial-asset-hub/asset-link-sdk/registry:{{ DRIVER_REGISTRY_VERSION }}"
     restart: unless-stopped
     logging:
