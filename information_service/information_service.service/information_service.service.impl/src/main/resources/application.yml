@@ -106,6 +106,14 @@ aas:
     path:
     url: ${aas.concept-descriptions-repository.scheme}://${aas.concept-descriptions-repository.host}:${aas.concept-descriptions-repository.port}${aas.concept-descriptions-repository.path}
 
+### Update Hub
+update-hub:
+  scheme: http
+  host: localhost
+  port: 6080
+  path:
+  url: ${update-hub.scheme}://${update-hub.host}:${update-hub.port}${update-hub.path}
+
 ### Consul
 consul:
   scheme: http
@@ -113,10 +121,3 @@ consul:
   port: 8500
   datacenter: fabos
   acl-token: your-consul-acl-token
-
-update-hub:
-  scheme: http
-  host: localhost
-  port: 6080
-  path:
-  url: ${update-hub.scheme}://${update-hub.host}:${update-hub.port}${update-hub.path}
