@@ -18,7 +18,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.SSLException;
-import javax.ws.rs.QueryParam;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
