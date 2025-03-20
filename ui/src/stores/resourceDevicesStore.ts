@@ -226,6 +226,7 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
             return Promise.all([
                 this.getResourcesFromBackend(),
                 this.getResourceAasDescriptors(),
+                this.getResourceAasValues(),
                 this.getLocations(),
                 this.getProfiler(),
                 this.getResourceConnectionTypes(),

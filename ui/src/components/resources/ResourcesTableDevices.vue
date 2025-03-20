@@ -5,75 +5,99 @@
       class="ml-8 mb-8"
       align="center"
     >
-      <v-text-field
-        v-model="searchResources"
-        label="Search resources"
-        append-inner-icon="mdi-magnify"
-        clearable
-        variant="underlined"
-      />
-      <v-spacer />
-      <v-spacer />
-      <v-tooltip
-        start
-        close-delay="2000"
-      >
-        <template #activator="{ props }">
+      <v-col cols="4">
+        <v-text-field
+          v-model="searchResources"
+          label="Search resources"
+          append-inner-icon="mdi-magnify"
+          clearable
+          variant="underlined"
+        />
+      </v-col>
+      <v-col cols="3">
+        <div v-if="resourcesHaveLocations()">
+          <v-row class="mx-8">
+            <!--            <div class="mr-10">-->
+            <!--              <v-btn-toggle-->
+            <!--                v-model="groupBy"-->
+            <!--                mandatory-->
+            <!--              >-->
+            <!--                <v-btn-->
+            <!--                  size="small"-->
+            <!--                  :model-value="null"-->
+            <!--                  :color="groupBy == null ? 'secondary' : 'disabled'"-->
+            <!--                  style="height:40px"-->
+            <!--                >-->
+            <!--                  <v-icon>mdi-ungroup</v-icon>-->
+            <!--                </v-btn>-->
+            <!--                <v-btn-->
+            <!--                  size="small"-->
+            <!--                  model-value="location.name"-->
+            <!--                  :color="groupBy === 'location.name' ? 'secondary' : 'disabled'"-->
+            <!--                  style="height:40px"-->
+            <!--                >-->
+            <!--                  <v-icon>mdi-group</v-icon>-->
+            <!--                </v-btn>-->
+            <!--              </v-btn-toggle>-->
+            <!--            </div>-->
+            <div class="mr-10">
+              <v-select
+                v-model="filterResourcesByLocations"
+                :items="locations"
+                item-title="name"
+                item-value="id"
+                label="Location"
+                density="compact"
+                variant="outlined"
+                hide-details
+                closable-chips
+                :width="200"
+                multiple
+                clearable
+              />
+            </div>
+          </v-row>
+        </div>
+      </v-col>
+      <v-col cols="2">
+        <v-spacer />
+      </v-col>
+      <v-col cols="3">
+        <v-row justify="end">
           <v-btn
-            v-if="profiler.length > 0"
+            class="mx-4"
             color="secondary"
-            v-bind="props"
-            @click="runProfiler"
+            @click="resourceDevicesStore.updateStore()"
           >
             <v-icon
-              icon="mdi-tab-search"
+              icon="mdi-refresh"
               color="white"
             />
           </v-btn>
-        </template>
-        <span>Run all available <a href="https://eclipse-slm.github.io/slm/docs/usage/profiler/">profilers</a> on all devices</span>
-      </v-tooltip>
-      <div v-if="resourcesHaveLocations()">
-        <div class="mr-10">
-          <v-btn-toggle
-            v-model="groupBy"
-            mandatory
+          <v-tooltip
+            start
+            close-delay="2000"
           >
-            <v-btn
-              size="small"
-              :model-value="null"
-              :color="groupBy == null ? 'secondary' : 'disabled'"
-              style="height:40px"
-            >
-              <v-icon>mdi-ungroup</v-icon>
-            </v-btn>
-            <v-btn
-              size="small"
-              model-value="location.name"
-              :color="groupBy === 'location.name' ? 'secondary' : 'disabled'"
-              style="height:40px"
-            >
-              <v-icon>mdi-group</v-icon>
-            </v-btn>
-          </v-btn-toggle>
-        </div>
-        <div class="mr-10">
-          <v-select
-            v-model="filterResourcesByLocations"
-            :items="locations"
-            item-title="name"
-            item-value="id"
-            label="filter by location"
-            density="compact"
-            variant="outlined"
-            hide-details
-            closable-chips
-            multiple
-            clearable
-          />
-        </div>
-      </div>
+            <template #activator="{ props }">
+              <v-btn
+                v-if="profiler.length > 0"
+                class="mx-4"
+                color="secondary"
+                v-bind="props"
+                @click="runProfiler"
+              >
+                <v-icon
+                  icon="mdi-tab-search"
+                  color="white"
+                />
+              </v-btn>
+            </template>
+            <span>Run all available <a href="https://eclipse-slm.github.io/slm/docs/usage/profiler/">profilers</a> on all devices</span>
+          </v-tooltip>
+        </v-row>
+      </v-col>
     </v-row>
+
     <v-data-table
       id="resource-table-devices"
       :headers="tableHeaders"
@@ -82,6 +106,7 @@
       :sort-by.sync="sortBy"
       :row-props="rowClass"
       item-key="id"
+      :loading="apiState === ApiState.LOADING || apiState === ApiState.UPDATING"
       @click:row="setSelectedResource"
     >
       <template #group.header="{items, isOpen, toggle}">
@@ -179,6 +204,7 @@ import CapabilitiesButton from "@/components/resources/capabilities/Capabilities
 import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.vue";
 import {storeToRefs} from "pinia";
 import FirmwareUpdateVersion from "@/components/updates/FirmwareUpdateVersion.vue";
+import ApiState from "@/api/apiState";
 
 
 const emit = defineEmits(['resource-selected']);
@@ -202,6 +228,7 @@ const sortBy = ref([{ key: 'product', order: 'asc' }]);
 const resourceToDelete = ref(null);
 const filterResourcesByLocations = ref([]);
 const searchResources = ref(undefined);
+const apiState = computed(() => resourceDevicesStore.apiState);
 
 const filteredResources = computed(() => {
   if (filterResourcesByLocations.value.length === 0) {
@@ -264,7 +291,7 @@ const resourcesHaveLocations = () => {
         return r.location.name;
     })
   )];
-  const hasLocations = locationNames.length > 1;
+  const hasLocations = locationNames.length > 0;
 
   if (!hasLocations)
     groupBy.value = null;
