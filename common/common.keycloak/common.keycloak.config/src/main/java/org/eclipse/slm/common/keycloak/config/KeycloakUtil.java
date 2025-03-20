@@ -1,5 +1,6 @@
 package org.eclipse.slm.common.keycloak.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.slm.common.keycloak.config.exceptions.KeycloakGroupNotFoundException;
 import org.eclipse.slm.common.keycloak.config.exceptions.KeycloakUserNotFoundException;
 import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
@@ -168,7 +169,11 @@ public class KeycloakUtil {
         newGroup.setName(groupName);
         newGroup.setAttributes(attributes);
         try {
-            realmResource.groups().add(newGroup);
+            var response = realmResource.groups().add(newGroup);
+            if (response.getStatus() != 201) {
+                var objectMapper = new ObjectMapper();
+                LOG.error("Error creating Kyylcoak group '" + groupName + "': " + objectMapper.writeValueAsString(response));
+            }
         } catch(Exception e) {
             LOG.info("Group '" + groupName + "' already exists");
         }
