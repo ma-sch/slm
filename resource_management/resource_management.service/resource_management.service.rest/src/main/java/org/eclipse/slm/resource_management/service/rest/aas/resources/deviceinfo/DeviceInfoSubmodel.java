@@ -12,7 +12,7 @@ import org.eclipse.slm.resource_management.model.resource.BasicResource;
 
 public class DeviceInfoSubmodel extends DefaultSubmodel {
     public static final String SUBMODEL_ID_SHORT = "DeviceInfo";
-    public static final String SEMANTIC_ID_VALUE = "http://eclipse.dev/slm/aas/sm/DeviceInfo";
+    public static final String SEMANTIC_ID_VALUE = "https://eclipse.dev/slm/aas/sm/DeviceInfo";
     public static final Reference SEMANTIC_ID = new DefaultReference.Builder()
             .type(ReferenceTypes.EXTERNAL_REFERENCE)
             .keys(new DefaultKey.Builder()
