@@ -100,7 +100,7 @@ public class DriverClient {
                 discoveryRequestFilters.add(discoveryRequestFilter);
             }
         } catch (io.grpc.StatusRuntimeException e) {
-            if (!e.getMessage().equals("UNKNOWN: no supported filter types")) {
+            if (!e.getMessage().equals("UNKNOWN: no supported filters")) {
                 LOG.error(e.getMessage());
             }
         }

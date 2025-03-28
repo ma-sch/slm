@@ -121,16 +121,18 @@ public class UpdatesRestController {
         // Sort available firmware versions from new to old
         availableFirmwareVersions.sort((o1, o2) -> {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            if (o1.getDate() == null || o1.getDate().isEmpty() || o2.getDate() == null || o2.getDate().isEmpty()) {
+                return 0;
+            }
             try {
                 var date1 = formatter.parse(o1.getDate());
                 var date2 = formatter.parse(o2.getDate());
 
                 return date2.compareTo(date1);
-            } catch (ParseException e) {
-                LOG.error("Error parsing date", e);
+            } catch (Exception e) {
+                LOG.error("Error parsing date: {}", e.getMessage());
+                return 0;
             }
-
-            return 0;
         });
 
         var updateInformation = new UpdateInformation();

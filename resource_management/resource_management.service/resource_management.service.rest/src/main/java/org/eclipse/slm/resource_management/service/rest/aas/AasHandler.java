@@ -46,27 +46,21 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
 
     private final String monitoringServiceUrl;
 
-    private final String externalScheme;
-    private final String externalHostname;
-    private final String externalPort;
+    private final String externalUrl;
 
 
     public AasHandler(AasRegistryClient aasRegistryClient, AasRepositoryClient aasRepositoryClient,
                       SubmodelRegistryClient submodelRegistryClient, SubmodelRepositoryClient submodelRepositoryClient,
                       ResourcesConsulClient resourcesConsulClient,
                       @Value("${monitoring.service.url}") String monitoringServiceUrl,
-                      @Value("${deployment.scheme}") String externalScheme,
-                      @Value("${deployment.hostname}") String externalHostname,
-                      @Value("${deployment.port}") String externalPort) {
+                      @Value("${deployment.url}") String externalUrl) {
         this.aasRegistryClient = aasRegistryClient;
         this.aasRepositoryClient = aasRepositoryClient;
         this.submodelRegistryClient = submodelRegistryClient;
         this.submodelRepositoryClient = submodelRepositoryClient;
         this.resourcesConsulClient = resourcesConsulClient;
         this.monitoringServiceUrl = monitoringServiceUrl;
-        this.externalScheme = externalScheme;
-        this.externalHostname = externalHostname;
-        this.externalPort = externalPort;
+        this.externalUrl = externalUrl;
     }
 
     @PostConstruct
@@ -100,7 +94,7 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
     private String getResourcesSubmodelRepositoryUrl(Base64UrlEncodedIdentifier aasId) {
         var basePath = ResourcesSubmodelRepositoryApiHTTPController.class.getAnnotation(RequestMapping.class).value()[0];
         basePath = basePath.replace("{aasId}", aasId.getEncodedIdentifier());
-        var url = this.externalScheme + "://" + this.externalHostname + ":" + this.externalPort + basePath;
+        var url = externalUrl + basePath;
 
         return url;
     }

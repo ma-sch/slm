@@ -40,14 +40,13 @@ RUN apk add --no-cache curl
 # Copy files from build stage to production stage
 COPY --from=build-stage /app/consul-template /usr/bin
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-# Replace the default Nginx configuration file with a custom one and copy files for consul template (configures nginx)
-COPY src/docker/config.hcl /consul-template/
-COPY src/docker/slm.ctmpl /consul-template/
-COPY src/docker/nginx.conf /etc/nginx/nginx.conf
 # Copy the entrypoint script and make it executable
 COPY src/docker/entrypoint.sh /app/entrypoint.sh
 RUN rm /etc/nginx/conf.d/*
 RUN chmod +x /app/entrypoint.sh
+# Replace the default Nginx configuration file with a custom one and copy files for consul template (configures nginx)
+COPY src/docker/nginx.conf /etc/nginx/nginx.conf
+COPY src/docker/slm.conf /etc/nginx/conf.d/slm.conf
 # Change the ownership of the /app, /var/cache/nginx and /tmp directories to the non-root user
 RUN chown -R myuser:mygroup /app /var/cache/nginx /tmp /etc/nginx /usr/share/nginx/html
 # Give the myuser/mygroup/other read/write/execute permissions to the /app, /var/cache/nginx and /tmp directories

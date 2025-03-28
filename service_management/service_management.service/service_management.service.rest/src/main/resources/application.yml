@@ -9,12 +9,17 @@ deployment:
   scheme: "http"
   hostname: "localhost"
   port: ${server.port}
+  path: "/service-management"
+  url: ${deployment.scheme}://${deployment.hostname}:${deployment.port}${deployment.path}
 
 ### Server / API
 server:
   port: 9020
   error:
     include-message: always
+  servlet:
+    context-path: ${deployment.path}
+  forward-headers-strategy: framework
 
 open-api:
   title: Service Management
@@ -56,11 +61,18 @@ spring:
       port: ${consul.port}
       discovery:
         enabled: true
-        hostname: ${deployment.hostname}
+        hostname: ${consul.service.address}
+        port: ${consul.service.port}
         acl-token: ${consul.acl-token}
         register-health-check: true
-        tags: slm, backend, ${spring.application.name}
+        healthCheckPath: ${deployment.path}/actuator/health
+        tags:
+          - slm
+          - backend
+          - ${spring.application.name}
+          - exposed
         service-name: ${spring.application.name}
+        instance-id: ${consul.service.name}
         metadata:
           version: ${application.version}
       config:
@@ -108,6 +120,7 @@ notification-service:
   scheme: "http"
   host: "localhost"
   port: 9001
+  path: ""
 
 ### Resource Management
 resource-management:
@@ -167,7 +180,7 @@ aas:
     scheme: http
     host: localhost
     port: 8081
-    path:
+    path: /aas/environment
     url: ${aas.aas-repository.scheme}://${aas.aas-repository.host}:${aas.aas-repository.port}${aas.aas-repository.path}
   submodel-registry:
     scheme: http
@@ -190,6 +203,10 @@ aas:
 
 ### Consul
 consul:
+  service:
+    name: service-management
+    address: host.docker.internal
+    port: ${server.port}
   scheme: http
   host: localhost
   port: 8500

@@ -58,9 +58,9 @@
       host: "{{ host }}"
       port: "{{ port }}"
       awx:
-        scheme: "{{ AWX_SCHEME }}"
-        host: "{{ AWX_HOST }}"
-        port: "{{ AWX_PORT }}"
+        scheme: "{{ AWX.SCHEME.INTERNAL }}"
+        host: "{{ AWX.HOST.INTERNAL }}"
+        port: "{{ AWX.PORT.INTERNAL }}"
         username: "{{ awx_config.users.admin.username }}"
         password: "{{ awx_config.users.admin.password }}"
       consul:

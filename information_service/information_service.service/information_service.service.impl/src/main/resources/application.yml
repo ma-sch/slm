@@ -9,12 +9,17 @@ deployment:
   hostname: "localhost"
   scheme: "http"
   port: ${server.port}
+  path: "/information-service"
+  url: ${deployment.scheme}://${deployment.hostname}:${deployment.port}${deployment.path}
 
 ### Server / API
 server:
   port: 9002
   error:
     include-message: always
+  servlet:
+    context-path: ${deployment.path}
+  forward-headers-strategy: framework
 
 open-api:
   title: Information Service
@@ -45,12 +50,18 @@ spring:
       port: ${consul.port}
       discovery:
         enabled: true
-        hostname: ${deployment.hostname}
-        port: ${deployment.port}
+        hostname: ${consul.service.address}
+        port: ${consul.service.port}
         acl-token: ${consul.acl-token}
         register-health-check: true
-        tags: slm, backend, ${spring.application.name}
+        healthCheckPath: ${deployment.path}/actuator/health
+        tags:
+          - slm
+          - backend
+          - ${spring.application.name}
+          - exposed
         service-name: ${spring.application.name}
+        instance-id: ${consul.service.name}
         metadata:
           version: ${application.version}
       config:
@@ -116,6 +127,10 @@ update-hub:
 
 ### Consul
 consul:
+  service:
+    name: information-service
+    address: host.docker.internal
+    port: ${server.port}
   scheme: http
   host: localhost
   port: 8500

@@ -106,6 +106,7 @@
       :sort-by.sync="sortBy"
       :row-props="rowClass"
       item-key="id"
+      :items-per-page="25"
       :loading="apiState === ApiState.LOADING || apiState === ApiState.UPDATING"
       @click:row="setSelectedResource"
     >

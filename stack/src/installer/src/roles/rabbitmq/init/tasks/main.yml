@@ -2,9 +2,9 @@
   block:
     - name: "Check if config exists in Consul"
       community.general.consul_kv:
-        scheme: "{{ CONSUL_SCHEME }}"
-        host: "{{ CONSUL_HOST }}"
-        port: "{{ CONSUL_PORT }}"
+        scheme: "{{ CONSUL.SCHEME.INTERNAL }}"
+        host: "{{ CONSUL.HOST.INTERNAL }}"
+        port: "{{ CONSUL.PORT.INTERNAL }}"
         token: "{{ _consul_token }}"
         key: "config/rabbitmq/data"
       register: rabbitmq_config_consul_response
@@ -19,8 +19,8 @@
         app_configs: "{{ app_configs | default({}) | combine(
           { 
             'rabbitmq': {
-              'host': RABBITMQ_HOST,
-              'port': RABBITMQ_PORT,
+              'host': RABBITMQ.HOST.INTERNAL,
+              'port': RABBITMQ.PORT.INTERNAL,
             }
           }, recursive=true) }}"
     - name: "Create admin user"
@@ -32,8 +32,8 @@
         _username: "{{ item.username }}"
         _password: "{{ item.password }}"
       loop:
-        - username: "{{ RABBITMQ_ADMIN_USERNAME }}"
-          password: "{{ RABBITMQ_ADMIN_PASSWORD }}"
+        - username: "{{ RABBITMQ.ADMIN_USERNAME }}"
+          password: "{{ RABBITMQ.ADMIN_PASSWORD }}"
 
     - name: "Store RabbitMQ config in Consul"
       include_role:
@@ -64,8 +64,8 @@
     name: consul/client
     tasks_from: register_service
   vars:
-    _service_name: "rabbitmq"
-    _service_port: "{{ RABBITMQ_PORT }}"
-    _service_address: "{{ RABBITMQ_HOST }}"
-    _tcp: "rabbitmq:5672"
+    _service_name: "{{ RABBITMQ.HOST.INTERNAL }}"
+    _service_port: "{{ RABBITMQ.PORT.INTERNAL }}"
+    _service_address: "{{ RABBITMQ.HOST.INTERNAL }}"
+    _tcp: "{{ RABBITMQ.HOST.INTERNAL }}:{{ RABBITMQ.PORT.INTERNAL }}"
     _additional_tags: [ "message-queue", "rabbitmq" ]

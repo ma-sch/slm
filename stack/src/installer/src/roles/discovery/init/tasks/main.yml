@@ -24,8 +24,8 @@
     _app_name: "driver-registry"
     _config:
       driver-registry:
-        host: "{{ DRIVER_REGISTRY_HOST }}"
-        port: "{{ DRIVER_REGISTRY_PORT }}"
+        host: "{{ DISCOVERY.DRIVER_REGISTRY.HOST.INTERNAL }}"
+        port: "{{ DISCOVERY.DRIVER_REGISTRY.PORT.INTERNAL }}"
 
 - name: "Add discovery config for resource management"
   include_role:
@@ -36,8 +36,8 @@
     _config:
       discovery:
         driver-registry:
-          address: "{{ DRIVER_REGISTRY_HOST }}"
-          port: "{{ DRIVER_REGISTRY_PORT }}"
+          address: "{{ DISCOVERY.DRIVER_REGISTRY.HOST.INTERNAL }}"
+          port: "{{ DISCOVERY.DRIVER_REGISTRY.PORT.INTERNAL }}"
 
 - name: "Register driver registry at Consul (discovery server)"
   include_role:
@@ -45,9 +45,9 @@
     tasks_from: register_service
   vars:
     _service_name: "driver-registry"
-    _service_port: "{{ DRIVER_REGISTRY_PORT }}"
-    _service_address: "{{ DRIVER_REGISTRY_HOST }}"
-    _tcp: "{{ DRIVER_REGISTRY_HOST }}:{{ DRIVER_REGISTRY_PORT }}"
+    _service_port: "{{ DISCOVERY.DRIVER_REGISTRY.PORT.INTERNAL }}"
+    _service_address: "{{ DISCOVERY.DRIVER_REGISTRY.HOST.INTERNAL }}"
+    _tcp: "{{ DISCOVERY.DRIVER_REGISTRY.HOST.INTERNAL }}:{{ DISCOVERY.DRIVER_REGISTRY.PORT.INTERNAL }}"
     _additional_tags:
       - "driver-registry"
       - "discovery"

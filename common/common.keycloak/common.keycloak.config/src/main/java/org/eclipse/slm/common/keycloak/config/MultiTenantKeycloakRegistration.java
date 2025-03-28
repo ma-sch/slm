@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 
+import javax.ws.rs.client.ClientBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -145,9 +147,14 @@ public class MultiTenantKeycloakRegistration {
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .clientId(keycloakOidcConfig.getResource())
                 .clientSecret(keycloakOidcConfig.getCredentials().getSecret())
+                .resteasyClient(new ResteasyClientBuilderImpl()
+                        .disableTrustManager()
+                        .build())
                 .build();
 
-        this.realmResourceMap.put(realm, keycloak.realm(realm) );
+
+        var realmResource = keycloak.realm(realm);
+        this.realmResourceMap.put(realm,  realmResource);
 
         var issuerProperties = new IssuerProperties();
         try {

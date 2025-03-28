@@ -44,6 +44,7 @@ public class DriverRegistryClient {
         var response = stub.queryRegisteredServices(registryQueryRequest);
 
         var driverInfos = new ArrayList<DriverInfo>();
+        LOG.info("Found {} registered drivers", response.getInfosCount());
         for (var serviceInfo : response.getInfosList()) {
             var driverInfo = new DriverInfo();
             driverInfo.setInstanceId(serviceInfo.getAppInstanceId());
@@ -53,6 +54,11 @@ public class DriverRegistryClient {
 
             try {
                 var driverClient = this.driverClientFactory.createDriverClient(driverInfo);
+                LOG.info("Getting version info for driver: Id: {} | IP: {} | DomainName: {} | Port: {} |",
+                        driverInfo.getInstanceId(),
+                        driverInfo.getIpv4Address(),
+                        driverInfo.getDomainName(),
+                        driverInfo.getPortNumber());
                 var versionInfo = driverClient.getVersionInfo();
 
                 driverInfo.setName(versionInfo.getProductName());

@@ -242,26 +242,9 @@ public class VaultClient {
             return new HashMap<>();
         }
 
-        try {
-            LOG.info(this.objectMapper.writeValueAsString(responseEntity));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
         var secretsData = (Map<String, String>)responseEntity.getBody().getData().get("data");
 
         return secretsData;
-    }
-
-    public String getOtp(VaultCredential vaultCredential, String ip, String username, String project) {
-        String url = "/" + project + "_ca/creds/" + ip + "_" + username;
-        OtpRequest otpRequest = new OtpRequest(username, ip);
-        HttpEntity httpEntity = loginAndCreateRequestWithBody(vaultCredential, otpRequest);
-
-        ResponseEntity<Response> responseEntity = restTemplate.exchange(url, HttpMethod.POST, httpEntity, Response.class);
-        Response response = responseEntity.getBody();
-
-        return (String) response.getData().get("key");
     }
 
     public void createKvSecretEngine(VaultCredential vaultCredential, String path) {

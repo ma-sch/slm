@@ -1,18 +1,18 @@
 services:
   keycloak:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/keycloak:{{ KEYCLOAK_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/keycloak:{{ KEYCLOAK.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
         max-file: "{{ LOGGING_MAX_FILE }}"
         max-size: "{{ LOGGING_MAX_SIZE }}"
-    ports:
-      - "{{ KEYCLOAK_PORT }}:8080"
+#    ports:
+#      - "{{ KEYCLOAK.PORT.EXTERNAL }}:{{ KEYCLOAK.PORT.INTERNAL }}"
     depends_on:
       - keycloak-database
     environment:
-      KC_HOSTNAME: "{{ keycloak_config.host }}"
+      KC_HOSTNAME: "{{ KEYCLOAK.HOST.EXTERNAL }}"
       KC_DB_HOST: "{{ keycloak_config.database.host }}"
       KC_DB_URL_HOST: "{{ keycloak_config.database.url_host }}"
       KC_DB_SCHEMA: "{{ keycloak_config.database.schema }}"
@@ -21,15 +21,23 @@ services:
       KEYCLOAK_ADMIN: "{{ keycloak_config.users.admin.username }}"
       KEYCLOAK_ADMIN_PASSWORD: "{{ keycloak_config.users.admin.password }}"
       KC_HTTP_RELATIVE_PATH: "{{ keycloak_config.http.relative_path }}"
+      KC_PROXY: edge
+      KC_PROXY_ADDRESS_FORWARDING: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: "xforwarded"
     networks:
       default:
         aliases:
-          - 'keycloak'
+          - "{{ KEYCLOAK.HOST.INTERNAL }}"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:8080/auth" ]
+    extra_hosts:
+      - "{{ SLM_HOSTNAME }}:172.17.0.1"
 
   keycloak-database:
-    image: "mariadb:{{ KEYCLOAK_DATABASE_VERSION }}"
+    image: "mariadb:{{ KEYCLOAK.DATABASE.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -41,7 +49,7 @@ services:
     networks:
       default:
         aliases:
-          - keycloak-database
+          - "{{ KEYCLOAK.DATABASE.HOST.INTERNAL }}"
     environment:
       MARIADB_ROOT_PASSWORD: "{{ keycloak_config.database.root_password }}"
       MARIADB_USER: "{{ keycloak_config.database.username }}"

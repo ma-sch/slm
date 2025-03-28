@@ -12,7 +12,7 @@
 
     - name: "Load Consul config"
       set_fact:
-        consul_scheme: "{{ lookup('env', 'CONSUL_SCHEME') }}"
+        consul_scheme: "{{ lookup('env', 'CONSUL.SCHEME') }}"
         consul_host: "{{ lookup('env', 'CONSUL_HOST') }}"
         consul_port: "{{ lookup('env', 'CONSUL_PORT') }}"
         consul_token: "{{ lookup('env', 'CONSUL_TOKEN') }}"

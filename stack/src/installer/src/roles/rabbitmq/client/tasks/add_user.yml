@@ -23,11 +23,11 @@
   vars:
     _app_name: "rabbitmq"
 
-- name: "RabbitMQ | Client | Add or update a user using the RabbitMQ Management API"
+- name: "RabbitMQ | Client | Add or update user '{{ app_configs.rabbitmq.users[_username].username }}' using the RabbitMQ Management API"
   community.rabbitmq.rabbitmq_user:
-    login_protocol: http
-    login_host: "{{ SLM_HOSTNAME }}"
-    login_port: 15672
+    login_protocol: "{{ RABBITMQ.SCHEME.INTERNAL }}"
+    login_host: "{{ RABBITMQ.HOST.INTERNAL }}"
+    login_port: "{{ RABBITMQ.MANAGEMENT_PORT.INTERNAL }}"
     login_user: "{{ app_configs.rabbitmq.users.admin.username }}"
     login_password: "{{ app_configs.rabbitmq.users.admin.password }}"
     user:  "{{ app_configs.rabbitmq.users[_username].username }}"

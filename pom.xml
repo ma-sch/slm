@@ -63,7 +63,7 @@
         <springaddons-c4-soft.version>7.8.10</springaddons-c4-soft.version>
         <springdoc.openapi.version>2.5.0</springdoc.openapi.version>
         <swagger.version>2.2.22</swagger.version>
-        <keycloak.version>19.0.3</keycloak.version>
+        <keycloak.version>20.0.0</keycloak.version>
         <migbase.version>2.2</migbase.version>
         <joda-time.version>2.12.7</joda-time.version>
         <mariadb.client.version>3.4.1</mariadb.client.version>
@@ -81,6 +81,7 @@
         <commons.io.version>2.18.0</commons.io.version>
         <hypersistence-utils-version>3.8.2</hypersistence-utils-version>
         <uuid.generator.version>5.0.0</uuid.generator.version>
+        <resteasy.version>4.7.4.Final</resteasy.version>
 
         <testcontainers.version>1.20.1</testcontainers.version>
         <assertj.version>3.26.3</assertj.version>

@@ -1,7 +1,7 @@
 services:
 
   vault:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/vault:{{ VAULT_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/vault:{{ VAULT.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -9,7 +9,7 @@ services:
         max-file: "{{ LOGGING_MAX_FILE }}"
         max-size: "{{ LOGGING_MAX_SIZE }}"
     ports:
-      - "{{ VAULT_PORT }}:8200"
+      - "{{ VAULT.PORT.EXTERNAL }}:{{ VAULT.PORT.INTERNAL }}"
     networks:
       default:
         aliases:

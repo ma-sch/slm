@@ -28,7 +28,7 @@ keycloak_clients:
       audience: true
       groups: true
 
-vault:
+vault_config:
   approles:
     - name: "resource_management"
       policies:

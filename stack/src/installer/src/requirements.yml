@@ -2,4 +2,5 @@ collections:
   - community.general
   - community.docker
   - community.rabbitmq
+  - community.crypto
   - awx.awx

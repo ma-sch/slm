@@ -17,13 +17,13 @@
     _app_name: "monitoring"
     _config:
       prometheus:
-        scheme: "{{ PROMETHEUS_SCHEME }}"
-        host: "{{ PROMETHEUS_HOST }}"
-        port: "{{ PROMETHEUS_PORT }}"
+        scheme: "{{ MONITORING.PROMETHEUS.SCHEME.INTERNAL }}"
+        host: "{{ MONITORING.PROMETHEUS.HOST.INTERNAL }}"
+        port: "{{ MONITORING.PROMETHEUS.PORT.INTERNAL }}"
       service:
-        scheme: "{{ MONITORING_PROMETHEUS_AAS_SCHEME }}"
-        host: "{{ MONITORING_PROMETHEUS_AAS_HOST }}"
-        port: "{{ MONITORING_PROMETHEUS_AAS_PORT }}"
+        scheme: "{{ MONITORING.PROMETHEUS_AAS.SCHEME.INTERNAL }}"
+        host: "{{ MONITORING.PROMETHEUS_AAS.HOST.INTERNAL }}"
+        port: "{{ MONITORING.PROMETHEUS_AAS.PORT.INTERNAL }}"
 
 - name: "Store resulting compose file"
   template:
@@ -37,8 +37,8 @@
     tasks_from: register_service
   vars:
     _service_name: prometheus
-    _service_port: "{{ PROMETHEUS_PORT }}"
-    _service_address: "{{ PROMETHEUS_HOST }}"
-    _http: "{{ PROMETHEUS_SCHEME }}://{{ PROMETHEUS_HOST }}:{{ PROMETHEUS_PORT }}/-/healthy"
+    _service_port: "{{ MONITORING.PROMETHEUS.PORT.INTERNAL }}"
+    _service_address: "{{ MONITORING.PROMETHEUS.HOST.INTERNAL }}"
+    _http: "{{ MONITORING.PROMETHEUS.SCHEME.INTERNAL }}://{{ MONITORING.PROMETHEUS.HOST.INTERNAL }}:{{ MONITORING.PROMETHEUS.PORT.INTERNAL }}/-/healthy"
     _additional_tags:
       - "monitoring"

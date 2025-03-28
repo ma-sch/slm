@@ -1,6 +1,4 @@
 #!/bin/sh
-consul-template -config /consul-template/config.hcl
-
 # Informational message
 echo "========================================="
 echo "Starting NGINX with base path: /"
@@ -53,25 +51,25 @@ find /usr/share/nginx/html -type f \( -name '*.js' -o -name '*.html' -o -name '*
 
 # Wait until Keycloak is running
 echo "Keycloak availability test URL: $KEYCLOAK_URL/realms/$KEYCLOAK_REALM/.well-known/openid-configuration"
-until curl -m 5 -s --location --request GET "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/.well-known/openid-configuration" > /dev/null; do
+until curl -m 5 -s -k --location --request GET "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/.well-known/openid-configuration" > /dev/null; do
   echo "Keycloak is unavailable -> sleeping"
   sleep 1
 done
 
 # Wait until Notification Service is running
-until curl -m 5 -s --location --request GET "$NOTIFICATION_SERVICE_URL/v3/api-docs" > /dev/null; do
+until curl -m 5 -s -k --location --request GET "$NOTIFICATION_SERVICE_URL/v3/api-docs" > /dev/null; do
   echo "Notification Service is unavailable -> sleeping"
   sleep 1
 done
 
 # Wait until Resource Management is running
-until curl -m 5 -s --location --request GET "$RESOURCE_MANAGEMENT_URL/v3/api-docs" > /dev/null; do
+until curl -m 5 -s -k --location --request GET "$RESOURCE_MANAGEMENT_URL/v3/api-docs" > /dev/null; do
   echo "Resource Management is unavailable -> sleeping"
   sleep 1
 done
 
 # Wait until Service Management is running
-until curl -m 5 -s --location --request GET "$SERVICE_MANAGEMENT_URL/v3/api-docs" > /dev/null; do
+until curl -m 5 -s -k --location --request GET "$SERVICE_MANAGEMENT_URL/v3/api-docs" > /dev/null; do
   echo "Service Management is unavailable -> sleeping"
   sleep 1
 done

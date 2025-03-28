@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
         build: {
             commonjsOptions: {
                 transformMixedEsModules: true
-            }
+            },
         },
         css: {
             preprocessorOptions: {

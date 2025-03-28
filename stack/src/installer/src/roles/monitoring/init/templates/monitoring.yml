@@ -1,28 +1,28 @@
 services:
   monitoring-prometheus-aas:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm-monitoring-prometheus-aas:{{ MONITORING_PROMETHEUS_AAS_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm-monitoring-prometheus-aas:{{ MONITORING.PROMETHEUS_AAS.VERSION }}"
     restart: unless-stopped
     networks:
       default:
         aliases:
-          - monitoring
+          - "{{ MONITORING.PROMETHEUS_AAS.HOST.INTERNAL }}"
     ports:
-      - "{{ MONITORING_PROMETHEUS_AAS_PORT }}:8080"
+      - "{{ MONITORING.PROMETHEUS_AAS.PORT.EXTERNAL }}:{{ MONITORING.PROMETHEUS_AAS.PORT.INTERNAL }}"
 
   prometheus:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/monitoring-prometheus:{{ PROMETHEUS_VERSION }}"
+    image: "{{ DOCKER_IMAGE_REGISTRY }}/monitoring-prometheus:{{ MONITORING.PROMETHEUS.VERSION }}"
     restart: unless-stopped
     environment:
-      CONSUL_URL: "{{ CONSUL_URL }}"
+      CONSUL_URL: "{{ consul.url.internal }}"
       CONSUL_TOKEN: "{{ _consul_token }}"
     networks:
       default:
         aliases:
-          - prometheus
+          - "{{ MONITORING.PROMETHEUS.HOST.INTERNAL }}"
     extra_hosts:
       - "{{ SLM_HOSTNAME }}:172.17.0.1"
     ports:
-      - "{{ PROMETHEUS_PORT }}:9090"
+      - "{{ MONITORING.PROMETHEUS.PORT.EXTERNAL }}:{{ MONITORING.PROMETHEUS.PORT.INTERNAL }}"
     healthcheck:
       test:  wget --quiet --tries=1 --spider http://localhost:9090/-/healthy || exit
       interval: 60s

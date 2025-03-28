@@ -32,4 +32,8 @@ services:
     image: ${DOCKER_IMAGE_REGISTRY}/monitoring-prometheus:${PROMETHEUS_VERSION}
     build: ../src/prometheus
 
+  traefik:
+    image: ${DOCKER_IMAGE_REGISTRY}/traefik:${TRAEFIK_VERSION}
+    build: ../src/traefik
+
 
