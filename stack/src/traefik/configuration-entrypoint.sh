@@ -7,6 +7,12 @@ mkdir -p /certs
 export CONSUL_HTTP_ADDR=$CONSUL_URL
 export CONSUL_HTTP_TOKEN=$CONSUL_TOKEN
 
+# Wait until Resource Management is running
+until curl -m 5 -s -k --location --request GET "$CONSUL_HTTP_ADDR/v1/status/leader" > /dev/null; do
+  echo "Consul is unavailable -> sleeping"
+  sleep 1
+done
+
 consul kv get certs/traefik/crt > /certs/certificate.crt
 consul kv get certs/traefik/key > /certs/certificate.key
 
