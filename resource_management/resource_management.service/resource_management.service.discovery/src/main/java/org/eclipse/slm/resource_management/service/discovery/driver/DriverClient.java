@@ -61,10 +61,14 @@ public class DriverClient {
         var discoverResponseStreamObserver = new DiscoverResponseStreamObserver(this.driverInfo, this.discoveryJobRepository, this.channel);
         discoverResponseStreamObserver.addListener(discoveryJobListener);
 
+        LOG.info("Starting discovery job '{}' for driver '{}'", discoverResponseStreamObserver.getDiscoveryJob().getId(), this.driverInfo);
+
         asyncStub.discoverDevices(discoverRequestBuilder.build(), discoverResponseStreamObserver);
 
         var discoveryJob = discoverResponseStreamObserver.getDiscoveryJob();
         this.discoveryJobRepository.save(discoveryJob);
+
+        LOG.info("Completed Discovery job '{}' of driver '{}'", discoveryJob.getId(), this.driverInfo);
 
         return discoveryJob;
     }
@@ -160,4 +164,9 @@ public class DriverClient {
     }
 
 
+    public void shutdown() {
+        if (this.channel != null) {
+            this.channel.shutdown();
+        }
+    }
 }

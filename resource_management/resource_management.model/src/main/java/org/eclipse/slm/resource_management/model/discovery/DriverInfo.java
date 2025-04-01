@@ -94,4 +94,16 @@ public class DriverInfo {
     public void setDiscoveryRequestOptions(List<DiscoveryRequestOption> discoveryRequestOptions) {
         this.discoveryRequestOptions = discoveryRequestOptions;
     }
+
+    public String toString() {
+        return "DriverInfo{" +
+                "instanceId='" + instanceId + '\'' +
+                ", name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", vendorName='" + vendorName + '\'' +
+                ", domainName='" + domainName + '\'' +
+                ", portNumber=" + portNumber +
+                ", ipv4Address='" + ipv4Address   +
+                '}';
+    }
 }

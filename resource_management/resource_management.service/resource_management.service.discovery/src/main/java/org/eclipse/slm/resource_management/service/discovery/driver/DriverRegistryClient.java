@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.discovery.driver;
 
+import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.eclipse.slm.resource_management.model.discovery.DriverInfo;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DriverNotFoundException;
@@ -13,6 +14,7 @@ import siemens.connectivitysuite.registry.v1.RegistryApiGrpc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class DriverRegistryClient {
@@ -34,53 +36,61 @@ public class DriverRegistryClient {
     }
 
     public List<DriverInfo> getRegisteredDrivers() {
-        var channel = ManagedChannelBuilder.forAddress(this.driverRegistryAddress, this.driverRegistryPort)
-                .usePlaintext()
-                .build();
+        ManagedChannel channel = null;
+        try {
+            channel = ManagedChannelBuilder.forAddress(this.driverRegistryAddress, this.driverRegistryPort)
+                    .usePlaintext()
+                    .build();
 
-        var registryQueryRequest = ConnSuiteRegistry.QueryRegisteredServicesRequest.newBuilder().build();
 
-        var stub = RegistryApiGrpc.newBlockingStub(channel);
-        var response = stub.queryRegisteredServices(registryQueryRequest);
+            var registryQueryRequest = ConnSuiteRegistry.QueryRegisteredServicesRequest.newBuilder().build();
 
-        var driverInfos = new ArrayList<DriverInfo>();
-        LOG.info("Found {} registered drivers", response.getInfosCount());
-        for (var serviceInfo : response.getInfosList()) {
-            var driverInfo = new DriverInfo();
-            driverInfo.setInstanceId(serviceInfo.getAppInstanceId());
-            driverInfo.setIpv4Address(serviceInfo.getIpv4Address());
-            driverInfo.setDomainName(serviceInfo.getDnsDomainname());
-            driverInfo.setPortNumber(serviceInfo.getGrpcIpPortNumber());
+            var stub = RegistryApiGrpc.newBlockingStub(channel);
+            var response = stub.queryRegisteredServices(registryQueryRequest);
 
-            try {
-                var driverClient = this.driverClientFactory.createDriverClient(driverInfo);
-                LOG.info("Getting version info for driver: Id: {} | IP: {} | DomainName: {} | Port: {} |",
-                        driverInfo.getInstanceId(),
-                        driverInfo.getIpv4Address(),
-                        driverInfo.getDomainName(),
-                        driverInfo.getPortNumber());
-                var versionInfo = driverClient.getVersionInfo();
+            var driverInfos = new ArrayList<DriverInfo>();
+            LOG.info("Found {} registered drivers: {}", response.getInfosCount(), response.getInfosList().stream().map(ConnSuiteRegistry.ServiceInfo::getAppInstanceId).toArray());
+            for (var serviceInfo : response.getInfosList()) {
+                var driverInfo = new DriverInfo();
+                driverInfo.setInstanceId(serviceInfo.getAppInstanceId());
+                driverInfo.setIpv4Address(serviceInfo.getIpv4Address());
+                driverInfo.setDomainName(serviceInfo.getDnsDomainname());
+                driverInfo.setPortNumber(serviceInfo.getGrpcIpPortNumber());
 
-                driverInfo.setName(versionInfo.getProductName());
-                driverInfo.setVendorName(versionInfo.getVendorName());
-                var majorVersion = versionInfo.getMajor();
-                var minorVersion = versionInfo.getMinor();
-                var patchVersion = versionInfo.getPatch();
-                driverInfo.setVersion(majorVersion + "." + minorVersion + "." + patchVersion);
+                try {
+                    var driverClient = this.driverClientFactory.createDriverClient(driverInfo);
+                    LOG.debug("Getting version info for driver: Id: {} | IP: {} | DomainName: {} | Port: {} |",
+                            driverInfo.getInstanceId(),
+                            driverInfo.getIpv4Address(),
+                            driverInfo.getDomainName(),
+                            driverInfo.getPortNumber());
+                    var versionInfo = driverClient.getVersionInfo();
 
-                var discoveryRequestFilters = driverClient.getDiscoveryRequestFilters();
-                driverInfo.setDiscoveryRequestFilters(discoveryRequestFilters);
+                    driverInfo.setName(versionInfo.getProductName());
+                    driverInfo.setVendorName(versionInfo.getVendorName());
+                    var majorVersion = versionInfo.getMajor();
+                    var minorVersion = versionInfo.getMinor();
+                    var patchVersion = versionInfo.getPatch();
+                    driverInfo.setVersion(majorVersion + "." + minorVersion + "." + patchVersion);
 
-                var discoveryRequestOptions = driverClient.getDiscoveryRequestOptions();
-                driverInfo.setDiscoveryRequestOptions(discoveryRequestOptions);
+                    var discoveryRequestFilters = driverClient.getDiscoveryRequestFilters();
+                    driverInfo.setDiscoveryRequestFilters(discoveryRequestFilters);
 
-                driverInfos.add(driverInfo);
-            } catch (DriverNotReachableException e) {
-                LOG.warn("Failed to get version info for driver: {}", driverInfo.getInstanceId());
+                    var discoveryRequestOptions = driverClient.getDiscoveryRequestOptions();
+                    driverInfo.setDiscoveryRequestOptions(discoveryRequestOptions);
+
+                    driverInfos.add(driverInfo);
+
+                    driverClient.shutdown();
+                } catch (DriverNotReachableException e) {
+                    LOG.warn("Failed to get version info for driver: {}", driverInfo.getInstanceId());
+                }
             }
-        }
 
-        return driverInfos;
+            return driverInfos;
+        } finally {
+            if (channel != null) channel.shutdown();
+        }
     }
 
     public DriverInfo getRegisteredDriver(String driverId) throws DriverNotFoundException {
