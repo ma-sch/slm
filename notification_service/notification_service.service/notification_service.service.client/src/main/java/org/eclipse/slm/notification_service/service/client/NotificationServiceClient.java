@@ -101,15 +101,14 @@ public class NotificationServiceClient {
             HttpEntity<String> request = new HttpEntity<String>(headers);
 
             try {
-                var uri = new URIBuilder(this.getNotificationServiceUrl())
+                var uri = new URIBuilder(this.getNotificationServiceUrl() + "/notification")
                         .addParameter("category", category.name())
                         .addParameter("jobTarget", jobTarget.name())
                         .addParameter("jobGoal", jobGoal.name())
                         .addParameter("text", text)
                         .build()
                         .toString();
-                restTemplate.postForEntity(uri, request, String.class);
-
+                var response = restTemplate.postForEntity(uri, request, String.class);
             } catch (URISyntaxException e) {
                 LOG.error(e.toString());
             } catch (MalformedURLException e) {

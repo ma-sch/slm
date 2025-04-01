@@ -121,10 +121,11 @@ notification-service:
   host: "localhost"
   port: 9001
   path: ""
+  url: ${notification-service.scheme}://${notification-service.host}:${notification-service.port}${notification-service.path}
 
 ### Resource Management
 resource-management:
-  url: "http://localhost:9010"
+  url: "http://localhost:9010/resource-management"
 
 ### Security
 security:

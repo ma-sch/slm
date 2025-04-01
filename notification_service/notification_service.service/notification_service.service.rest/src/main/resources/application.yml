@@ -110,6 +110,7 @@ notification-service:
   host: "localhost"
   port: ${server.port}
   path: ""
+  url: ${notification-service.scheme}://${notification-service.host}:${notification-service.port}${notification-service.path}
 
 ### Security
 security:
