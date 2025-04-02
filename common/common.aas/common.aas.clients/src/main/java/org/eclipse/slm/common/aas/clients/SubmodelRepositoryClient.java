@@ -3,20 +3,37 @@ package org.eclipse.slm.common.aas.clients;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonDeserializer;
+import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonMapperFactory;
+import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.SimpleAbstractTypeResolverFactory;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElement;
+import org.eclipse.digitaltwin.basyx.client.internal.ApiClient;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierException;
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.eclipse.digitaltwin.basyx.submodelrepository.client.ConnectedSubmodelRepository;
+import org.eclipse.digitaltwin.basyx.submodelrepository.client.internal.SubmodelRepositoryApi;
 import org.eclipse.digitaltwin.basyx.submodelservice.value.SubmodelValueOnly;
 import org.eclipse.digitaltwin.basyx.submodelservice.value.exception.ValueMapperNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.List;
 
 @Component
@@ -32,19 +49,70 @@ public class SubmodelRepositoryClient {
 
     private final ConnectedSubmodelRepository connectedSubmodelRepository;
 
+    @Autowired
     public SubmodelRepositoryClient(@Value("${aas.submodel-repository.url}") String submodelRepositoryUrl,
                                     DiscoveryClient discoveryClient) {
         this.submodelRepositoryUrl = submodelRepositoryUrl;
-        this.connectedSubmodelRepository = new ConnectedSubmodelRepository(submodelRepositoryUrl);
+        this.connectedSubmodelRepository = this.getConnectedSubmodelRepository(submodelRepositoryUrl, null);
         this.discoveryClient = discoveryClient;
 
         var submodelRepositoryServiceInstance = this.discoveryClient.getInstances(submodelRepositoryDiscoveryInstanceId).get(0);
         if (submodelRepositoryServiceInstance != null) {
             this.submodelRepositoryUrl = "http://" + submodelRepositoryServiceInstance.getHost()
                     + ":" + submodelRepositoryServiceInstance.getPort();
-        }
-        else {
+        } else {
             LOG.warn("No service instance '" + submodelRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL from application.yml.");
+        }
+    }
+
+    public SubmodelRepositoryClient(String submodelRepositoryUrl, JwtAuthenticationToken jwtAuthenticationToken) {
+        this.submodelRepositoryUrl = submodelRepositoryUrl;
+        this.connectedSubmodelRepository = this.getConnectedSubmodelRepository(submodelRepositoryUrl, jwtAuthenticationToken);
+        this.discoveryClient = null;
+    }
+
+    private ConnectedSubmodelRepository getConnectedSubmodelRepository(String submodelRepositoryUrl,
+                                                                       JwtAuthenticationToken jwtAuthenticationToken) {
+        try {
+            var trustAllCerts = new X509TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+
+            var sslContext = SSLContext.getInstance("TLS");
+
+            sslContext.init(null, trustAllCerts, new SecureRandom());
+            var clientBuilder = HttpClient.newBuilder()
+                    .sslContext(sslContext);
+
+            var apiClient = new ApiClient(clientBuilder, (new JsonMapperFactory()).create((new SimpleAbstractTypeResolverFactory()).create()), submodelRepositoryUrl);
+            if (jwtAuthenticationToken != null) {
+                apiClient.setRequestInterceptor(interceptor -> {
+                    interceptor.header("Authorization", "Bearer " + jwtAuthenticationToken.getToken().getTokenValue());
+                });
+            }
+
+            var submodelRepositoryApi = new SubmodelRepositoryApi(apiClient);
+
+            var newConnectedSubmodelRepository = new ConnectedSubmodelRepository(submodelRepositoryUrl, submodelRepositoryApi);
+
+            return newConnectedSubmodelRepository;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (KeyManagementException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -67,7 +135,7 @@ public class SubmodelRepositoryClient {
             var submodel = this.connectedSubmodelRepository.getSubmodel(submodelId);
             return submodel;
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.error("Error while fetching submodel with id '{}': {}", submodelId, e);
             return null;
         }
     }
@@ -79,7 +147,7 @@ public class SubmodelRepositoryClient {
             return submodelValueOnly;
         }
         catch (ValueMapperNotFoundException e) {
-            LOG.error("Value mapper not found for submodel with ID: " + submodelId);
+            LOG.error("Value mapper not found for submodel with id: " + submodelId);
         }
 
         return null;

@@ -108,7 +108,7 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
                     });
                 }
             } catch (ElementDoesNotExistException | org.eclipse.digitaltwin.basyx.client.internal.ApiException | IllegalStateException | NullPointerException e) {
-                LOG.info("Failed to get value only representation for submodel '{}': {}", submodelId, e.getMessage());
+                LOG.debug("Failed to get value only representation for submodel '{}': {}", submodelId, e.getMessage());
             }
         }
 
