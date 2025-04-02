@@ -14,7 +14,6 @@ services:
       - "./env.yml:/env/env.yml"
       - "./env.override.yml:/env/env.override.yml"
       - "./src:/src"
-#      - "./result_compose/cert/cert.crt:/certs/cert.crt"
-#      - "./result_compose/cert/cert.key:/certs/cert.key"
+      - "./result_compose:/compose"
     extra_hosts:
       - "${SLM_HOSTNAME}:172.17.0.1"
