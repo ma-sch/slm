@@ -94,7 +94,7 @@ services:
         max-size: "{{ LOGGING_MAX_SIZE }}"
     environment:
       RESOURCEMANAGEMENT_URL: "{{ resource_management.url.internal }}"
-      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external }}"
+      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.proxy }}"
       KEYCLOAK_REALM: "{{ KEYCLOAK.REALM }}"
       KEYCLOAK_USERNAME: "{{ keycloak_config['default_user_username'] }}"
       KEYCLOAK_PASSWORD: "{{ keycloak_config['default_user_password'] }}"
@@ -153,7 +153,7 @@ services:
       SERVICEMANAGEMENT_URL: "{{ service_management.url.internal }}"
       SERVICEMANAGEMENT_INITDIRECTORIES: "{{ SERVICE_MANAGEMENT.INITIALIZATION_LOCAL_DIRECTORIES }}"
       SERVICEMANAGEMENT_GITREPOS_URLS: "{{ SERVICE_MANAGEMENT.INITIALIZATION_GIT_REPOS }}"
-      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external }}"
+      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.proxy }}"
       KEYCLOAK_REALM: "{{ KEYCLOAK.REALM }}"
       KEYCLOAK_USERNAME: "{{ keycloak_config['default_user_username'] }}"
       KEYCLOAK_PASSWORD: "{{ keycloak_config['default_user_password'] }}"
