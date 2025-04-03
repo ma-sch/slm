@@ -81,6 +81,9 @@
       additional_tags:
         - "aas"
         - "exposed"
+        - "traefik.http.routers.aas-ui.entryPoints=aas-ui"
+        - "traefik.http.routers.aas-ui.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.aas-ui.tls=true"
 
 - name: "Register AAS broker at Consul (discovery server)"
   include_role:
