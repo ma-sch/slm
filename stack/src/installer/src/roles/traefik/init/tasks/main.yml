@@ -3,19 +3,19 @@
     name: cert
     tasks_from: generate_or_import_certificate
   vars:
-    _common_name: "{{ SLM_HOSTNAME }}"
+    _common_name: "{{ ENV.SLM_HOSTNAME }}"
 
 - name: "Traefik | Configure Consul"
   community.general.consul_kv:
-    scheme: "{{ CONSUL.SCHEME.INTERNAL }}"
-    host: "{{ CONSUL.HOST.INTERNAL }}"
-    port: "{{ CONSUL.PORT.INTERNAL }}"
+    scheme: "{{ ENV.CONSUL.SCHEME.INTERNAL }}"
+    host: "{{ ENV.CONSUL.HOST.INTERNAL }}"
+    port: "{{ ENV.CONSUL.PORT.INTERNAL }}"
     token: "{{ _consul_token }}"
     key: "{{ item.key }}"
     value: "{{ item.value }}"
   with_items:
 #    - { key: "traefik/http/routers/dashboard/entryPoints/0", value: "web" }
-#    - { key: "traefik/http/routers/dashboard/rule", value: "Host(`{{ SLM_HOSTNAME }}`)" }
+#    - { key: "traefik/http/routers/dashboard/rule", value: "Host(`{{ ENV.SLM_HOSTNAME }}`)" }
 #    - { key: "traefik/http/routers/dashboard/service", value: "api@internal" }
     - { key: "traefik/tls/stores/default/defaultCertificate/certFile", value: "/certs/certificate.crt" }
     - { key: "traefik/tls/stores/default/defaultCertificate/keyFile", value: "/certs/certificate.key" }
@@ -29,7 +29,7 @@
     project_name: eclipse-slm
     definition: "{{ traefik_compose | from_yaml}}"
     state: present
-    pull: "{{ PULL_DOCKER_IMAGES }}"
+    pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
   register: traefik_compose_start_output
 
 - name: "Traefik | Wait for Traefik ('{{ traefik.url.api }}') being up"

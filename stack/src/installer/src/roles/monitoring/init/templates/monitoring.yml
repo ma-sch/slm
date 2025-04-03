@@ -1,24 +1,24 @@
 services:
   monitoring-prometheus-aas:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm-monitoring-prometheus-aas:{{ MONITORING.PROMETHEUS_AAS.VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm-monitoring-prometheus-aas:{{ ENV.MONITORING.PROMETHEUS_AAS.VERSION }}"
     restart: unless-stopped
     networks:
       default:
         aliases:
-          - "{{ MONITORING.PROMETHEUS_AAS.HOST.INTERNAL }}"
+          - "{{ ENV.MONITORING.PROMETHEUS_AAS.HOST.INTERNAL }}"
     ports:
-      - "{{ MONITORING.PROMETHEUS_AAS.PORT.EXTERNAL }}:{{ MONITORING.PROMETHEUS_AAS.PORT.INTERNAL }}"
+      - "{{ ENV.MONITORING.PROMETHEUS_AAS.PORT.EXTERNAL }}:{{ ENV.MONITORING.PROMETHEUS_AAS.PORT.INTERNAL }}"
     environment:
       DEPLOYMENT_URL: "{{ monitoring_service.url.proxy }}"
-      CONSUL_SCHEME: "{{ CONSUL.SCHEME.INTERNAL }}"
+      CONSUL_SCHEME: "{{ ENV.CONSUL.SCHEME.INTERNAL }}"
       CONSUL_HOST: "{{ CONSUL.HOST.INTERNAL  }}"
       CONSUL_PORT: "{{ CONSUL.PORT.INTERNAL  }}"
       CONSUL_ACLTOKEN: "{{ _consul_token }}"
-      CONSUL_SERVICE_ADDRESS: "{{ MONITORING.PROMETHEUS_AAS.HOST.INTERNAL }}"
-      CONSUL_SERVICE_PORT: "{{ MONITORING.PROMETHEUS_AAS.PORT.INTERNAL }}"
+      CONSUL_SERVICE_ADDRESS: "{{ ENV.MONITORING.PROMETHEUS_AAS.HOST.INTERNAL }}"
+      CONSUL_SERVICE_PORT: "{{ ENV.MONITORING.PROMETHEUS_AAS.PORT.INTERNAL }}"
 
   prometheus:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/monitoring-prometheus:{{ MONITORING.PROMETHEUS.VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/monitoring-prometheus:{{ ENV.MONITORING.PROMETHEUS.VERSION }}"
     restart: unless-stopped
     environment:
       CONSUL_URL: "{{ consul.url.internal }}"
@@ -26,11 +26,11 @@ services:
     networks:
       default:
         aliases:
-          - "{{ MONITORING.PROMETHEUS.HOST.INTERNAL }}"
+          - "{{ ENV.MONITORING.PROMETHEUS.HOST.INTERNAL }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     ports:
-      - "{{ MONITORING.PROMETHEUS.PORT.EXTERNAL }}:{{ MONITORING.PROMETHEUS.PORT.INTERNAL }}"
+      - "{{ ENV.MONITORING.PROMETHEUS.PORT.EXTERNAL }}:{{ ENV.MONITORING.PROMETHEUS.PORT.INTERNAL }}"
     healthcheck:
       test:  wget --quiet --tries=1 --spider http://localhost:9090/-/healthy || exit
       interval: 60s

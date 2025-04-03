@@ -1,34 +1,38 @@
 - name: "Assert inputs of 'consul/init | start.yml'"
   assert:
     that:
-      - (CONSUL.SCHEME.INTERNAL is defined) and (CONSUL.SCHEME.INTERNAL|length > 0)
-      - (CONSUL.HOST.INTERNAL is defined) and (CONSUL.HOST.INTERNAL|length > 0)
-      - (CONSUL.PORT.INTERNAL is defined)
+      - (ENV.CONSUL.SCHEME.INTERNAL is defined) and (ENV.CONSUL.SCHEME.INTERNAL|length > 0)
+      - (ENV.CONSUL.HOST.INTERNAL is defined) and (ENV.CONSUL.HOST.INTERNAL|length > 0)
+      - (ENV.CONSUL.PORT.INTERNAL is defined)
 
 - name: "Consul | Config"
   block:
     - name: "Consul | Check if instance is already running"
       docker_container_info:
-        name: "/{{ COMPOSE_PROJECT_NAME }}-consul-1"
+        name: "/{{ ENV.COMPOSE_PROJECT_NAME }}-consul-1"
       register: consul_container
     - name: "Consul | Get master token of existing instance"
       set_fact:
-        CONSUL: "{{ CONSUL | combine(
-            { 'MASTER_TOKEN': consul_container.container.Config.Env | regex_search('\\\"master\\\": \\\"(.*)\\\"', '\\1') | first }
-          , recursive=true) }}"
+        ENV: "{{ ENV | combine({
+                'CONSUL': { 
+                  'MASTER_TOKEN': consul_container.container.Config.Env | regex_search('\\\"master\\\": \\\"(.*)\\\"', '\\1') | first 
+                }
+              }, recursive=true) }}"
       when: consul_container.exists
     - name: "Consul | Create master token"
       set_fact:
-        CONSUL: "{{ CONSUL | combine(
-            { 'MASTER_TOKEN': lookup('ansible.builtin.password', '/dev/null', chars=['ascii_lowercase', 'ascii_uppercase', 'digits'], length=24) }
-          , recursive=true) }}"
-      when: (CONSUL.MASTER_TOKEN is not defined) or (CONSUL.MASTER_TOKEN | default([]) | length == 0) and not consul_container.exists
+        ENV: "{{ ENV | combine({
+                'CONSUL': {
+                  'MASTER_TOKEN': lookup('ansible.builtin.password', '/dev/null', chars=['ascii_lowercase', 'ascii_uppercase', 'digits'], length=24)
+                }
+              }, recursive=true) }}"
+      when: (ENV.CONSUL.MASTER_TOKEN is not defined) or (ENV.CONSUL.MASTER_TOKEN | default([]) | length == 0) and not consul_container.exists
     - name: "Consul | Update consul_local_config dictionary and override default values"
       set_fact:
         consul_local_config: "{{ consul_local_config | combine(
         { 'acl': {
             'tokens': {
-              'master': CONSUL.MASTER_TOKEN
+              'master': ENV.CONSUL.MASTER_TOKEN
             }
           }
         }
@@ -37,17 +41,17 @@
 - name: "Consul | Start"
   block:
     - debug:
-        var: CONSUL
+        var: ENV.CONSUL
     - name: "Consul | Create compose definition from template"
       set_fact:
         consul_compose: "{{ lookup('template', 'consul.yml') }}"
     - name: "Consul | Start containers"
-      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+      delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ consul_compose | from_yaml}}"
         state: present
-        pull: "{{ PULL_DOCKER_IMAGES }}"
+        pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
     - name: "Consul | Wait for Consul ('{{ consul.url.internal }}') being up"
       uri:
         url: "{{ consul.url.internal }}/v1/status/leader"
@@ -61,10 +65,10 @@
 
 - name: "Consul | Store Consul local_config in Consul"
   community.general.consul_kv:
-    scheme: "{{ CONSUL.SCHEME.INTERNAL }}"
-    host: "{{ CONSUL.HOST.INTERNAL }}"
-    port: "{{ CONSUL.PORT.INTERNAL }}"
-    token: "{{ CONSUL.MASTER_TOKEN }}"
+    scheme: "{{ ENV.CONSUL.SCHEME.INTERNAL }}"
+    host: "{{ ENV.CONSUL.HOST.INTERNAL }}"
+    port: "{{ ENV.CONSUL.PORT.INTERNAL }}"
+    token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
     key: "{{ item.key }}"
     value: "{{ item.value }}"
   with_items:
@@ -73,21 +77,21 @@
 - name: "Consul | Create Consul config dictionary and override default values"
   set_fact:
     consul_config: "{{ consul_config | combine(
-    { 'scheme': '{{ CONSUL.SCHEME.INTERNAL }}',
-      'host': '{{ CONSUL.HOST.INTERNAL }}',
-      'port': '{{ CONSUL.PORT.INTERNAL }}',
+    { 'scheme': '{{ ENV.CONSUL.SCHEME.INTERNAL }}',
+      'host': '{{ ENV.CONSUL.HOST.INTERNAL }}',
+      'port': '{{ ENV.CONSUL.PORT.INTERNAL }}',
       'tokens': {
-        'master': '{{ CONSUL.MASTER_TOKEN }}'
+        'master': '{{ ENV.CONSUL.MASTER_TOKEN }}'
       }
     }
     , recursive=true) }}"
 
 - name: "Consul | Store Consul config in Consul"
   community.general.consul_kv:
-    scheme: "{{ CONSUL.SCHEME.INTERNAL }}"
-    host: "{{ CONSUL.HOST.INTERNAL }}"
-    port: "{{ CONSUL.PORT.INTERNAL }}"
-    token: "{{ CONSUL.MASTER_TOKEN }}"
+    scheme: "{{ ENV.CONSUL.SCHEME.INTERNAL }}"
+    host: "{{ ENV.CONSUL.HOST.INTERNAL }}"
+    port: "{{ ENV.CONSUL.PORT.INTERNAL }}"
+    token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
     key: "{{ item.key }}"
     value: "{{ item.value }}"
   with_items:

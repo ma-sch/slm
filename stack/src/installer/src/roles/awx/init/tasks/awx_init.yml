@@ -98,7 +98,7 @@
     vars:
       _keycloak_client: "{{ awx_keycloak_client }}"
       _keycloak_access_token: "{{ keycloak_access_token }}"
-      _keycloak_realm_name: "{{ KEYCLOAK.REALM }}"
+      _keycloak_realm_name: "{{ ENV.KEYCLOAK.REALM }}"
 
   - name: "Get OIDC JSON for Keycloak client '{{ client_id }}'"
     include_role:
@@ -106,7 +106,7 @@
       tasks_from: clients/get_oidc-keycloak-json
     vars:
       _keycloak_access_token: "{{ keycloak_access_token }}"
-      _keycloak_realm_name: "{{ KEYCLOAK.REALM }}"
+      _keycloak_realm_name: "{{ ENV.KEYCLOAK.REALM }}"
       client_id: "{{ awx_keycloak_client.client_id }}"
 
   - name: "Create OIDC JSON Object"

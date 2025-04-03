@@ -1,18 +1,18 @@
 services:
   keycloak:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/keycloak:{{ KEYCLOAK.VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/keycloak:{{ ENV.KEYCLOAK.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
 #    ports:
-#      - "{{ KEYCLOAK.PORT.EXTERNAL }}:{{ KEYCLOAK.PORT.INTERNAL }}"
+#      - "{{ ENV.KEYCLOAK.PORT.EXTERNAL }}:{{ ENV.KEYCLOAK.PORT.INTERNAL }}"
     depends_on:
       - keycloak-database
     environment:
-      KC_HOSTNAME: "{{ KEYCLOAK.HOST.EXTERNAL }}"
+      KC_HOSTNAME: "{{ ENV.KEYCLOAK.HOST.EXTERNAL }}"
       KC_DB_HOST: "{{ keycloak_config.database.host }}"
       KC_DB_URL_HOST: "{{ keycloak_config.database.url_host }}"
       KC_DB_SCHEMA: "{{ keycloak_config.database.schema }}"
@@ -30,26 +30,26 @@ services:
     networks:
       default:
         aliases:
-          - "{{ KEYCLOAK.HOST.INTERNAL }}"
+          - "{{ ENV.KEYCLOAK.HOST.INTERNAL }}"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:8080/auth" ]
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
 
   keycloak-database:
-    image: "mariadb:{{ KEYCLOAK.DATABASE.VERSION }}"
+    image: "mariadb:{{ ENV.KEYCLOAK.DATABASE.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     volumes:
       - keycloak-database_data:/var/lib/mysql
     networks:
       default:
         aliases:
-          - "{{ KEYCLOAK.DATABASE.HOST.INTERNAL }}"
+          - "{{ ENV.KEYCLOAK.DATABASE.HOST.INTERNAL }}"
     environment:
       MARIADB_ROOT_PASSWORD: "{{ keycloak_config.database.root_password }}"
       MARIADB_USER: "{{ keycloak_config.database.username }}"

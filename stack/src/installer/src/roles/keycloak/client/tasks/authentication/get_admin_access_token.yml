@@ -3,8 +3,8 @@
   assert:
     that:
       - (keycloak.url.external is defined) and (keycloak.url.external|length > 0)               # Auth URL of the Keycloak instance
-      - (KEYCLOAK.ADMIN_USERNAME is defined) and (KEYCLOAK.ADMIN_USERNAME|length > 0)   # Username of Keycloak admin
-      - (KEYCLOAK.ADMIN_USERNAME is defined) and (KEYCLOAK.ADMIN_USERNAME|length > 0)   # Password of Keycloak admin
+      - (ENV.KEYCLOAK.ADMIN_USERNAME is defined) and (ENV.KEYCLOAK.ADMIN_USERNAME|length > 0)   # Username of Keycloak admin
+      - (ENV.KEYCLOAK.ADMIN_USERNAME is defined) and (ENV.KEYCLOAK.ADMIN_USERNAME|length > 0)   # Password of Keycloak admin
 
 - name: "Get Keycloak admin access token"
   uri:
@@ -13,8 +13,8 @@
     method: POST
     body_format: form-urlencoded
     body:
-      username: "{{ KEYCLOAK.ADMIN_USERNAME }}"
-      password: "{{ KEYCLOAK.ADMIN_PASSWORD }}"
+      username: "{{ ENV.KEYCLOAK.ADMIN_USERNAME }}"
+      password: "{{ ENV.KEYCLOAK.ADMIN_PASSWORD }}"
       grant_type: "password"
       client_id: "admin-cli"
     status_code: 200

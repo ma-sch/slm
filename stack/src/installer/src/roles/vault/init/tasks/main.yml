@@ -3,9 +3,9 @@
   assert:
     that:
       - (vault.url.internal is defined) and (vault.url.internal|length > 0)           # URL of the Vault instance
-      - (CONSUL.SCHEME.INTERNAL is defined) and (CONSUL.SCHEME.INTERNAL|length > 0)   # Scheme of the Consul instance
-      - (CONSUL.HOST.INTERNAL is defined) and (CONSUL.HOST.INTERNAL|length > 0)       # Host of the Consul instance
-      - (CONSUL.PORT.INTERNAL is defined)                                    # Port of the Consul instance
+      - (ENV.CONSUL.SCHEME.INTERNAL is defined) and (ENV.CONSUL.SCHEME.INTERNAL|length > 0)   # Scheme of the Consul instance
+      - (ENV.CONSUL.HOST.INTERNAL is defined) and (ENV.CONSUL.HOST.INTERNAL|length > 0)       # Host of the Consul instance
+      - (ENV.CONSUL.PORT.INTERNAL is defined)                                    # Port of the Consul instance
       - (_consul_token is defined) and (_consul_token|length > 0)   # Token to authenticate with Consul
 
 - set_fact:
@@ -17,12 +17,12 @@
     set_fact:
       vault_compose: "{{ lookup('template', 'vault.yml') }}"
   - name: "Start Vault containers"
-    delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+    delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
     community.docker.docker_compose_v2:
       project_name: eclipse-slm
       definition: "{{ vault_compose | from_yaml}}"
       state: present
-      pull: "{{ PULL_DOCKER_IMAGES }}"
+      pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
     register: vault_compose_start_output
   - name: "Wait for Vault ('{{ vault.url.internal }}') being up"
     uri:
@@ -33,7 +33,7 @@
     retries: 120
     delay: 3
   - name: "Get Vault root token"
-    delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+    delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
     community.docker.docker_container_exec:
       container: "{{ vault_compose_start_output.images | community.general.json_query(query) | first }}"
       command: "grep 'Token' /vault/config/root/vault_init_msg"
@@ -57,9 +57,9 @@
     vars:
       _vault_token: "{{ vault_root_token }}"
 
-  - name: "Wait for Keycloak ('{{ keycloak.url.external }}/realms/{{ KEYCLOAK.REALM }}/.well-known/openid-configuration') being up"
+  - name: "Wait for Keycloak ('{{ keycloak.url.external }}/realms/{{ ENV.KEYCLOAK.REALM }}/.well-known/openid-configuration') being up"
     uri:
-      url: "{{ keycloak.url.external }}/realms/{{ KEYCLOAK.REALM }}/.well-known/openid-configuration"
+      url: "{{ keycloak.url.external }}/realms/{{ ENV.KEYCLOAK.REALM }}/.well-known/openid-configuration"
       validate_certs: no
       status_code: 200
     register: result
@@ -73,7 +73,7 @@
     vars:
       _vault_token: "{{ vault_root_token }}"
       _mount_auth_path: "jwt"
-      _oidc_discovery_url: "{{ keycloak.url.external_without_port }}/realms/{{ KEYCLOAK.REALM }}"
+      _oidc_discovery_url: "{{ keycloak.url.external_without_port }}/realms/{{ ENV.KEYCLOAK.REALM }}"
 
 - name: "Store config"
   block:
@@ -84,9 +84,9 @@
       tasks_from: create_or_add_config
     vars:
       _config:
-        scheme: "{{ VAULT.SCHEME.INTERNAL }}"
-        host: "{{ VAULT.HOST.INTERNAL }}"
-        port: "{{ VAULT.PORT.INTERNAL }}"
+        scheme: "{{ ENV.VAULT.SCHEME.INTERNAL }}"
+        host: "{{ ENV.VAULT.HOST.INTERNAL }}"
+        port: "{{ ENV.VAULT.PORT.INTERNAL }}"
         tokens:
           root: "{{ vault_root_token }}"
 
@@ -96,8 +96,8 @@
     tasks_from: register_service
   vars:
     _service_name: vault
-    _service_port: "{{ VAULT.PORT.INTERNAL }}"
-    _service_address: "{{ VAULT.HOST.INTERNAL }}"
+    _service_port: "{{ ENV.VAULT.PORT.INTERNAL }}"
+    _service_address: "{{ ENV.VAULT.HOST.INTERNAL }}"
     _http: "{{ vault.url.internal }}/v1/sys/health"
     _additional_tags:
       - "vault"

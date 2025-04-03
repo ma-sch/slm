@@ -13,38 +13,38 @@
     database_schema: "{{ item.app_name }}"
   with_items:
     - app_name: service_management
-      database_host: "{{ SERVICE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
-      database_port: "{{ SERVICE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
-      scheme: "{{ SERVICE_MANAGEMENT.SCHEME.INTERNAL }}"
-      host: "{{ SERVICE_MANAGEMENT.HOST.INTERNAL }}"
-      port: "{{ SERVICE_MANAGEMENT.PORT.INTERNAL | int }}"
-      consul_app_token: "{{ CONSUL.MASTER_TOKEN }}"
+      database_host: "{{ ENV.SERVICE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
+      database_port: "{{ ENV.SERVICE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
+      scheme: "{{ ENV.SERVICE_MANAGEMENT.SCHEME.INTERNAL }}"
+      host: "{{ ENV.SERVICE_MANAGEMENT.HOST.INTERNAL }}"
+      port: "{{ ENV.SERVICE_MANAGEMENT.PORT.INTERNAL | int }}"
+      consul_app_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
     - app_name: resource_management
-      database_host: "{{ RESOURCE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
-      database_port: "{{ RESOURCE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
-      scheme: "{{ RESOURCE_MANAGEMENT.SCHEME.INTERNAL }}"
-      host: "{{ RESOURCE_MANAGEMENT.HOST.INTERNAL }}"
-      port: "{{ RESOURCE_MANAGEMENT.PORT.INTERNAL | int }}"
-      consul_app_token: "{{ CONSUL.MASTER_TOKEN }}"
+      database_host: "{{ ENV.RESOURCE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
+      database_port: "{{ ENV.RESOURCE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
+      scheme: "{{ ENV.RESOURCE_MANAGEMENT.SCHEME.INTERNAL }}"
+      host: "{{ ENV.RESOURCE_MANAGEMENT.HOST.INTERNAL }}"
+      port: "{{ ENV.RESOURCE_MANAGEMENT.PORT.INTERNAL | int }}"
+      consul_app_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
     - app_name: notification_service
-      database_host: "{{ NOTIFICATION_SERVICE.DATABASE.HOST.INTERNAL }}"
-      database_port: "{{ NOTIFICATION_SERVICE.DATABASE.PORT.INTERNAL }}"
-      scheme: "{{ NOTIFICATION_SERVICE.SCHEME.INTERNAL }}"
-      host: "{{ NOTIFICATION_SERVICE.HOST.INTERNAL }}"
-      port: "{{ NOTIFICATION_SERVICE.PORT.INTERNAL | int }}"
-      consul_app_token: "{{ CONSUL.MASTER_TOKEN }}"
+      database_host: "{{ ENV.NOTIFICATION_SERVICE.DATABASE.HOST.INTERNAL }}"
+      database_port: "{{ ENV.NOTIFICATION_SERVICE.DATABASE.PORT.INTERNAL }}"
+      scheme: "{{ ENV.NOTIFICATION_SERVICE.SCHEME.INTERNAL }}"
+      host: "{{ ENV.NOTIFICATION_SERVICE.HOST.INTERNAL }}"
+      port: "{{ ENV.NOTIFICATION_SERVICE.PORT.INTERNAL | int }}"
+      consul_app_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
     - app_name: information_service
-      scheme: "{{ INFORMATION_SERVICE.SCHEME.INTERNAL }}"
-      host: "{{ INFORMATION_SERVICE.HOST.INTERNAL }}"
-      port: "{{ INFORMATION_SERVICE.PORT.INTERNAL | int }}"
-      consul_app_token: "{{ CONSUL.MASTER_TOKEN }}"
+      scheme: "{{ ENV.INFORMATION_SERVICE.SCHEME.INTERNAL }}"
+      host: "{{ ENV.INFORMATION_SERVICE.HOST.INTERNAL }}"
+      port: "{{ ENV.INFORMATION_SERVICE.PORT.INTERNAL | int }}"
+      consul_app_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
     - app_name: catalog_service
-      database_host: "{{ SLM_CATALOG_SERVICE.DATABASE.HOST.INTERNAL }}"
-      database_port: "{{ SLM_CATALOG_SERVICE.DATABASE.PORT.INTERNAL }}"
-      scheme: "{{ SLM_CATALOG_SERVICE.SCHEME.INTERNAL }}"
-      host: "{{ SLM_CATALOG_SERVICE.HOST.INTERNAL }}"
-      port: "{{ SLM_CATALOG_SERVICE.PORT.INTERNAL | int }}"
-      consul_app_token: "{{ CONSUL.MASTER_TOKEN }}"
+      database_host: "{{ ENV.SLM_CATALOG_SERVICE.DATABASE.HOST.INTERNAL }}"
+      database_port: "{{ ENV.SLM_CATALOG_SERVICE.DATABASE.PORT.INTERNAL }}"
+      scheme: "{{ ENV.SLM_CATALOG_SERVICE.SCHEME.INTERNAL }}"
+      host: "{{ ENV.SLM_CATALOG_SERVICE.HOST.INTERNAL }}"
+      port: "{{ ENV.SLM_CATALOG_SERVICE.PORT.INTERNAL | int }}"
+      consul_app_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
 
 - name: "Create Minio access"
   include_tasks: "create_and_store_minio_config.yml"
@@ -61,7 +61,7 @@
     tasks_from: clients/create_client.yml
   vars:
     _keycloak_access_token: "{{ keycloak_access_token }}"
-    _keycloak_realm_name: "{{ KEYCLOAK.REALM }}"
+    _keycloak_realm_name: "{{ ENV.KEYCLOAK.REALM }}"
     _keycloak_client: "{{ item }}"
   loop: "{{ keycloak_clients }}"
 
@@ -89,12 +89,12 @@
     - set_fact:
         slm_compose: "{{ lookup('template', 'slm.yml') }}"
     - name: "Start containers"
-      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+      delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ slm_compose | from_yaml}}"
         state: present
-        pull: "{{ PULL_DOCKER_IMAGES }}"
+        pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
 
 - name: "Store resulting compose file"
   template:
@@ -121,12 +121,12 @@
     - set_fact:
         catalog_compose: "{{ lookup('template', 'catalog.yml') }}"
     - name: "Start containers"
-      delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+      delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
       community.docker.docker_compose_v2:
         project_name: eclipse-slm
         definition: "{{ catalog_compose | from_yaml }}"
         state: present
-        pull: "{{ PULL_DOCKER_IMAGES }}"
+        pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
 
 - name: "Store resulting compose file"
   template:

@@ -2,9 +2,9 @@
   block:
     - name: "Check if config exists in Consul"
       community.general.consul_kv:
-        scheme: "{{ CONSUL.SCHEME.INTERNAL }}"
-        host: "{{ CONSUL.HOST.INTERNAL }}"
-        port: "{{ CONSUL.PORT.INTERNAL }}"
+        scheme: "{{ ENV.CONSUL.SCHEME.INTERNAL }}"
+        host: "{{ ENV.CONSUL.HOST.INTERNAL }}"
+        port: "{{ ENV.CONSUL.PORT.INTERNAL }}"
         token: "{{ _consul_token }}"
         key: "config/rabbitmq/data"
       register: rabbitmq_config_consul_response
@@ -32,8 +32,8 @@
         _username: "{{ item.username }}"
         _password: "{{ item.password }}"
       loop:
-        - username: "{{ RABBITMQ.ADMIN_USERNAME }}"
-          password: "{{ RABBITMQ.ADMIN_PASSWORD }}"
+        - username: "{{ ENV.RABBITMQ.ADMIN_USERNAME }}"
+          password: "{{ ENV.RABBITMQ.ADMIN_PASSWORD }}"
 
     - name: "Store RabbitMQ config in Consul"
       include_role:
@@ -46,12 +46,12 @@
     rabbitmq_compose: "{{ lookup('template', 'rabbitmq.yml') }}"
 
 - name: "Start containers"
-  delegate_to: '{{ DEPLOYMENT_HOST_HOSTNAME }}'
+  delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
   community.docker.docker_compose_v2:
     project_name: eclipse-slm
     definition: "{{ rabbitmq_compose | from_yaml}}"
     state: present
-    pull: "{{ PULL_DOCKER_IMAGES }}"
+    pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
 
 - name: "Store resulting compose file"
   template:
@@ -64,8 +64,8 @@
     name: consul/client
     tasks_from: register_service
   vars:
-    _service_name: "{{ RABBITMQ.HOST.INTERNAL }}"
-    _service_port: "{{ RABBITMQ.PORT.INTERNAL }}"
-    _service_address: "{{ RABBITMQ.HOST.INTERNAL }}"
-    _tcp: "{{ RABBITMQ.HOST.INTERNAL }}:{{ RABBITMQ.PORT.INTERNAL }}"
+    _service_name: "{{ ENV.RABBITMQ.HOST.INTERNAL }}"
+    _service_port: "{{ ENV.RABBITMQ.PORT.INTERNAL }}"
+    _service_address: "{{ ENV.RABBITMQ.HOST.INTERNAL }}"
+    _tcp: "{{ ENV.RABBITMQ.HOST.INTERNAL }}:{{ ENV.RABBITMQ.PORT.INTERNAL }}"
     _additional_tags: [ "message-queue", "rabbitmq" ]

@@ -36,9 +36,9 @@
       vars:
         _config:
           minio:
-            scheme: "{{ MINIO.SCHEME.INTERNAL }}"
-            host: "{{ MINIO.HOST.INTERNAL }}"
-            port: "{{ MINIO.API_PORT.INTERNAL }}"
+            scheme: "{{ ENV.MINIO.SCHEME.INTERNAL }}"
+            host: "{{ ENV.MINIO.HOST.INTERNAL }}"
+            port: "{{ ENV.MINIO.API_PORT.INTERNAL }}"
             user: "{{ _app_name }}"
             password: "{{ minio_password }}"
             access-key: "{{ minio_access_key }}"

@@ -31,7 +31,7 @@
       Type: jwt
       Description: FabOS Keycloak Instance
       Config:
-        OIDCDiscoveryURL: "{{ keycloak.url.external_without_port }}/realms/{{ KEYCLOAK.REALM }}"
+        OIDCDiscoveryURL: "{{ keycloak.url.external_without_port }}/realms/{{ ENV.KEYCLOAK.REALM }}"
         OIDCDiscoveryCACert: "{{ oidc_discovery_crt }}"
         ClaimMappings:
           given_name: first_name

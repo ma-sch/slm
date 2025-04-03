@@ -72,7 +72,7 @@
   vars:
     _keycloak_client: "{{ awx_jwt_authenticator.keycloak_client }}"
     _keycloak_access_token: "{{ keycloak_access_token }}"
-    _keycloak_realm_name: "{{ KEYCLOAK.REALM }}"
+    _keycloak_realm_name: "{{ ENV.KEYCLOAK.REALM }}"
 
 - name: "Get client secret of awx-jwt-authenticator"
   block:
@@ -82,7 +82,7 @@
       vars:
         _client_id: "{{ awx_jwt_authenticator.keycloak_client.client_id }}"
         _keycloak_access_token: "{{ keycloak_access_token }}"
-        _keycloak_realm_name: "{{ KEYCLOAK.REALM }}"
+        _keycloak_realm_name: "{{ ENV.KEYCLOAK.REALM }}"
     - set_fact:
         awx_jwt_authenticator_keycloak_secret_id: "{{ client_secret }}"
 

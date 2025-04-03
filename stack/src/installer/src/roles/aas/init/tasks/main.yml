@@ -2,12 +2,12 @@
     aas_compose: "{{ lookup('template', 'aas.yml') }}"
 
 - name: "Start containers"
-  delegate_to: "{{ DEPLOYMENT_HOST_HOSTNAME }}"
+  delegate_to: "{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}"
   community.docker.docker_compose_v2:
     project_name: eclipse-slm
     definition: "{{ aas_compose | from_yaml}}"
     state: present
-    pull: "{{ PULL_DOCKER_IMAGES }}"
+    pull: "{{ ENV.PULL_DOCKER_IMAGES }}"
 
 - name: "Store resulting compose file"
   template:
@@ -27,56 +27,56 @@
     _additional_tags: "{{ item.additional_tags }}"
   loop:
     - name: aas-discovery
-      service_address: "{{ AAS.AAS_DISCOVERY.HOST.INTERNAL }}"
-      port: "{{ AAS.AAS_DISCOVERY.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.AAS_DISCOVERY.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.AAS_DISCOVERY.PORT.INTERNAL }}"
       http_check_url: "{{ aas.aas_discovery.url.internal }}/actuator/health"
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.aas-discovery.rule=PathPrefix(`{{ AAS.AAS_DISCOVERY.PATH.EXTERNAL }}`)"
+        - "traefik.http.routers.aas-discovery.rule=PathPrefix(`{{ ENV.AAS.AAS_DISCOVERY.PATH.EXTERNAL }}`)"
     - name: aas-registry
-      service_address: "{{ AAS.AAS_REGISTRY.HOST.INTERNAL }}"
-      port: "{{ AAS.AAS_REGISTRY.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.AAS_REGISTRY.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.AAS_REGISTRY.PORT.INTERNAL }}"
       http_check_url: "{{ aas.aas_registry.url.internal }}/actuator/health"
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.aas-registry.rule=PathPrefix(`{{ AAS.AAS_REGISTRY.PATH.EXTERNAL }}`)"
+        - "traefik.http.routers.aas-registry.rule=PathPrefix(`{{ ENV.AAS.AAS_REGISTRY.PATH.EXTERNAL }}`)"
     - name: aas-repository
-      service_address: "{{ AAS.AAS_REPOSITORY.HOST.INTERNAL }}"
-      port: "{{ AAS.AAS_REPOSITORY.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.AAS_REPOSITORY.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.AAS_REPOSITORY.PORT.INTERNAL }}"
       http_check_url: "{{ aas.aas_repository.url.internal }}/actuator/health"
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.aas-repository.rule=PathPrefix(`{{ AAS.AAS_REPOSITORY.PATH.EXTERNAL }}`)"
+        - "traefik.http.routers.aas-repository.rule=PathPrefix(`{{ ENV.AAS.AAS_REPOSITORY.PATH.EXTERNAL }}`)"
     - name: submodel-registry
-      service_address: "{{ AAS.SUBMODEL_REGISTRY.HOST.INTERNAL }}"
-      port: "{{ AAS.SUBMODEL_REGISTRY.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.SUBMODEL_REGISTRY.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.SUBMODEL_REGISTRY.PORT.INTERNAL }}"
       http_check_url: "{{ aas.submodel_registry.url.internal }}/actuator/health"
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.submodel-registry.rule=PathPrefix(`{{ AAS.SUBMODEL_REGISTRY.PATH.EXTERNAL }}`)"
+        - "traefik.http.routers.submodel-registry.rule=PathPrefix(`{{ ENV.AAS.SUBMODEL_REGISTRY.PATH.EXTERNAL }}`)"
     - name: submodel-repository
-      service_address: "{{ AAS.SUBMODEL_REPOSITORY.HOST.INTERNAL }}"
-      port: "{{ AAS.SUBMODEL_REPOSITORY.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.SUBMODEL_REPOSITORY.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.SUBMODEL_REPOSITORY.PORT.INTERNAL }}"
       http_check_url: "{{ aas.submodel_repository.url.internal }}/actuator/health"
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.submodel-repository.rule=PathPrefix(`{{ AAS.SUBMODEL_REPOSITORY.PATH.EXTERNAL }}`)"
+        - "traefik.http.routers.submodel-repository.rule=PathPrefix(`{{ ENV.AAS.SUBMODEL_REPOSITORY.PATH.EXTERNAL }}`)"
     - name: concept-description-repository
-      service_address: "{{ AAS.CONCEPTDESCRIPTION_REPOSITORY.HOST.INTERNAL }}"
-      port: "{{ AAS.CONCEPTDESCRIPTION_REPOSITORY.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.CONCEPTDESCRIPTION_REPOSITORY.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.CONCEPTDESCRIPTION_REPOSITORY.PORT.INTERNAL }}"
       http_check_url: "{{ aas.concept_description_repository.url.internal }}/actuator/health"
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.concept-description-repository.rule=PathPrefix(`{{ AAS.CONCEPTDESCRIPTION_REPOSITORY.PATH.EXTERNAL }}`)"
+        - "traefik.http.routers.concept-description-repository.rule=PathPrefix(`{{ ENV.AAS.CONCEPTDESCRIPTION_REPOSITORY.PATH.EXTERNAL }}`)"
     - name: aas-gui
-      port: "{{ AAS.AAS_GUI.PORT.INTERNAL }}"
-      service_address: "{{ AAS.AAS_GUI.HOST.INTERNAL }}"
+      port: "{{ ENV.AAS.AAS_GUI.PORT.INTERNAL }}"
+      service_address: "{{ ENV.AAS.AAS_GUI.HOST.INTERNAL }}"
       http_check_url: "{{ aas.aas_gui.url.internal }}"
       additional_tags:
         - "aas"
@@ -91,9 +91,9 @@
     tasks_from: register_service
   vars:
     _service_name: aas-broker
-    _service_port: "{{ AAS.AAS_BROKER.PORT.INTERNAL }}"
-    _service_address: "{{ AAS.AAS_BROKER.HOST.INTERNAL }}"
-    _tcp: "{{ AAS.AAS_BROKER.HOST.INTERNAL }}:{{ AAS.AAS_BROKER.PORT.INTERNAL }}"
+    _service_port: "{{ ENV.AAS.AAS_BROKER.PORT.INTERNAL }}"
+    _service_address: "{{ ENV.AAS.AAS_BROKER.HOST.INTERNAL }}"
+    _tcp: "{{ ENV.AAS.AAS_BROKER.HOST.INTERNAL }}:{{ ENV.AAS.AAS_BROKER.PORT.INTERNAL }}"
     _additional_tags: [ "aas" ]
 
 - name: "Register AAS database at Consul (discovery server)"
@@ -102,7 +102,7 @@
     tasks_from: register_service
   vars:
     _service_name: aas-database
-    _service_port: "{{ AAS.DATABASE.PORT.INTERNAL }}"
-    _service_address: "{{ AAS.DATABASE.HOST.INTERNAL }}"
-    _tcp: "{{ AAS.DATABASE.HOST.INTERNAL }}:{{ AAS.DATABASE.PORT.INTERNAL }}"
+    _service_port: "{{ ENV.AAS.DATABASE.PORT.INTERNAL }}"
+    _service_address: "{{ ENV.AAS.DATABASE.HOST.INTERNAL }}"
+    _tcp: "{{ ENV.AAS.DATABASE.HOST.INTERNAL }}:{{ ENV.AAS.DATABASE.PORT.INTERNAL }}"
     _additional_tags: [ "aas", "database", "docker-internal" ]

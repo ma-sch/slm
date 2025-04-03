@@ -1,19 +1,19 @@
 services:
 
   ui:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/ui:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/ui:{{ ENV.SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     networks:
       default:
         aliases:
           - ui
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     environment:
       KEYCLOAK_URL: "{{ keycloak.url.external_without_port }}"
       AWX_URL: "{{ awx.url.external }}"
@@ -25,53 +25,53 @@ services:
       CATALOG_SERVICE_URL: "{{ catalog_service.url.proxy }}"
 
   resource-management:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/resource-management:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/resource-management:{{ ENV.SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     environment:
       DEPLOYMENT_URL: "{{ resource_management.url.proxy }}"
       CONSUL_SCHEME: "{{ app_configs['resource_management']['consul']['scheme'] }}"
       CONSUL_HOST: "{{ app_configs['resource_management']['consul']['host'] }}"
       CONSUL_PORT: "{{ app_configs['resource_management']['consul']['port'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['resource_management']['consul']['acl-token'] }}"
-      CONSUL_SERVICE_ADDRESS: "{{ RESOURCE_MANAGEMENT.HOST.INTERNAL }}"
-      CONSUL_SERVICE_PORT: "{{ RESOURCE_MANAGEMENT.PORT.INTERNAL }}"
+      CONSUL_SERVICE_ADDRESS: "{{ ENV.RESOURCE_MANAGEMENT.HOST.INTERNAL }}"
+      CONSUL_SERVICE_PORT: "{{ ENV.RESOURCE_MANAGEMENT.PORT.INTERNAL }}"
       AAS_AASREGISTRY_URL: "{{ aas.aas_registry.url.internal }}"
       AAS_AASREPOSITORY_URL: "{{ aas.aas_repository.url.internal }}"
       AAS_SUBMODELREGISTRY_URL: "{{ aas.submodel_registry.url.internal }}"
       AAS_SUBMODELREPOSITORY_URL: "{{ aas.submodel_repository.url.internal }}"
       AAS_CONCEPTDESCRIPTIONSREPOSITORY_URL: "{{ aas.concept_description_repository.url.internal }}"
       MONITORING_SERVICE_URL: "{{ monitoring_service.url.proxy }}"
-      SERVER_MAXHTTPHEADERSIZE: "{{ SERVER_MAXHTTPHEADERSIZE }}"
+      SERVER_MAXHTTPHEADERSIZE: "{{ ENV.SERVER_MAXHTTPHEADERSIZE }}"
     ports:
-      - "{{ RESOURCE_MANAGEMENT.PORT.EXTERNAL }}:{{ RESOURCE_MANAGEMENT.PORT.INTERNAL }}"
+      - "{{ ENV.RESOURCE_MANAGEMENT.PORT.EXTERNAL }}:{{ ENV.RESOURCE_MANAGEMENT.PORT.INTERNAL }}"
     networks:
       default:
         aliases:
-          - "{{ RESOURCE_MANAGEMENT.HOST.INTERNAL }}"
+          - "{{ ENV.RESOURCE_MANAGEMENT.HOST.INTERNAL }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9010/swagger-ui/index.html" ]
 
   resource-management-database:
-    image: "mariadb:{{ RESOURCE_MANAGEMENT.DATABASE.VERSION }}"
+    image: "mariadb:{{ ENV.RESOURCE_MANAGEMENT.DATABASE.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     ports:
-      - "{{ RESOURCE_MANAGEMENT.DATABASE.PORT.EXTERNAL }}:{{ RESOURCE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
+      - "{{ ENV.RESOURCE_MANAGEMENT.DATABASE.PORT.EXTERNAL }}:{{ ENV.RESOURCE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
     networks:
       default:
         aliases:
-          - "{{ RESOURCE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
+          - "{{ ENV.RESOURCE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
     environment:
       MARIADB_ROOT_PASSWORD: "{{ app_configs['resource_management']['database']['root_password'] }}"
       MARIADB_USER: "{{ app_configs['resource_management']['database']['username'] }}"
@@ -83,78 +83,78 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   resource-management-init:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/resource-management-init:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/resource-management-init:{{ ENV.SLM_VERSION }}"
     restart: "no"
     depends_on:
       - resource-management
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     environment:
       RESOURCEMANAGEMENT_URL: "{{ resource_management.url.internal }}"
       KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external_without_port }}"
-      KEYCLOAK_REALM: "{{ KEYCLOAK.REALM }}"
+      KEYCLOAK_REALM: "{{ ENV.KEYCLOAK.REALM }}"
       KEYCLOAK_USERNAME: "{{ keycloak_config['default_user_username'] }}"
       KEYCLOAK_PASSWORD: "{{ keycloak_config['default_user_password'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['resource_management']['consul']['acl-token'] }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
 
   service-management:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/service-management:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/service-management:{{ ENV.SLM_VERSION }}"
     restart: unless-stopped
     depends_on:
       - service-management-database
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     environment:
       DEPLOYMENT_URL: "{{ service_management.url.proxy }}"
       CONSUL_SCHEME: "{{ app_configs['service_management']['consul']['scheme'] }}"
       CONSUL_HOST: "{{ app_configs['service_management']['consul']['host'] }}"
       CONSUL_PORT: "{{ app_configs['service_management']['consul']['port'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['service_management']['consul']['acl-token'] }}"
-      CONSUL_SERVICE_ADDRESS: "{{ SERVICE_MANAGEMENT.HOST.INTERNAL }}"
-      CONSUL_SERVICE_PORT: "{{ SERVICE_MANAGEMENT.PORT.INTERNAL }}"
-      GIT_SERVICEOFFERINGIMPORTER_UPDATERINTERVALMINUTES: "{{ SERVICE_MANAGEMENT.GIT_CHECK_INTERVAL_MINUTES }}"
+      CONSUL_SERVICE_ADDRESS: "{{ ENV.SERVICE_MANAGEMENT.HOST.INTERNAL }}"
+      CONSUL_SERVICE_PORT: "{{ ENV.SERVICE_MANAGEMENT.PORT.INTERNAL }}"
+      GIT_SERVICEOFFERINGIMPORTER_UPDATERINTERVALMINUTES: "{{ ENV.SERVICE_MANAGEMENT.GIT_CHECK_INTERVAL_MINUTES }}"
       AAS_AASREGISTRY_URL: "{{ aas.aas_registry.url.internal }}"
       AAS_AASREPOSITORY_URL: "{{ aas.aas_repository.url.internal }}"
       AAS_SUBMODELREGISTRY_URL: "{{ aas.submodel_registry.url.internal }}"
       AAS_SUBMODELREPOSITORY_URL: "{{ aas.submodel_repository.url.internal }}"
       AAS_CONCEPTDESCRIPTIONSREPOSITORY_URL: "{{ aas.concept_description_repository.url.internal }}"
       SERVICEMANAGEMENT_URL: "{{ service_management.url.internal }}"
-      SERVER_MAXHTTPHEADERSIZE: "{{ SERVER_MAXHTTPHEADERSIZE }}"
+      SERVER_MAXHTTPHEADERSIZE: "{{ ENV.SERVER_MAXHTTPHEADERSIZE }}"
     ports:
-      - "{{ SERVICE_MANAGEMENT.PORT.EXTERNAL }}:{{ SERVICE_MANAGEMENT.PORT.INTERNAL }}"
+      - "{{ ENV.SERVICE_MANAGEMENT.PORT.EXTERNAL }}:{{ ENV.SERVICE_MANAGEMENT.PORT.INTERNAL }}"
     networks:
       default:
         aliases:
-          - "{{ SERVICE_MANAGEMENT.HOST.INTERNAL }}"
+          - "{{ ENV.SERVICE_MANAGEMENT.HOST.INTERNAL }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9020/swagger-ui/index.html" ]
 
   service-management-init:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/service-management-init:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/service-management-init:{{ ENV.SLM_VERSION }}"
     restart: "no"
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     environment:
       SERVICEMANAGEMENT_URL: "{{ service_management.url.internal }}"
-      SERVICEMANAGEMENT_INITDIRECTORIES: "{{ SERVICE_MANAGEMENT.INITIALIZATION_LOCAL_DIRECTORIES }}"
-      SERVICEMANAGEMENT_GITREPOS_URLS: "{{ SERVICE_MANAGEMENT.INITIALIZATION_GIT_REPOS }}"
+      SERVICEMANAGEMENT_INITDIRECTORIES: "{{ ENV.SERVICE_MANAGEMENT.INITIALIZATION_LOCAL_DIRECTORIES }}"
+      SERVICEMANAGEMENT_GITREPOS_URLS: "{{ ENV.SERVICE_MANAGEMENT.INITIALIZATION_GIT_REPOS }}"
       KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external_without_port }}"
-      KEYCLOAK_REALM: "{{ KEYCLOAK.REALM }}"
+      KEYCLOAK_REALM: "{{ ENV.KEYCLOAK.REALM }}"
       KEYCLOAK_USERNAME: "{{ keycloak_config['default_user_username'] }}"
       KEYCLOAK_PASSWORD: "{{ keycloak_config['default_user_password'] }}"
       CONSUL_SCHEME: "{{ app_configs['service_management']['consul']['scheme'] }}"
@@ -163,19 +163,19 @@ services:
       CONSUL_ACLTOKEN: "{{ app_configs['service_management']['consul']['acl-token'] }}"
 
   service-management-database:
-    image: "mariadb:{{ SERVICE_MANAGEMENT.DATABASE.VERSION }}"
+    image: "mariadb:{{ ENV.SERVICE_MANAGEMENT.DATABASE.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     ports:
-      - "{{ SERVICE_MANAGEMENT.DATABASE.PORT.EXTERNAL }}:{{ SERVICE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
+      - "{{ ENV.SERVICE_MANAGEMENT.DATABASE.PORT.EXTERNAL }}:{{ ENV.SERVICE_MANAGEMENT.DATABASE.PORT.INTERNAL }}"
     networks:
       default:
         aliases:
-          - "{{ SERVICE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
+          - "{{ ENV.SERVICE_MANAGEMENT.DATABASE.HOST.INTERNAL }}"
     environment:
       MARIADB_ROOT_PASSWORD: "{{ app_configs['service_management']['database']['root_password'] }}"
       MARIADB_USER: "{{ app_configs['service_management']['database']['username'] }}"
@@ -187,47 +187,47 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   notification-service:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/notification-service:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/notification-service:{{ ENV.SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     ports:
-      - "{{ NOTIFICATION_SERVICE.PORT.EXTERNAL }}:{{ NOTIFICATION_SERVICE.PORT.INTERNAL }}"
+      - "{{ ENV.NOTIFICATION_SERVICE.PORT.EXTERNAL }}:{{ ENV.NOTIFICATION_SERVICE.PORT.INTERNAL }}"
     environment:
       DEPLOYMENT_URL: "{{ notification_service.url.proxy }}"
       CONSUL_SCHEME: "{{ app_configs['notification_service']['consul']['scheme'] }}"
       CONSUL_HOST: "{{ app_configs['notification_service']['consul']['host'] }}"
       CONSUL_PORT: "{{ app_configs['notification_service']['consul']['port'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['notification_service']['consul']['acl-token'] }}"
-      CONSUL_SERVICE_ADDRESS: "{{ NOTIFICATION_SERVICE.HOST.INTERNAL }}"
-      CONSUL_SERVICE_PORT: "{{ NOTIFICATION_SERVICE.PORT.INTERNAL }}"
+      CONSUL_SERVICE_ADDRESS: "{{ ENV.NOTIFICATION_SERVICE.HOST.INTERNAL }}"
+      CONSUL_SERVICE_PORT: "{{ ENV.NOTIFICATION_SERVICE.PORT.INTERNAL }}"
       KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external }}"
     networks:
       default:
         aliases:
-          - "{{ NOTIFICATION_SERVICE.HOST.INTERNAL }}"
+          - "{{ ENV.NOTIFICATION_SERVICE.HOST.INTERNAL }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9001/swagger-ui/index.html" ]
 
   notification-service-database:
-    image: "mariadb:{{ NOTIFICATION_SERVICE.DATABASE.VERSION }}"
+    image: "mariadb:{{ ENV.NOTIFICATION_SERVICE.DATABASE.VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     ports:
-      - "{{ NOTIFICATION_SERVICE.DATABASE.PORT.EXTERNAL }}:{{ NOTIFICATION_SERVICE.DATABASE.PORT.INTERNAL }}"
+      - "{{ ENV.NOTIFICATION_SERVICE.DATABASE.PORT.EXTERNAL }}:{{ ENV.NOTIFICATION_SERVICE.DATABASE.PORT.INTERNAL }}"
     networks:
       default:
         aliases:
-          - "{{ NOTIFICATION_SERVICE.DATABASE.HOST.INTERNAL }}"
+          - "{{ ENV.NOTIFICATION_SERVICE.DATABASE.HOST.INTERNAL }}"
     environment:
       MARIADB_ROOT_PASSWORD: "{{ app_configs['notification_service']['database']['root_password'] }}"
       MARIADB_USER: "{{ app_configs['notification_service']['database']['username'] }}"
@@ -239,38 +239,38 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   information-service:
-    image: "{{ DOCKER_IMAGE_REGISTRY }}/slm/information-service:{{ SLM_VERSION }}"
+    image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/slm/information-service:{{ ENV.SLM_VERSION }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
-        max-file: "{{ LOGGING_MAX_FILE }}"
-        max-size: "{{ LOGGING_MAX_SIZE }}"
+        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
+        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
     ports:
-      - "{{ INFORMATION_SERVICE.PORT.EXTERNAL }}:{{ INFORMATION_SERVICE.PORT.INTERNAL }}"
+      - "{{ ENV.INFORMATION_SERVICE.PORT.EXTERNAL }}:{{ ENV.INFORMATION_SERVICE.PORT.INTERNAL }}"
     environment:
       DEPLOYMENT_URL: "{{ information_service.url.proxy }}"
       CONSUL_SCHEME: "{{ app_configs['information_service']['consul']['scheme'] }}"
       CONSUL_HOST: "{{ app_configs['information_service']['consul']['host'] }}"
       CONSUL_PORT: "{{ app_configs['information_service']['consul']['port'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['information_service']['consul']['acl-token'] }}"
-      CONSUL_SERVICE_ADDRESS: "{{ INFORMATION_SERVICE.HOST.INTERNAL }}"
-      CONSUL_SERVICE_PORT: "{{ INFORMATION_SERVICE.PORT.INTERNAL }}"
+      CONSUL_SERVICE_ADDRESS: "{{ ENV.INFORMATION_SERVICE.HOST.INTERNAL }}"
+      CONSUL_SERVICE_PORT: "{{ ENV.INFORMATION_SERVICE.PORT.INTERNAL }}"
       AAS_AASREGISTRY_URL: "{{ aas.aas_registry.url.internal }}"
       AAS_AASREPOSITORY_URL: "{{ aas.aas_repository.url.internal }}"
       AAS_SUBMODELREGISTRY_URL: "{{ aas.submodel_registry.url.internal }}"
       AAS_SUBMODELREPOSITORY_URL: "{{ aas.submodel_repository.url.internal }}"
       AAS_CONCEPTDESCRIPTIONSREPOSITORY_URL: "{{ aas.concept_description_repository.url.internal }}"
-      UPDATEHUB_SCHEME: "{{ UPDATE_HUB.SCHEME.EXTERNAL }}"
+      UPDATEHUB_SCHEME: "{{ ENV.UPDATE_HUB.SCHEME.EXTERNAL }}"
       UPDATEHUB_HOST: "{{ UPDATE_HUB.HOST.EXTERNAL  }}"
       UPDATEHUB_PORT: "{{ UPDATE_HUB.PORT.EXTERNAL  }}"
       KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external }}"
     networks:
       default:
         aliases:
-          - "{{ INFORMATION_SERVICE.HOST.INTERNAL }}"
+          - "{{ ENV.INFORMATION_SERVICE.HOST.INTERNAL }}"
     extra_hosts:
-      - "{{ SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9002/swagger-ui/index.html" ]
 
