@@ -45,7 +45,7 @@ services:
       AAS_SUBMODELREGISTRY_URL: "{{ aas.submodel_registry.url.internal }}"
       AAS_SUBMODELREPOSITORY_URL: "{{ aas.submodel_repository.url.internal }}"
       AAS_CONCEPTDESCRIPTIONSREPOSITORY_URL: "{{ aas.concept_description_repository.url.internal }}"
-      MONITORING_SERVICE_URL: "{{ monitoring_service.url.internal }}"
+      MONITORING_SERVICE_URL: "{{ monitoring_service.url.proxy }}"
       SERVER_MAXHTTPHEADERSIZE: "{{ SERVER_MAXHTTPHEADERSIZE }}"
     ports:
       - "{{ RESOURCE_MANAGEMENT.PORT.EXTERNAL }}:{{ RESOURCE_MANAGEMENT.PORT.INTERNAL }}"
@@ -94,7 +94,7 @@ services:
         max-size: "{{ LOGGING_MAX_SIZE }}"
     environment:
       RESOURCEMANAGEMENT_URL: "{{ resource_management.url.internal }}"
-      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.proxy }}"
+      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external_without_port }}"
       KEYCLOAK_REALM: "{{ KEYCLOAK.REALM }}"
       KEYCLOAK_USERNAME: "{{ keycloak_config['default_user_username'] }}"
       KEYCLOAK_PASSWORD: "{{ keycloak_config['default_user_password'] }}"
@@ -153,7 +153,7 @@ services:
       SERVICEMANAGEMENT_URL: "{{ service_management.url.internal }}"
       SERVICEMANAGEMENT_INITDIRECTORIES: "{{ SERVICE_MANAGEMENT.INITIALIZATION_LOCAL_DIRECTORIES }}"
       SERVICEMANAGEMENT_GITREPOS_URLS: "{{ SERVICE_MANAGEMENT.INITIALIZATION_GIT_REPOS }}"
-      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.proxy }}"
+      KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external_without_port }}"
       KEYCLOAK_REALM: "{{ KEYCLOAK.REALM }}"
       KEYCLOAK_USERNAME: "{{ keycloak_config['default_user_username'] }}"
       KEYCLOAK_PASSWORD: "{{ keycloak_config['default_user_password'] }}"

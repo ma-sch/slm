@@ -17,8 +17,8 @@ services:
       CONSUL_HOST: "{{ app_configs['catalog_service']['consul']['host'] }}"
       CONSUL_PORT: "{{ app_configs['catalog_service']['consul']['port'] }}"
       CONSUL_ACLTOKEN: "{{ app_configs['catalog_service']['consul']['acl-token'] }}"
-      CONSUL_SERVICE_ADDRESS: "{{ CATALOG_SERVICE.HOST.INTERNAL }}"
-      CONSUL_SERVICE_PORT: "{{ CATALOG_SERVICE.PORT.INTERNAL }}"
+      CONSUL_SERVICE_ADDRESS: "{{ SLM_CATALOG_SERVICE.HOST.INTERNAL }}"
+      CONSUL_SERVICE_PORT: "{{ SLM_CATALOG_SERVICE.PORT.INTERNAL }}"
     ports:
       - "{{ SLM_CATALOG_SERVICE.PORT.EXTERNAL }}:{{ SLM_CATALOG_SERVICE.PORT.INTERNAL }}"
     networks:

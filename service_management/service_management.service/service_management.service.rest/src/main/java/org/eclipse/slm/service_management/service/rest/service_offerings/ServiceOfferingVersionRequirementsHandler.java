@@ -68,7 +68,7 @@ public class ServiceOfferingVersionRequirementsHandler {
                 var matchesFound = matcher.find();
                 if (matchesFound) {
                     var submodelServiceBasUrl = matcher.group(1);
-                    var submodelServiceClient = new SubmodelServiceClient(submodelServiceBasUrl);
+                    var submodelServiceClient = new SubmodelServiceClient(submodelServiceBasUrl, jwtAuthenticationToken);
                     var submodelOptional = submodelServiceClient.getSubmodel();
                     submodelOptional.ifPresent(resourceSubmodels::add);
                 }

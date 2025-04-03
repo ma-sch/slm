@@ -73,47 +73,13 @@ public class SubmodelRepositoryClient {
 
     private ConnectedSubmodelRepository getConnectedSubmodelRepository(String submodelRepositoryUrl,
                                                                        JwtAuthenticationToken jwtAuthenticationToken) {
-        try {
-            var trustAllCerts = new X509TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
 
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-
-            var sslContext = SSLContext.getInstance("TLS");
-
-            sslContext.init(null, trustAllCerts, new SecureRandom());
-            var clientBuilder = HttpClient.newBuilder()
-                    .sslContext(sslContext);
-
-            var apiClient = new ApiClient(clientBuilder, (new JsonMapperFactory()).create((new SimpleAbstractTypeResolverFactory()).create()), submodelRepositoryUrl);
-            if (jwtAuthenticationToken != null) {
-                apiClient.setRequestInterceptor(interceptor -> {
-                    interceptor.header("Authorization", "Bearer " + jwtAuthenticationToken.getToken().getTokenValue());
-                });
-            }
-
+            var apiClient = ClientUtils.getApiClient(submodelRepositoryUrl, jwtAuthenticationToken);
             var submodelRepositoryApi = new SubmodelRepositoryApi(apiClient);
 
             var newConnectedSubmodelRepository = new ConnectedSubmodelRepository(submodelRepositoryUrl, submodelRepositoryApi);
 
             return newConnectedSubmodelRepository;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (KeyManagementException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public List<Submodel> getAllSubmodels() throws DeserializationException {
