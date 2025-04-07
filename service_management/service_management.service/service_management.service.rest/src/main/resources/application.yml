@@ -177,6 +177,7 @@ aas:
     port: 8082
     path: /aas/shell-registry
     url: ${aas.aas-registry.scheme}://${aas.aas-registry.host}:${aas.aas-registry.port}${aas.aas-registry.path}
+    proxy: ${deployment.scheme}://${deployment.hostname}:${deployment.port}${aas.aas-registry.path}
   aas-repository:
     scheme: http
     host: localhost
@@ -189,6 +190,7 @@ aas:
     port: 8083
     path: /aas/submodel-registry
     url: ${aas.submodel-registry.scheme}://${aas.submodel-registry.host}:${aas.submodel-registry.port}${aas.submodel-registry.path}
+    proxy: ${deployment.scheme}://${deployment.hostname}:${deployment.port}${aas.submodel-registry.path}
   submodel-repository:
     scheme: http
     host: localhost

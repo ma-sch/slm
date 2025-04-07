@@ -181,9 +181,6 @@ export default {
       }
     },
     computed: {
-      valueOfTemplateVariable() {
-        return this.resourceDevicesStore.valueOfTemplateVariable
-      },
       serviceManagementSystemVariables() {
         return this.serviceOfferingsStore.serviceManagementSystemVariables
       },
@@ -207,6 +204,9 @@ export default {
     methods: {
       ipValueChanged (value) {
         console.log(value)
+      },
+      valueOfTemplateVariable(templateVariableKey) {
+        return this.serviceOfferingsStore.valueOfTemplateVariable(templateVariableKey)
       },
     },
   }
