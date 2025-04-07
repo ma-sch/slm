@@ -123,20 +123,13 @@
 
       <template #item.product="{ item }">
         <div>
-          {{ getProductOfResource(item.id) }}
+          {{ DeviceUtils.getProduct(item.id) }}
         </div>
       </template>
 
       <template #item.vendor="{ item }">
-        <div v-if="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, 'Nameplate', '$.ManufacturerName..en') == 'N/A'">
-          {{
-            resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..de")
-          }}
-        </div>
-        <div v-else>
-          {{
-            resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(item.id, "Nameplate", "$.ManufacturerName..en")
-          }}
+        <div>
+          {{ DeviceUtils.getVendor(item.id) }}
         </div>
       </template>
 
@@ -206,6 +199,7 @@ import CapabilityIcon from "@/components/resources/capabilities/CapabilityIcon.v
 import {storeToRefs} from "pinia";
 import FirmwareUpdateVersion from "@/components/updates/FirmwareUpdateVersion.vue";
 import ApiState from "@/api/apiState";
+import DeviceUtils from '@/utils/deviceUtils';
 
 
 const emit = defineEmits(['resource-selected']);
@@ -305,29 +299,6 @@ const runProfiler = () => {
   this.$toast.info('Started Profiler for all devices.');
 };
 
-const getProductOfResource = (resourceId) => {
-  let productValue = "N/A";
-  let productValueChecked = "";
-  let manufacturerProductDesignation = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.ManufacturerProductDesignation..en');
-  if (manufacturerProductDesignation !== 'N/A' && manufacturerProductDesignation.length < 40) {
-    productValue = manufacturerProductDesignation;
-  }
-  else if ((productValueChecked = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.ManufacturerProductType..en')) !== 'N/A') {
-    productValue = productValueChecked;
-  }
-  else if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.ManufacturerProductType')) !== 'N/A') {
-    productValue = productValueChecked;
-  }
-  else if ((productValue = resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId,
-      'Nameplate', '$.OrderCodeOfManufacturer')) !== 'N/A') {
-    productValue = productValueChecked;
-  }
-
-  return productValue;
-};
 </script>
 
 <style scoped>

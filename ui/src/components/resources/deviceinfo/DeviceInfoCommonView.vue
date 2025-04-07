@@ -7,7 +7,7 @@ import {BasicResource} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import {useToast} from 'vue-toast-notification';
-
+import DeviceUtils from '@/utils/deviceUtils';
 
 const props = defineProps({
   resourceId: {
@@ -59,6 +59,14 @@ onMounted(() => {
     </div>
 
     <div v-else>
+      <RowWithLabel
+        label="Product"
+        :text="DeviceUtils.getProduct(resourceId)"
+      />
+      <RowWithLabel
+        label="Vendor"
+        :text="DeviceUtils.getVendor(resourceId)"
+      />
       <RowWithLabel
         label="Resource Id"
         :text="resourceDevicesStore.getSubmodelElementValueOfResourceSubmodel(resourceId, 'DeviceInfo', '$.Id')"
