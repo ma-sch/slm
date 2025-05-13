@@ -154,63 +154,6 @@ services:
       retries: 5
       start_period: 20s
 
-  aas-transformer:
-    image: "ghcr.io/fabos-ai/aas-transformer/service:{{ ENV.AAS_TRANSFORMER.VERSION }}"
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
-        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
-    depends_on:
-      - aas-transformer-database
-    ports:
-      - "4010:4010"
-    networks:
-      default:
-        aliases:
-          - aas-transformer
-    environment:
-      AAS_BROKER_HOST: aas-broker
-      AAS_BROKER_PORT: 1883
-      DATABASE_HOST: aas-transformer-database
-      DATABASE_SCHEMA: "{{ ENV.AAS_TRANSFORMER.DATABASE.NAME }}"
-      DATABASE_USERNAME: "{{ ENV.AAS_TRANSFORMER.DATABASE.USER }}"
-      DATABASE_PASSWORD: "{{ ENV.AAS_TRANSFORMER.DATABASE.PASSWORD }}"
-    extra_hosts:
-      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
-
-  aas-transformer-database:
-    image: mariadb:10.5
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
-        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
-    networks:
-      default:
-        aliases:
-          - aas-transformer-database
-    environment:
-      MARIADB_USER: "{{ ENV.AAS_TRANSFORMER.DATABASE.USER }}"
-      MARIADB_PASSWORD: "{{ ENV.AAS_TRANSFORMER.DATABASE.PASSWORD }}"
-      MARIADB_DATABASE: "{{ ENV.AAS_TRANSFORMER.DATABASE.NAME }}"
-      MARIADB_ROOT_PASSWORD: "{{ ENV.AAS_TRANSFORMER.DATABASE.ROOT_PASSWORD }}"
-    volumes:
-      - "aas_transformer_database:/var/lib/mysql"
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "--silent" ]
-
-  aas-transformer-initializer:
-    image: "ghcr.io/fabos-ai/aas-transformer/initializer:{{ ENV.AAS_TRANSFORMER.VERSION }}"
-    restart: "no"
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "{{ ENV.LOGGING_MAX_FILE }}"
-        max-size: "{{ ENV.LOGGING_MAX_SIZE }}"
-
 volumes:
   aas_database:
   aas_transformer_database:
