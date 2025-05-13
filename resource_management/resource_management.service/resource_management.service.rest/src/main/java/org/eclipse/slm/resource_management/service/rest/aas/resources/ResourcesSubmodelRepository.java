@@ -1,14 +1,12 @@
 package org.eclipse.slm.resource_management.service.rest.aas.resources;
 
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
+import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultSubmodel;
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.eclipse.digitaltwin.basyx.core.pagination.CursorResult;
 import org.eclipse.digitaltwin.basyx.core.pagination.PaginationInfo;
 import org.eclipse.digitaltwin.basyx.core.pagination.PaginationSupport;
-import org.eclipse.slm.common.aas.clients.AasRegistryClient;
-import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
-import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
-import org.eclipse.slm.common.aas.clients.SubmodelRepositoryClient;
+import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.aas.repositories.AbstractSubmodelRepository;
 import org.eclipse.slm.common.aas.repositories.api.GetSubmodelsValueOnlyResult;
 import org.eclipse.slm.common.aas.repositories.api.SubmodelValueOnly;
@@ -97,13 +95,22 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
             try {
                 if (!localSubmodelIds.contains(submodelId)) {
                     this.submodelRegistryClient.findSubmodelDescriptor(submodelId).ifPresent(submodelDescriptor -> {
-                        var submodelValueOnlyBasyx = this.submodelRepositoryClient.getSubmodelValueOnly(submodelDescriptor.getId());
-                        if (submodelValueOnlyBasyx != null) {
-                            var submodelValueOnly = new SubmodelValueOnly();
-                            submodelValueOnly.setValuesOnlyMap(submodelValueOnlyBasyx.getValuesOnlyMap());
-                            submodelValueOnly.setIdShort(submodelDescriptor.getIdShort());
+                        var submodelEndpoint = submodelDescriptor.getEndpoints().get(0).getProtocolInformation().getHref();
+                        if (submodelEndpoint.contains("/submodels/")) {
+                            var scopedSubmodelRepositoryClient = SubmodelRepositoryClient.FromSubmodelDescriptor(submodelDescriptor, null);
 
-                            submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
+                            var submodelValueOnlyBasyx = scopedSubmodelRepositoryClient.getSubmodelValueOnly(submodelDescriptor.getId());
+                            if (submodelValueOnlyBasyx != null) {
+                                var submodelValueOnly = new SubmodelValueOnly();
+                                submodelValueOnly.setValuesOnlyMap(submodelValueOnlyBasyx.getValuesOnlyMap());
+                                submodelValueOnly.setIdShort(submodelDescriptor.getIdShort());
+
+                                submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
+                            }
+                        }
+
+                        if (submodelEndpoint.endsWith("/submodel")) {
+                            LOG.info("Value only representation for submodel '{}' is currently not supported by the submodel service", submodelId);
                         }
                     });
                 }

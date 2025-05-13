@@ -82,6 +82,11 @@
                 internal: "{{ ENV.INFORMATION_SERVICE.SCHEME.INTERNAL }}://{{ ENV.INFORMATION_SERVICE.HOST.INTERNAL }}:{{ ENV.INFORMATION_SERVICE.PORT.INTERNAL }}{{ ENV.INFORMATION_SERVICE.PATH.INTERNAL }}"
                 external: "{{ ENV.INFORMATION_SERVICE.SCHEME.EXTERNAL }}://{{ ENV.INFORMATION_SERVICE.HOST.EXTERNAL }}:{{ ENV.INFORMATION_SERVICE.PORT.EXTERNAL }}{{ ENV.INFORMATION_SERVICE.PATH.EXTERNAL }}"
                 proxy: "{{ ENV.TRAEFIK.SCHEME.EXTERNAL }}://{{ ENV.TRAEFIK.HOST.EXTERNAL }}:{{ ENV.TRAEFIK.HTTPS_PORT }}{{ ENV.INFORMATION_SERVICE.PATH.EXTERNAL }}"
+            irs:
+              url:
+                internal: "{{ ENV.IRS.SCHEME.INTERNAL }}://{{ ENV.IRS.HOST.INTERNAL }}:{{ ENV.IRS.PORT.INTERNAL }}{{ ENV.IRS.PATH.INTERNAL }}"
+                external: "{{ ENV.IRS.SCHEME.EXTERNAL }}://{{ ENV.IRS.HOST.EXTERNAL }}:{{ ENV.IRS.PORT.EXTERNAL }}{{ ENV.IRS.PATH.EXTERNAL }}"
+                proxy: "{{ ENV.TRAEFIK.SCHEME.EXTERNAL }}://{{ ENV.TRAEFIK.HOST.EXTERNAL }}:{{ ENV.TRAEFIK.HTTPS_PORT }}{{ ENV.IRS.PATH.EXTERNAL }}"
             resource_management:
               url:
                 internal: "{{ ENV.RESOURCE_MANAGEMENT.SCHEME.INTERNAL }}://{{ ENV.RESOURCE_MANAGEMENT.HOST.INTERNAL }}:{{ ENV.RESOURCE_MANAGEMENT.PORT.INTERNAL }}{{ ENV.RESOURCE_MANAGEMENT.PATH.INTERNAL }}"
@@ -285,6 +290,15 @@
       vars:
         _consul_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
         _store_compose_file: /compose/discovery.yml
+
+    - name: "Start IRS"
+      include_role:
+        name: irs/init
+        tasks_from: main.yml
+      vars:
+        _consul_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
+        _store_compose_file: /compose/irs.yml
+      when: ENV.IRS.ENABLED
 
     - name: "Start internal SLM components"
       include_role:

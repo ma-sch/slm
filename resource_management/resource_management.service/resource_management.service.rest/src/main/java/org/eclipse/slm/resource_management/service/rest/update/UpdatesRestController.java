@@ -12,6 +12,8 @@ import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManag
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,16 +33,13 @@ public class UpdatesRestController {
 
     private final SubmodelRegistryClient submodelRegistryClient;
 
-    private final SubmodelRepositoryClient submodelRepositoryClient;
-
     private final ResourcesManager resourcesManager;
 
     public UpdatesRestController(AasRepositoryClient aasRepositoryClient,
                                  SubmodelRegistryClient submodelRegistryClient,
-                                 SubmodelRepositoryClient submodelRepositoryClient, ResourcesManager resourcesManager) {
+                                 ResourcesManager resourcesManager, SubmodelRepositoryClient submodelRepositoryClient) {
         this.aasRepositoryClient = aasRepositoryClient;
         this.submodelRegistryClient = submodelRegistryClient;
-        this.submodelRepositoryClient = submodelRepositoryClient;
         this.resourcesManager = resourcesManager;
     }
 
@@ -49,6 +48,7 @@ public class UpdatesRestController {
     public ResponseEntity<UpdateInformation> getUpdateInformationOfResource(
             @PathVariable(name = "resourceId") UUID resourceId
     ) {
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         var resourceAas = aasRepositoryClient.getAas(ResourceAas.createAasIdFromResourceId(resourceId));
         var softwareNameplateSubmodels = new ArrayList<Submodel>();
@@ -56,9 +56,22 @@ public class UpdatesRestController {
             var submodelId = submodelRef.getKeys().get(0).getValue();
 
             this.submodelRegistryClient.findSubmodelDescriptor(submodelId).ifPresent(submodelDescriptor -> {
-                if (submodelDescriptor.getIdShort().contains("SoftwareNameplate")) {
-                    var submodel = this.submodelRepositoryClient.getSubmodel(submodelDescriptor.getId());
-                    softwareNameplateSubmodels.add(submodel);
+                if (submodelDescriptor.getSemanticId() != null) {
+                    if (!submodelDescriptor.getSemanticId().getKeys().isEmpty()) {
+                        var semanticId = submodelDescriptor.getSemanticId().getKeys().get(0).getValue();
+
+                        if (semanticId.equals("https://admin-shell.io/idta/SoftwareNameplate/1/0")) {
+                            try {
+                                var submodelRepositoryClient = SubmodelRepositoryClient.FromSubmodelDescriptor(submodelDescriptor, jwtAuthenticationToken);
+                                var submodel = submodelRepositoryClient.getSubmodel(submodelDescriptor.getId());
+                                if (submodel != null) {
+                                    softwareNameplateSubmodels.add(submodel);
+                                }
+                            } catch (Exception e) {
+                                LOG.error("Error retrieving submodel {}: {}", submodelId, e.getMessage());
+                            }
+                        }
+                    }
                 }
             });
         }

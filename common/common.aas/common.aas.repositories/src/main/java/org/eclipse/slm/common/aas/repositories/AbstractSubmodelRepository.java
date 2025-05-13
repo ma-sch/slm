@@ -62,10 +62,12 @@ public abstract class AbstractSubmodelRepository implements SubmodelRepository {
         var submodelsValueOnly = new GetSubmodelsValueOnlyResult();
         for (var submodelFactory : submodelServiceFactories.values()) {
             var submodel = submodelFactory.getSubmodelService(this.aasId).getSubmodel();
-            var submodelValueOnly = this.getSubmodelByIdValueOnly(submodel.getId());
-            submodelValueOnly.setIdShort(submodel.getIdShort());
+            if (submodel.getId() != null) {
+                var submodelValueOnly = this.getSubmodelByIdValueOnly(submodel.getId());
+                submodelValueOnly.setIdShort(submodel.getIdShort());
 
-            submodelsValueOnly.put(submodel.getIdShort(), submodelValueOnly);
+                submodelsValueOnly.put(submodel.getIdShort(), submodelValueOnly);
+            }
         }
 
         return submodelsValueOnly;

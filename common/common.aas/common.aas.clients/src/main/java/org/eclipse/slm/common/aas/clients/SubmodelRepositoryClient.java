@@ -6,6 +6,7 @@ import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonDeserializer;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonMapperFactory;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.SimpleAbstractTypeResolverFactory;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
+import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElement;
 import org.eclipse.digitaltwin.basyx.client.internal.ApiClient;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierException;
@@ -35,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Component
 public class SubmodelRepositoryClient {
@@ -69,6 +71,24 @@ public class SubmodelRepositoryClient {
         this.submodelRepositoryUrl = submodelRepositoryUrl;
         this.connectedSubmodelRepository = this.getConnectedSubmodelRepository(submodelRepositoryUrl, jwtAuthenticationToken);
         this.discoveryClient = null;
+    }
+
+    public static SubmodelRepositoryClient FromSubmodelDescriptor(SubmodelDescriptor submodelDescriptor, JwtAuthenticationToken jwtAuthenticationToken) {
+        var submodelEndpoint = submodelDescriptor.getEndpoints().get(0).getProtocolInformation().getHref();
+
+        if (submodelEndpoint.contains("/submodels/")) {
+            var regExPattern = Pattern.compile("(.*)/submodels");
+            var matcher = regExPattern.matcher(submodelEndpoint);
+            var matchesFound = matcher.find();
+            if (matchesFound) {
+                var submodelRepositoryBaseUrl = matcher.group(1);
+                var submodelRepositoryClient = new SubmodelRepositoryClient(submodelRepositoryBaseUrl, jwtAuthenticationToken);
+
+                return submodelRepositoryClient;
+            }
+        }
+
+        throw new IllegalArgumentException("Submodel endpoint '" + submodelEndpoint + "' not valid for submodel repository");
     }
 
     private ConnectedSubmodelRepository getConnectedSubmodelRepository(String submodelRepositoryUrl,

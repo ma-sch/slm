@@ -1,10 +1,11 @@
 package org.eclipse.slm.information_service.service.impl;
 
-import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException;
-import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonDeserializer;
+import jakarta.annotation.PostConstruct;
 import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultSubmodel;
+import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultSubmodelDescriptor;
+import org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiException;
 import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
 import org.eclipse.slm.common.aas.clients.IDTASubmodelTemplates;
 import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
@@ -38,18 +39,25 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
     private final SubmodelRegistryClient submodelRegistryClient;
     private final ResourceMessageSender resourceMessageSender;
 
-    private final String updateHubServiceUrl;
+    private final AasRepositoryClient irsAasRepositoryClient;
+    private final SubmodelRegistryClient irsSubmodelRegistryClient;
+    private final String irsUrl;
 
-    public InformationServiceResourceMessageListener(@Value("${update-hub.url}") String updateHubServiceUrl,
+    public InformationServiceResourceMessageListener(@Value("${irs.url}") String irsUrl,
                                                      AasRepositoryClient aasRepositoryClient,
                                                      SubmodelRepositoryClient submodelRepositoryClient,
                                                      SubmodelRegistryClient submodelRegistryClient,
                                                      ResourceMessageSender resourceMessageSender) {
-        this.updateHubServiceUrl = updateHubServiceUrl;
+        this.irsUrl = irsUrl;
         this.aasRepositoryClient = aasRepositoryClient;
         this.submodelRepositoryClient = submodelRepositoryClient;
         this.submodelRegistryClient = submodelRegistryClient;
         this.resourceMessageSender = resourceMessageSender;
+
+        this.irsAasRepositoryClient = new AasRepositoryClient(this.irsUrl + "/api/shell_repo");
+        this.irsSubmodelRegistryClient = new SubmodelRegistryClient(
+                this.irsUrl + "/api/submodel_registry",
+                this.irsUrl + "/api/submodel_repo");
     }
 
     @Override
@@ -57,12 +65,12 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
         LOG.info("Received resource created message: {}", resourceCreatedMessage);
 
         try {
-            var aasId = "Resource_" + resourceCreatedMessage.resourceId();
-            var aas = aasRepositoryClient.getAas(aasId);
+            var resourceAasId = "Resource_" + resourceCreatedMessage.resourceId();
+            var resourceAas = aasRepositoryClient.getAas(resourceAasId);
             var semanticIdToSubmodelDescriptors = new HashMap<String, List<SubmodelDescriptor>>();
 
             // Get all submodel descriptors of submodels contained in the AAS
-            for (var submodelRef : aas.getSubmodels()) {
+            for (var submodelRef : resourceAas.getSubmodels()) {
                 var submodelRefKey = submodelRef.getKeys().get(0);
                 if (submodelRefKey.getType().equals(KeyTypes.SUBMODEL)) {
                     var submodelDescriptor = submodelRegistryClient.findSubmodelDescriptor(submodelRefKey.getValue());
@@ -92,9 +100,9 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                 return;
             }
 
-            // Get submodels of device via Update Hub Service using ID Link
+            // Get submodels of device via Information Receiving Service using ID Link
             var webClientBuilder = WebClient.builder();
-            var webClient = webClientBuilder.baseUrl(updateHubServiceUrl)
+            var webClient = webClientBuilder.baseUrl(irsUrl)
                     .codecs(codecs -> codecs
                             .defaultCodecs()
                             .maxInMemorySize(10000 * 1024))
@@ -104,8 +112,8 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
             String[] shellIds = new String[0];
             try {
                 shellIds = webClient.get()
-                        .uri(uriBuilder -> uriBuilder.path("/lookup/shells")
-                                .queryParam("assetIds", uriOfTheProductBase64Encoded)
+                        .uri(uriBuilder -> uriBuilder.path("/api/shell_discovery/lookup/shells")
+                                .queryParam("assetId", uriOfTheProductBase64Encoded)
                                 .build())
                         .retrieve()
                         .bodyToMono(String[].class)
@@ -115,31 +123,30 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                 return;
             }
 
-            DefaultSubmodel[] receivedSubmodels = new DefaultSubmodel[0];
+            var receivedSubmodelDescriptors = new ArrayList<SubmodelDescriptor>();
             for (var shellId : shellIds) {
-                var shellIdEncoded = Base64.getEncoder().encodeToString(shellId.getBytes());
-                var response = webClient.get()
-                        .uri("/shells/{shellId}/submodels", shellIdEncoded)
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
-
-                var aasJsonDeserializer = new JsonDeserializer();
-
-                try {
-                    receivedSubmodels = aasJsonDeserializer.read(response, DefaultSubmodel[].class);
-                } catch (DeserializationException e) {
-                    throw new RuntimeException(e);
-                }
+                var shell = irsAasRepositoryClient.getAas(shellId);
+                shell.getSubmodels().forEach(submodelRef -> {
+                    var submodelRefKey = submodelRef.getKeys().get(0);
+                    if (submodelRefKey.getType().equals(KeyTypes.SUBMODEL)) {
+                        var submodelDescriptorOptional = irsSubmodelRegistryClient.findSubmodelDescriptor(submodelRefKey.getValue());
+                        if (submodelDescriptorOptional.isPresent()) {
+                            var submodelDescriptor = submodelDescriptorOptional.get();
+                            receivedSubmodelDescriptors.add(submodelDescriptor);
+                        } else {
+                            LOG.info("Submodel descriptor not found for id '{}', skipping", submodelRefKey.getValue());
+                        }
+                    }
+                });
             }
 
             var duplicateSubmodelIdsToDelete = new ArrayList<String>();
-            for (var submodel : receivedSubmodels) {
-                if (submodel.getSemanticId() == null) {
-                    LOG.info("No semantic ID found for received submodel '{}', skipping duplicate check", submodel.getId());
+            for (var submodelDescriptor : receivedSubmodelDescriptors) {
+                if (submodelDescriptor.getSemanticId() == null) {
+                    LOG.info("No semantic ID found for received submodelDescriptor '{}', skipping duplicate check", submodelDescriptor.getId());
                 }
                 else {
-                    var semanticId = submodel.getSemanticId().getKeys().get(0).getValue();
+                    var semanticId = submodelDescriptor.getSemanticId().getKeys().get(0).getValue();
                     if ((semanticId.equals(IDTASubmodelTemplates.NAMEPLATE_V2_SUBMODEL_SEMANTIC_ID)
                             || semanticId.equals(IDTASubmodelTemplates.NAMEPLATE_V3_SUBMODEL_SEMANTIC_ID))
                             && (semanticIdToSubmodelDescriptors.containsKey(IDTASubmodelTemplates.NAMEPLATE_V2_SUBMODEL_SEMANTIC_ID)
@@ -153,19 +160,39 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                     }
                 }
 
-                // Add submodel to Submodel Repository
-                submodelRepositoryClient.createOrUpdateSubmodel(submodel);
-                // Add submodel refs to existing resourceCreatedMessage AAS
-                aasRepositoryClient.addSubmodelReferenceToAas(aas.getId(), submodel.getId());
+                // Register submodel of IRS at submodel registry of SLM
+                String submodelEndpoint;
+                if (!submodelDescriptor.getEndpoints().isEmpty()) {
+                    submodelEndpoint = submodelDescriptor.getEndpoints().get(0).getProtocolInformation().getHref();
+                }
+                else {
+                    LOG.info("No endpoint found for submodel descriptor '{}', skipping", submodelDescriptor.getId());
+                    return;
+                }
+                String semanticId = null;
+                if (submodelDescriptor.getSemanticId() != null) {
+                    if (!submodelDescriptor.getSemanticId().getKeys().isEmpty()) {
+                        semanticId = submodelDescriptor.getSemanticId().getKeys().get(0).getValue();
+                    }
+                }
+                submodelRegistryClient.registerSubmodel(
+                        submodelEndpoint,
+                        submodelDescriptor.getId(),
+                        submodelDescriptor.getIdShort(),
+                        semanticId);
+
+                aasRepositoryClient.addSubmodelReferenceToAas(resourceAas.getId(), submodelDescriptor.getId());
+                // Add submodelDescriptor refs to existing resourceCreatedMessage AAS
+                aasRepositoryClient.addSubmodelReferenceToAas(resourceAas.getId(), submodelDescriptor.getId());
             }
 
             for (var submodelIdToDelete : duplicateSubmodelIdsToDelete) {
-                aasRepositoryClient.removeSubmodelReferenceFromAas(aasId, submodelIdToDelete);
+                aasRepositoryClient.removeSubmodelReferenceFromAas(resourceAasId, submodelIdToDelete);
                 submodelRepositoryClient.deleteSubmodel(submodelIdToDelete);
-                LOG.info("Deleted duplicate submodel '{}' from AAS '{}'", submodelIdToDelete, aasId);
+                LOG.info("Deleted duplicate submodel '{}' from AAS '{}'", submodelIdToDelete, resourceAasId);
             }
 
-            LOG.info("Successfully added {} submodels to AAS '{}'", receivedSubmodels.length, aasId);
+            LOG.info("Successfully added {} submodels to AAS '{}'", receivedSubmodelDescriptors.size(), resourceAasId);
 
             resourceMessageSender.sendResourceInformationMessage(resourceCreatedMessage.resourceId());
         }

@@ -49,29 +49,17 @@ public class ServiceOfferingVersionRequirementsHandler {
             var submodelEndpoint = submodelDescriptor.get().getEndpoints().get(0).getProtocolInformation().getHref();
 
             if (submodelEndpoint.contains("/submodels/")) {
-                var regExPattern = Pattern.compile("(.*)/submodels");
-                var matcher = regExPattern.matcher(submodelEndpoint);
-                var matchesFound = matcher.find();
-                if (matchesFound) {
-                    var submodelRepositoryBaseUrl = matcher.group(1);
-                    var scopedSubmodelRepositoryClient = new SubmodelRepositoryClient(submodelRepositoryBaseUrl, jwtAuthenticationToken);
-                    var submodel = scopedSubmodelRepositoryClient.getSubmodel(submodelDescriptor.get().getId());
-                    if (submodel != null) {
-                        resourceSubmodels.add(submodel);
-                    }
+                var scopedSubmodelRepositoryClient = SubmodelRepositoryClient.FromSubmodelDescriptor(submodelDescriptor.get(), jwtAuthenticationToken);
+                var submodel = scopedSubmodelRepositoryClient.getSubmodel(submodelDescriptor.get().getId());
+                if (submodel != null) {
+                    resourceSubmodels.add(submodel);
                 }
             }
 
             if (submodelEndpoint.contains("/submodel")) {
-                var regExPattern = Pattern.compile("(.*/submodel)$");
-                var matcher = regExPattern.matcher(submodelEndpoint);
-                var matchesFound = matcher.find();
-                if (matchesFound) {
-                    var submodelServiceBasUrl = matcher.group(1);
-                    var submodelServiceClient = new SubmodelServiceClient(submodelServiceBasUrl, jwtAuthenticationToken);
-                    var submodelOptional = submodelServiceClient.getSubmodel();
-                    submodelOptional.ifPresent(resourceSubmodels::add);
-                }
+                var submodelServiceClient = SubmodelServiceClient.FromSubmodelDescriptor(submodelDescriptor.get(), jwtAuthenticationToken);
+                var submodelOptional = submodelServiceClient.getSubmodel();
+                submodelOptional.ifPresent(resourceSubmodels::add);
             }
         }
 
