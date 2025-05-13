@@ -17,7 +17,7 @@ services:
     environment:
       KEYCLOAK_URL: "{{ keycloak.url.external_without_port }}"
       AWX_URL: "{{ awx.url.external }}"
-      BASYX_AAS_GUI_URL: "{{ aas.aas_gui.url.external }}"
+      BASYX_AAS_GUI_URL: "{{ aas.aas_gui.url.proxy }}"
       CONSUL_TOKEN: "{{ app_configs['resource_management']['consul']['acl-token'] }}"
       NOTIFICATION_SERVICE_URL: "{{ notification_service.url.proxy }}"
       RESOURCE_MANAGEMENT_URL: "{{ resource_management.url.proxy }}"

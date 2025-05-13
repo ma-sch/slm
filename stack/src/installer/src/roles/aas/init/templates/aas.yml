@@ -110,6 +110,7 @@ services:
       KEYCLOAK_URL: "{{ keycloak.url.external_without_port }}"
       KEYCLOAK_REALM: "{{ ENV.KEYCLOAK.REALM }}"
       KEYCLOAK_CLIENT_ID: "ui"
+      BASE_PATH: "{{ AAS.AAS_GUI.PATH.INTERNAL }}"
     networks:
       default:
         aliases:

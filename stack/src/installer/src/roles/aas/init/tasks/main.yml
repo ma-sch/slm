@@ -77,13 +77,11 @@
     - name: aas-gui
       port: "{{ ENV.AAS.AAS_GUI.PORT.INTERNAL }}"
       service_address: "{{ ENV.AAS.AAS_GUI.HOST.INTERNAL }}"
-      http_check_url: "{{ aas.aas_gui.url.internal }}"
+      http_check_url: "{{ aas.aas_gui.url.internal }}/" # BaSyx AAS Web UI requires /
       additional_tags:
         - "aas"
         - "exposed"
-        - "traefik.http.routers.aas-ui.entryPoints=aas-ui"
-        - "traefik.http.routers.aas-ui.rule=PathPrefix(`/`)"
-        - "traefik.http.routers.aas-ui.tls=true"
+        - "traefik.http.routers.aas-ui.rule=PathPrefix(`{{ AAS.AAS_GUI.PATH.EXTERNAL }}/`)"
 
 - name: "Register AAS broker at Consul (discovery server)"
   include_role:
