@@ -33,7 +33,3 @@ services:
       - "{{ ENV.TRAEFIK.API_PORT }}:8080"
     extra_hosts:
       - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
-
-networks:
-  eclipse-slm_default:
-    external: true

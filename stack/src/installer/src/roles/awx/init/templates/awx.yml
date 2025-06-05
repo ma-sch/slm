@@ -139,7 +139,3 @@ volumes:
   awx_rsyslog_socket:
   awx_rsyslog_config:
   awx-redis:
-
-networks:
-  eclipse-slm_default:
-    external: true

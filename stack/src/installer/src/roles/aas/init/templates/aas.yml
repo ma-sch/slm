@@ -158,7 +158,3 @@ services:
 volumes:
   aas_database:
   aas_transformer_database:
-
-networks:
-  eclipse-slm_default:
-    external: true

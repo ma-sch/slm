@@ -60,7 +60,3 @@ services:
 
 volumes:
   keycloak-database_data:
-
-networks:
-  eclipse-slm_default:
-    external: true

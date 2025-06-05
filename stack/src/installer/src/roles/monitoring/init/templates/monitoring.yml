@@ -36,7 +36,3 @@ services:
       interval: 60s
       retries: 5
       timeout: 10s
-
-networks:
-  eclipse-slm_default:
-    external: true

@@ -27,7 +27,3 @@ services:
 volumes:
   vault_data:
   vault_config_root:
-
-networks:
-  eclipse-slm_default:
-    external: true

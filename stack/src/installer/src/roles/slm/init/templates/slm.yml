@@ -274,10 +274,6 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:9002/swagger-ui/index.html" ]
 
-networks:
-  eclipse-slm_default:
-    external: true
-
 volumes:
   notification-service-database_data:
   resource-management-database_data:
