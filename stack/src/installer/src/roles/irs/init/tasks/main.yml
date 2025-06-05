@@ -52,7 +52,7 @@
   delegate_to: '{{ ENV.DEPLOYMENT_HOST_HOSTNAME }}'
   community.docker.docker_container_exec:
     container: "{{ irs_compose_start_output.images | community.general.json_query(query) | first }}"
-    command: "curl -X PUT http://{{ ENV.IRS.DATABASE.USERNAME }}:{{ ENV.IRS.DATABASE.PASSWORD }}@127.0.0.1:{{ ENV.IRS.DATABASE.PORT.INTERNAL }}/{{ item }}"
+    command: "curl -X PUT http://{{ ENV.IRS.DATABASE.USERNAME }}:{{ database_password }}@127.0.0.1:{{ ENV.IRS.DATABASE.PORT.INTERNAL }}/{{ item }}"
   vars:
     query: "[?Repository.contains(@, 'couchdb')].ContainerName"
   loop:
