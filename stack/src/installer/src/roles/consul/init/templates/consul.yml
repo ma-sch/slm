@@ -43,3 +43,7 @@ services:
 
 volumes:
   consul_data:
+
+networks:
+  eclipse-slm_default:
+    external: true

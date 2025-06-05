@@ -100,9 +100,10 @@ jobs:
               ghcr.io/eclipse-slm/slm/uninstaller:$CORE_VERSION
             docker system prune -f
 
-            docker pull ghcr.io/eclipse-slm/slm/installer:$CORE_VERSION
             docker run \
               --rm \
+              --name eclipse-slm-installer \
+              --pull=always \
               --env SLM_HOSTNAME=$STAGING_VM_HOSTNAME \
               --volume /var/run/docker.sock:/var/run/docker.sock \
               --add-host $STAGING_VM_HOSTNAME:host-gateway \

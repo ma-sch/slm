@@ -35,4 +35,5 @@ services:
       - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
 
 networks:
-  default:
+  eclipse-slm_default:
+    external: true

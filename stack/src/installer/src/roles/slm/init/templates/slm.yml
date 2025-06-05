@@ -275,9 +275,11 @@ services:
       test: [ "CMD", "curl", "http://localhost:9002/swagger-ui/index.html" ]
 
 networks:
-  default:
+  eclipse-slm_default:
+    external: true
 
 volumes:
   notification-service-database_data:
   resource-management-database_data:
   service-management-database_data:
+

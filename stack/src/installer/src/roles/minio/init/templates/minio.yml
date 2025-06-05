@@ -27,3 +27,7 @@ services:
 
 volumes:
   minio_data:
+
+networks:
+  eclipse-slm_default:
+    external: true

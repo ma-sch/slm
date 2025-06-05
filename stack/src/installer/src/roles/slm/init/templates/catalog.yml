@@ -55,7 +55,8 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
 networks:
-  default:
+  eclipse-slm_default:
+    external: true
 
 volumes:
   catalog-database_data:

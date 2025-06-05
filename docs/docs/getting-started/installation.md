@@ -23,6 +23,7 @@ Run the following command to start the SLM installer:
 ```sh
 docker run \
   --rm \
+  --name eclipse-slm-installer \
   --pull=always \
   --env SLM_HOSTNAME=$SLM_HOSTNAME \
   --volume /var/run/docker.sock:/var/run/docker.sock \

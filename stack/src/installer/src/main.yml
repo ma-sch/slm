@@ -214,6 +214,14 @@
         ((ENV.DOCKER_IMAGE_REGISTRY_USERNAME is defined) and (ENV.DOCKER_IMAGE_REGISTRY_USERNAME|length > 0)) and
         ((ENV.DOCKER_IMAGE_REGISTRY_PASSWORD) is defined and (ENV.DOCKER_IMAGE_REGISTRY_PASSWORD|length > 0))
 
+    - name: "Create docker network for SLM"
+      community.docker.docker_network:
+        name: "eclipse-slm_default"
+        state: "present"
+        connected:
+          - eclipse-slm-installer
+        appends: true
+
     - name: "Start Consul"
       include_role:
         name: consul/init
