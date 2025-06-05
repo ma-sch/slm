@@ -76,7 +76,7 @@ jobs:
     runs-on: self-hosted
     env:
       STAGING_VM_IP: ${{ github.ref_name == 'develop' && '10.17.165.36' || '10.17.166.74' }}
-      STAGING_VM_HOSTNAME: ${{ github.ref_name == 'develop' && '10.17.165.36' || '10.17.166.74' }}
+      STAGING_VM_HOSTNAME: ${{ github.ref_name == 'develop' && 'develop.staging.slm.dev' || 'main.staging.slm.dev' }}
     steps:
       - name: Deploy stack von staging VM
         uses: appleboy/ssh-action@v0.1.10
@@ -100,6 +100,7 @@ jobs:
               ghcr.io/eclipse-slm/slm/uninstaller:$CORE_VERSION
             docker system prune -f
 
+            docker stop eclipse-slm-installer || true
             docker run \
               --rm \
               --name eclipse-slm-installer \
