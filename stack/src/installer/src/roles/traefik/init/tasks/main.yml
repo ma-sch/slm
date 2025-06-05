@@ -17,8 +17,8 @@
 #    - { key: "traefik/http/routers/dashboard/entryPoints/0", value: "web" }
 #    - { key: "traefik/http/routers/dashboard/rule", value: "Host(`{{ ENV.SLM_HOSTNAME }}`)" }
 #    - { key: "traefik/http/routers/dashboard/service", value: "api@internal" }
-    - { key: "traefik/tls/stores/default/defaultCertificate/certFile", value: "/certs/certificate.crt" }
-    - { key: "traefik/tls/stores/default/defaultCertificate/keyFile", value: "/certs/certificate.key" }
+    - { key: "traefik/tls/stores/default/defaultCertificate/certFile", value: "/certs/cert.crt" }
+    - { key: "traefik/tls/stores/default/defaultCertificate/keyFile", value: "/certs/cert.key" }
 
 - name: "Traefik | Create compose definition from template"
   set_fact:
