@@ -59,6 +59,8 @@
     - "_users"
     - "_replicator"
     - "_global_changes"
+  retries: 5
+  delay: 3
 
 - name: "IRS | Register components at Consul (discovery server)"
   include_role:
