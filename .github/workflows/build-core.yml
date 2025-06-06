@@ -76,7 +76,7 @@ jobs:
     runs-on: self-hosted
     env:
       STAGING_VM_IP: ${{ github.ref_name == 'develop' && '10.17.165.36' || '10.17.166.74' }}
-      STAGING_VM_HOSTNAME: ${{ github.ref_name == 'develop' && 'develop.staging.slm.dev' || 'main.staging.slm.dev' }}
+      STAGING_VM_HOSTNAME: ${{ github.ref_name == 'develop' && 'develop.staging.slm.local' || 'main.staging.slm.local' }}
     steps:
       - name: Deploy stack von staging VM
         uses: appleboy/ssh-action@v0.1.10
