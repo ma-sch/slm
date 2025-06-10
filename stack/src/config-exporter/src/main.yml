@@ -12,7 +12,7 @@
 
     - name: "Load Consul config"
       set_fact:
-        consul_scheme: "{{ lookup('env', 'CONSUL.SCHEME') }}"
+        consul_scheme: "{{ lookup('env', 'CONSUL_SCHEME') }}"
         consul_host: "{{ lookup('env', 'CONSUL_HOST') }}"
         consul_port: "{{ lookup('env', 'CONSUL_PORT') }}"
         consul_token: "{{ lookup('env', 'CONSUL_TOKEN') }}"
@@ -52,7 +52,7 @@
         - service_name: "notification-service"
         - service_name: "information-service"
         - service_name: "awx"
-        - service_name: "keycloak"
+        - service_name: "auth"
         - service_name: "aas-gui"
         - service_name: "catalog-service"
         - service_name: "minio"
