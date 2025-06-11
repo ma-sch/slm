@@ -14,6 +14,9 @@ import org.eclipse.digitaltwin.basyx.submodelregistry.client.model.SubmodelDescr
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.consul.discovery.ConsulDiscoveryClient;
+import org.springframework.cloud.consul.discovery.ConsulServiceInstance;
 import org.springframework.stereotype.Component;
 
 import java.net.http.HttpClient;
@@ -27,19 +30,37 @@ public class AasRegistryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(AasRegistryClient.class);
 
-    private final String aasRegistryUrl;
+    private String aasRegistryUrl;
 
-    private final String aasRepositoryUrl;
+    private String aasRegistryPath;
 
     private RegistryAndDiscoveryInterfaceApi aasRegistryApi;
+
+    private final DiscoveryClient discoveryClient;
+
+    private final String aasRegistryDiscoveryInstanceId = "aas-registry";
+
 
     private final ObjectMapper objectMapper;
 
     public AasRegistryClient(@Value("${aas.aas-registry.url}") String aasRegistryUrl,
-                             @Value("${aas.aas-repository.url}") String aasRepositoryUrl, ObjectMapper objectMapper) {
+                             @Value("${aas.aas-registry.path}") String aasRegistryPath,
+                             DiscoveryClient discoveryClient,
+                             ObjectMapper objectMapper) {
         this.aasRegistryUrl = aasRegistryUrl;
-        this.aasRepositoryUrl = aasRepositoryUrl;
+        this.aasRegistryPath = aasRegistryPath;
+        this.discoveryClient = discoveryClient;
         this.objectMapper = objectMapper;
+
+        var aasRegistryServiceInstance = this.discoveryClient.getInstances(aasRegistryDiscoveryInstanceId).get(0);
+        if (aasRegistryServiceInstance != null) {
+            this.aasRegistryUrl = "http://" + aasRegistryServiceInstance.getHost()
+                    + ":" + aasRegistryServiceInstance.getPort() + aasRegistryPath;
+        } else {
+            LOG.warn("No service instance '" + aasRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
+                    + this.aasRegistryUrl + "' from application.yml.");
+        }
+
         var aasRegistryClient = new ApiClient(HttpClient.newBuilder(), objectMapper, this.aasRegistryUrl);
         this.aasRegistryApi = new RegistryAndDiscoveryInterfaceApi(aasRegistryClient);
     }

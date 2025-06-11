@@ -15,6 +15,7 @@ import org.eclipse.digitaltwin.basyx.submodelregistry.client.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
 
 import java.net.http.HttpClient;
@@ -28,16 +29,33 @@ public class SubmodelRegistryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(SubmodelRegistryClient.class);
 
-    private final String submodelRegistryUrl;
+    private String submodelRegistryUrl;
 
-    private final String submodelRepositoryUrl;
+    private String submodelRegistryPath;
 
     private SubmodelRegistryApi submodelRegistryApi;
 
+    private final DiscoveryClient discoveryClient;
+
+    private final String submodelRegistryDiscoveryInstanceId = "submodel-registry";
+
+
     public SubmodelRegistryClient(@Value("${aas.submodel-registry.url}") String submodelRegistryUrl,
-                                  @Value("${aas.submodel-repository.url}") String submodelRepositoryUrl) {
+                                  @Value("${aas.submodel-registry.path}") String submodelRegistryPath,
+                                  DiscoveryClient discoveryClient) {
         this.submodelRegistryUrl = submodelRegistryUrl;
-        this.submodelRepositoryUrl = submodelRepositoryUrl;
+        this.submodelRegistryPath = submodelRegistryPath;
+        this.discoveryClient = discoveryClient;
+
+        var submodelRegistryServiceInstance = this.discoveryClient.getInstances(submodelRegistryDiscoveryInstanceId).get(0);
+        if (submodelRegistryServiceInstance != null) {
+            this.submodelRegistryUrl = "http://" + submodelRegistryServiceInstance.getHost()
+                    + ":" + submodelRegistryServiceInstance.getPort() + submodelRegistryPath;
+        } else {
+            LOG.warn("No service instance '" + submodelRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
+                    + this.submodelRegistryUrl + "' from application.yml.");
+        }
+
         var objectMapper = new ObjectMapper();
         var submodelRegistryClient = new org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiClient(HttpClient.newBuilder(), objectMapper, this.submodelRegistryUrl);
         this.submodelRegistryApi = new SubmodelRegistryApi(submodelRegistryClient);
@@ -108,10 +126,6 @@ public class SubmodelRegistryClient {
                 throw e;
             }
         }
-    }
-
-    public void registerSubmodel(String submodelRepositoryUrl, Submodel submodel) throws ApiException {
-        this.registerSubmodel(submodelRepositoryUrl, submodel.getId(), submodel.getIdShort(), submodel.getSemanticId().getKeys().get(0).getValue());
     }
 
     public void unregisterSubmodel(String submodelId) throws ApiException {

@@ -12,6 +12,7 @@ import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistExceptio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,12 +20,33 @@ public class AasRepositoryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(AasRepositoryClient.class);
 
-    private final String aasRepositoryUrl;
+    private String aasRepositoryUrl;
+
+    private String aasRepositoryPath;
 
     private final ConnectedAasRepository connectedAasRepository;
 
-    public AasRepositoryClient(@Value("${aas.aas-repository.url}") String aasRepositoryUrl) {
+    private final DiscoveryClient discoveryClient;
+
+    private final String aasRepositoryDiscoveryInstanceId = "aas-repository";
+
+    public AasRepositoryClient(@Value("${aas.aas-repository.url}") String aasRepositoryUrl,
+                               @Value("${aas.aas-repository.path}") String aasRepositoryPath,
+                               DiscoveryClient discoveryClient
+                               ) {
         this.aasRepositoryUrl = aasRepositoryUrl;
+        this.aasRepositoryPath = aasRepositoryPath;
+        this.discoveryClient = discoveryClient;
+
+        var aasRepositoryServiceInstance = this.discoveryClient.getInstances(aasRepositoryDiscoveryInstanceId).get(0);
+        if (aasRepositoryServiceInstance != null) {
+            this.aasRepositoryUrl = "http://" + aasRepositoryServiceInstance.getHost()
+                    + ":" + aasRepositoryServiceInstance.getPort() + aasRepositoryPath;
+        } else {
+            LOG.warn("No service instance '" + aasRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
+                    + this.aasRepositoryUrl + "' from application.yml.");
+        }
+
         this.connectedAasRepository = new ConnectedAasRepository(this.aasRepositoryUrl);
     }
 
