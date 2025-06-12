@@ -11,6 +11,7 @@ import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingSubmodelReferenceE
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ public class AasRepositoryClient {
 
     private final String aasRepositoryDiscoveryInstanceId = "aas-repository";
 
+    @Autowired
     public AasRepositoryClient(@Value("${aas.aas-repository.url}") String aasRepositoryUrl,
                                @Value("${aas.aas-repository.path}") String aasRepositoryPath,
                                DiscoveryClient discoveryClient
@@ -52,7 +54,7 @@ public class AasRepositoryClient {
         this.connectedAasRepository = new ConnectedAasRepository(this.aasRepositoryUrl);
     }
 
-    public AasRepositoryClient(@Value("${aas.aas-repository.url}") String aasRepositoryUrl) {
+    public AasRepositoryClient(String aasRepositoryUrl) {
         this(aasRepositoryUrl, "", null);
     }
 
