@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.consul.discovery.ConsulDiscoveryClient;
-import org.springframework.cloud.consul.discovery.ConsulServiceInstance;
 import org.springframework.stereotype.Component;
 
 import java.net.http.HttpClient;
