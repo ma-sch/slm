@@ -55,9 +55,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
         this.resourceMessageSender = resourceMessageSender;
 
         this.irsAasRepositoryClient = new AasRepositoryClient(this.irsUrl + "/api/shell_repo");
-        this.irsSubmodelRegistryClient = new SubmodelRegistryClient(
-                this.irsUrl + "/api/submodel_registry",
-                this.irsUrl + "/api/submodel_repo");
+        this.irsSubmodelRegistryClient = new SubmodelRegistryClient(this.irsUrl + "/api/submodel_registry");
     }
 
     @Override

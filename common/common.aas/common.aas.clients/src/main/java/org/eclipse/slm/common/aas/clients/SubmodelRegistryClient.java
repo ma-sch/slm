@@ -14,6 +14,7 @@ import org.eclipse.digitaltwin.basyx.submodelregistry.client.api.SubmodelRegistr
 import org.eclipse.digitaltwin.basyx.submodelregistry.client.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class SubmodelRegistryClient {
 
     private final String submodelRegistryDiscoveryInstanceId = "submodel-registry";
 
-
+    @Autowired
     public SubmodelRegistryClient(@Value("${aas.submodel-registry.url}") String submodelRegistryUrl,
                                   @Value("${aas.submodel-registry.path}") String submodelRegistryPath,
                                   DiscoveryClient discoveryClient) {
@@ -47,18 +48,24 @@ public class SubmodelRegistryClient {
         this.submodelRegistryPath = submodelRegistryPath;
         this.discoveryClient = discoveryClient;
 
-        var submodelRegistryServiceInstance = this.discoveryClient.getInstances(submodelRegistryDiscoveryInstanceId).get(0);
-        if (submodelRegistryServiceInstance != null) {
-            this.submodelRegistryUrl = "http://" + submodelRegistryServiceInstance.getHost()
-                    + ":" + submodelRegistryServiceInstance.getPort() + submodelRegistryPath;
-        } else {
-            LOG.warn("No service instance '" + submodelRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
-                    + this.submodelRegistryUrl + "' from application.yml.");
+        if (discoveryClient != null) {
+            var submodelRegistryServiceInstance = this.discoveryClient.getInstances(submodelRegistryDiscoveryInstanceId).get(0);
+            if (submodelRegistryServiceInstance != null) {
+                this.submodelRegistryUrl = "http://" + submodelRegistryServiceInstance.getHost()
+                        + ":" + submodelRegistryServiceInstance.getPort() + submodelRegistryPath;
+            } else {
+                LOG.warn("No service instance '" + submodelRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
+                        + this.submodelRegistryUrl + "' from application.yml.");
+            }
         }
 
         var objectMapper = new ObjectMapper();
         var submodelRegistryClient = new org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiClient(HttpClient.newBuilder(), objectMapper, this.submodelRegistryUrl);
         this.submodelRegistryApi = new SubmodelRegistryApi(submodelRegistryClient);
+    }
+
+    public SubmodelRegistryClient(String submodelRegistryUrl) {
+        this(submodelRegistryUrl, "", null);
     }
 
     public List<org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor> getAllSubmodelDescriptors() {

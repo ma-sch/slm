@@ -38,16 +38,22 @@ public class AasRepositoryClient {
         this.aasRepositoryPath = aasRepositoryPath;
         this.discoveryClient = discoveryClient;
 
-        var aasRepositoryServiceInstance = this.discoveryClient.getInstances(aasRepositoryDiscoveryInstanceId).get(0);
-        if (aasRepositoryServiceInstance != null) {
-            this.aasRepositoryUrl = "http://" + aasRepositoryServiceInstance.getHost()
-                    + ":" + aasRepositoryServiceInstance.getPort() + aasRepositoryPath;
-        } else {
-            LOG.warn("No service instance '" + aasRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
-                    + this.aasRepositoryUrl + "' from application.yml.");
+        if (discoveryClient != null) {
+            var aasRepositoryServiceInstance = this.discoveryClient.getInstances(aasRepositoryDiscoveryInstanceId).get(0);
+            if (aasRepositoryServiceInstance != null) {
+                this.aasRepositoryUrl = "http://" + aasRepositoryServiceInstance.getHost()
+                        + ":" + aasRepositoryServiceInstance.getPort() + aasRepositoryPath;
+            } else {
+                LOG.warn("No service instance '" + aasRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
+                        + this.aasRepositoryUrl + "' from application.yml.");
+            }
         }
 
         this.connectedAasRepository = new ConnectedAasRepository(this.aasRepositoryUrl);
+    }
+
+    public AasRepositoryClient(@Value("${aas.aas-repository.url}") String aasRepositoryUrl) {
+        this(aasRepositoryUrl, "", null);
     }
 
     public void createOrUpdateAas(AssetAdministrationShell aas) {
