@@ -32,8 +32,6 @@ public class SubmodelRegistryClient {
 
     private String submodelRegistryUrl;
 
-    private String submodelRegistryPath;
-
     private SubmodelRegistryApi submodelRegistryApi;
 
     private final DiscoveryClient discoveryClient;
@@ -42,17 +40,19 @@ public class SubmodelRegistryClient {
 
     @Autowired
     public SubmodelRegistryClient(@Value("${aas.submodel-registry.url}") String submodelRegistryUrl,
-                                  @Value("${aas.submodel-registry.path}") String submodelRegistryPath,
                                   DiscoveryClient discoveryClient) {
         this.submodelRegistryUrl = submodelRegistryUrl;
-        this.submodelRegistryPath = submodelRegistryPath;
         this.discoveryClient = discoveryClient;
 
         if (discoveryClient != null) {
             var submodelRegistryServiceInstance = this.discoveryClient.getInstances(submodelRegistryDiscoveryInstanceId).get(0);
+            var path = "";
+            if (submodelRegistryServiceInstance.getMetadata().get("path") != null) {
+                path = submodelRegistryServiceInstance.getMetadata().get("path");
+            }
             if (submodelRegistryServiceInstance != null) {
                 this.submodelRegistryUrl = "http://" + submodelRegistryServiceInstance.getHost()
-                        + ":" + submodelRegistryServiceInstance.getPort() + submodelRegistryPath;
+                        + ":" + submodelRegistryServiceInstance.getPort() + path;
             } else {
                 LOG.warn("No service instance '" + submodelRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
                         + this.submodelRegistryUrl + "' from application.yml.");
@@ -65,7 +65,7 @@ public class SubmodelRegistryClient {
     }
 
     public SubmodelRegistryClient(String submodelRegistryUrl) {
-        this(submodelRegistryUrl, "", null);
+        this(submodelRegistryUrl, null);
     }
 
     public List<org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor> getAllSubmodelDescriptors() {

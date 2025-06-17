@@ -13,6 +13,7 @@ import org.eclipse.digitaltwin.basyx.aasregistry.client.api.RegistryAndDiscovery
 import org.eclipse.digitaltwin.basyx.submodelregistry.client.model.SubmodelDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
@@ -30,8 +31,6 @@ public class AasRegistryClient {
 
     private String aasRegistryUrl;
 
-    private String aasRegistryPath;
-
     private RegistryAndDiscoveryInterfaceApi aasRegistryApi;
 
     private final DiscoveryClient discoveryClient;
@@ -41,19 +40,22 @@ public class AasRegistryClient {
 
     private final ObjectMapper objectMapper;
 
+    @Autowired
     public AasRegistryClient(@Value("${aas.aas-registry.url}") String aasRegistryUrl,
-                             @Value("${aas.aas-registry.path}") String aasRegistryPath,
                              DiscoveryClient discoveryClient,
                              ObjectMapper objectMapper) {
         this.aasRegistryUrl = aasRegistryUrl;
-        this.aasRegistryPath = aasRegistryPath;
         this.discoveryClient = discoveryClient;
         this.objectMapper = objectMapper;
 
         var aasRegistryServiceInstance = this.discoveryClient.getInstances(aasRegistryDiscoveryInstanceId).get(0);
+        var path = "";
+        if (aasRegistryServiceInstance.getMetadata().get("path") != null) {
+            path = aasRegistryServiceInstance.getMetadata().get("path");
+        }
         if (aasRegistryServiceInstance != null) {
             this.aasRegistryUrl = "http://" + aasRegistryServiceInstance.getHost()
-                    + ":" + aasRegistryServiceInstance.getPort() + aasRegistryPath;
+                    + ":" + aasRegistryServiceInstance.getPort() + path;
         } else {
             LOG.warn("No service instance '" + aasRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
                     + this.aasRegistryUrl + "' from application.yml.");

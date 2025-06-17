@@ -45,8 +45,6 @@ public class SubmodelRepositoryClient {
 
     private String submodelRepositoryUrl;
 
-    private String submodelRepositoryPath;
-
     private final DiscoveryClient discoveryClient;
 
     private final String submodelRepositoryDiscoveryInstanceId = "submodel-repository";
@@ -55,17 +53,19 @@ public class SubmodelRepositoryClient {
 
     @Autowired
     public SubmodelRepositoryClient(@Value("${aas.submodel-repository.url}") String submodelRepositoryUrl,
-                                    @Value("${aas.submodel-repository.path}") String submodelRepositoryPath,
                                     DiscoveryClient discoveryClient) {
         this.submodelRepositoryUrl = submodelRepositoryUrl;
-        this.submodelRepositoryPath = submodelRepositoryPath;
         this.connectedSubmodelRepository = this.getConnectedSubmodelRepository(submodelRepositoryUrl, null);
         this.discoveryClient = discoveryClient;
 
         var submodelRepositoryServiceInstance = this.discoveryClient.getInstances(submodelRepositoryDiscoveryInstanceId).get(0);
+        var path = "";
+        if (submodelRepositoryServiceInstance.getMetadata().get("path") != null) {
+            path = submodelRepositoryServiceInstance.getMetadata().get("path");
+        }
         if (submodelRepositoryServiceInstance != null) {
             this.submodelRepositoryUrl = "http://" + submodelRepositoryServiceInstance.getHost()
-                    + ":" + submodelRepositoryServiceInstance.getPort() + submodelRepositoryPath;
+                    + ":" + submodelRepositoryServiceInstance.getPort() + path;
         } else {
             LOG.warn("No service instance '" + submodelRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
                     + this.submodelRepositoryUrl + "'from application.yml.");
