@@ -9,12 +9,15 @@ import org.eclipse.digitaltwin.basyx.aasrepository.client.ConnectedAasRepository
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierException;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingSubmodelReferenceException;
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
+import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class AasRepositoryClient {
@@ -69,10 +72,19 @@ public class AasRepositoryClient {
         }
     }
 
-    public AssetAdministrationShell getAas(String aasId) {
+    public Optional<AssetAdministrationShell> getAas(String aasId) {
+        try {
+            this.connectedAasRepository.getAas(aasId);
+        } catch (ElementDoesNotExistException e) {
+            LOG.error("AAS with id '{}' does not exist", aasId);
+            return Optional.empty();
+        } catch (RuntimeException e) {
+            LOG.error("Error while retrieving AAS with id {}: {}", aasId, e.getMessage());
+            return Optional.empty();
+        }
         var aas = this.connectedAasRepository.getAas(aasId);
 
-        return aas;
+        return Optional.of(aas);
     }
 
     public void addSubmodelReferenceToAas(String aasId, Submodel submodel) {

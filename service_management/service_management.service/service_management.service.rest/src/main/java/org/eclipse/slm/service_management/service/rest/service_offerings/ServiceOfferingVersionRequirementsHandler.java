@@ -41,7 +41,8 @@ public class ServiceOfferingVersionRequirementsHandler {
     public boolean isRequirementFulfilledByResource(ServiceRequirement serviceRequirement,
                                                     UUID resourceId,
                                                     JwtAuthenticationToken jwtAuthenticationToken) {
-        var resourceAas = this.aasRepositoryClient.getAas(ResourceAas.createAasIdFromResourceId(resourceId));
+        var resourceAasOptional = this.aasRepositoryClient.getAas(ResourceAas.createAasIdFromResourceId(resourceId));
+        var resourceAas = resourceAasOptional.get();
 
         var resourceSubmodels = new ArrayList<Submodel>();
         for (var submodelRef: resourceAas.getSubmodels()) {

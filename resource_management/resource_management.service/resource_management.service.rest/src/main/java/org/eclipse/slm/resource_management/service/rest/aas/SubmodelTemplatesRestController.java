@@ -11,6 +11,7 @@ import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.slm.common.aas.clients.AasRegistryClient;
 import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
 import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
+import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +52,13 @@ public class SubmodelTemplatesRestController {
         var allAASDescriptors = this.aasRegistryClient.getAllShellDescriptors();
         var submodelIdToAasDescriptor = new HashMap<String, AssetAdministrationShellDescriptor>();
         for (var aasDescriptor : allAASDescriptors) {
-            var aas = this.aasRepositoryClient.getAas(aasDescriptor.getId());
+            var aasOptional = aasRepositoryClient.getAas(aasDescriptor.getId());
+            if (aasOptional.isEmpty()) {
+                LOG.error("AAS with ID {} not found", aasDescriptor.getId());
+                throw new ShellNotFoundException(aasDescriptor.getId());
+            }
+            var aas = aasOptional.get();
+
             for (var submodelRef : aas.getSubmodels()) {
                 var submodelId = submodelRef.getKeys().get(0).getValue();
                 submodelIdToAasDescriptor.put(submodelId, aasDescriptor);

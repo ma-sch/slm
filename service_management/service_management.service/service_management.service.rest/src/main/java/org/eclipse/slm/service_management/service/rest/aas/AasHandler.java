@@ -111,7 +111,8 @@ public class AasHandler implements ApplicationListener<ServiceOfferingVersionEve
     private void deleteServiceOfferingVersionAasAndSubmodels(UUID serviceOfferingVersion) {
         try {
             var serviceOfferingVersionAasId = ServiceOfferingVersionAas.createAasIdFromServiceOfferingVersionId(serviceOfferingVersion);
-            var serviceOfferingVersionAas = this.aasRepositoryClient.getAas(serviceOfferingVersionAasId);
+            var serviceOfferingVersionAasOptional = this.aasRepositoryClient.getAas(serviceOfferingVersionAasId);
+            var serviceOfferingVersionAas = serviceOfferingVersionAasOptional.get();
 
             for (var submodelRef : serviceOfferingVersionAas.getSubmodels()) {
                 if (submodelRef.getKeys().get(0).getType().equals(KeyTypes.SUBMODEL)) {

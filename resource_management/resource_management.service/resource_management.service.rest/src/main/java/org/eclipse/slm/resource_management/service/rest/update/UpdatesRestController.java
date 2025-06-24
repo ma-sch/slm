@@ -7,6 +7,7 @@ import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElementCollection;
 import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
 import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
 import org.eclipse.slm.common.aas.clients.SubmodelRepositoryClient;
+import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.eclipse.slm.resource_management.model.resource.ResourceAas;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
 import org.slf4j.Logger;
@@ -50,7 +51,14 @@ public class UpdatesRestController {
     ) {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        var resourceAas = aasRepositoryClient.getAas(ResourceAas.createAasIdFromResourceId(resourceId));
+        var resourceAasId = ResourceAas.createAasIdFromResourceId(resourceId);
+        var resourceAasOptional = aasRepositoryClient.getAas(resourceAasId);
+        if (resourceAasOptional.isEmpty()) {
+            LOG.error("Resource AAS with ID {} not found", resourceAasId);
+            throw new ShellNotFoundException(resourceAasId);
+        }
+        var resourceAas = resourceAasOptional.get();
+
         var softwareNameplateSubmodels = new ArrayList<Submodel>();
         for (var submodelRef : resourceAas.getSubmodels()) {
             var submodelId = submodelRef.getKeys().get(0).getValue();

@@ -51,7 +51,14 @@ public abstract class AbstractSubmodelRepository implements SubmodelRepository {
             submodels.add(submodel);
         }
 
-        TreeMap<String, Submodel> submodelMap = submodels.stream().collect(Collectors.toMap(Submodel::getId, submodel -> submodel, (a, b) -> a, TreeMap::new));
+        TreeMap<String, Submodel> submodelMap = submodels.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        Submodel::getId,
+                        submodel -> submodel,
+                        (a, b) -> a,
+                        TreeMap::new
+                ));
         PaginationSupport<Submodel> paginationSupport = new PaginationSupport<>(submodelMap, Submodel::getId);
 
         return paginationSupport.getPaged(pInfo);

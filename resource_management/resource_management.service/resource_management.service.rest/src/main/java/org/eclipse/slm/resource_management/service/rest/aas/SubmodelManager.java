@@ -6,6 +6,7 @@ import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
 import org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiException;
 import org.eclipse.slm.common.aas.clients.*;
+import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
 import org.eclipse.slm.resource_management.model.resource.ResourceAas;
 import org.slf4j.Logger;
@@ -45,7 +46,12 @@ public class SubmodelManager {
         var submodelDescriptors = new ArrayList<SubmodelDescriptor>();
 
         var aasId = ResourceAas.createAasIdFromResourceId(resource.getId());
-        var aas = this.aasRepositoryClient.getAas(aasId);
+        var aasOptional = aasRepositoryClient.getAas(aasId);
+        if (aasOptional.isEmpty()) {
+            LOG.error("AAS with ID {} not found", aasId);
+            throw new ShellNotFoundException(aasId);
+        }
+        var aas = aasOptional.get();
         var submodelRefs = aas.getSubmodels();
         for (var submodelRef : submodelRefs) {
             var submodelId = submodelRef.getKeys().get(0).getValue();

@@ -63,7 +63,13 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
         try {
             var resourceAasId = "Resource_" + resourceCreatedMessage.resourceId();
-            var resourceAas = aasRepositoryClient.getAas(resourceAasId);
+            var resourceAasOptional = aasRepositoryClient.getAas(resourceAasId);
+            if (resourceAasOptional.isEmpty()) {
+                LOG.info("No AAS found for resource '{}', skipping information retrieval", resourceCreatedMessage.resourceId());
+                return;
+            }
+            var resourceAas = resourceAasOptional.get();
+
             var semanticIdToSubmodelDescriptors = new HashMap<String, List<SubmodelDescriptor>>();
 
             // Get all submodel descriptors of submodels contained in the AAS
@@ -122,7 +128,8 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
             var receivedSubmodelDescriptors = new ArrayList<SubmodelDescriptor>();
             for (var shellId : shellIds) {
-                var shell = irsAasRepositoryClient.getAas(shellId);
+                var shellOptional = irsAasRepositoryClient.getAas(shellId);
+                var shell = shellOptional.get();
                 shell.getSubmodels().forEach(submodelRef -> {
                     var submodelRefKey = submodelRef.getKeys().get(0);
                     if (submodelRefKey.getType().equals(KeyTypes.SUBMODEL)) {
