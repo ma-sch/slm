@@ -50,15 +50,17 @@ public class AasHandler implements ApplicationListener<ResourceEvent> {
     private final String externalUrl;
 
 
-    public AasHandler(AasRegistryClient aasRegistryClient, AasRepositoryClient aasRepositoryClient,
-                      SubmodelRegistryClient submodelRegistryClient, SubmodelRepositoryClient submodelRepositoryClient,
+    public AasHandler(AasRegistryClientFactory aasRegistryClientFactory,
+                      AasRepositoryClientFactory aasRepositoryClientFactory,
+                      SubmodelRegistryClientFactory submodelRegistryClientFactory,
+                      SubmodelRepositoryClientFactory submodelRepositoryClientFactory,
                       ResourcesConsulClient resourcesConsulClient,
                       @Value("${monitoring.service.url}") String monitoringServiceUrl,
                       @Value("${deployment.url}") String externalUrl) {
-        this.aasRegistryClient = aasRegistryClient;
-        this.aasRepositoryClient = aasRepositoryClient;
-        this.submodelRegistryClient = submodelRegistryClient;
-        this.submodelRepositoryClient = submodelRepositoryClient;
+        this.aasRegistryClient = aasRegistryClientFactory.getClient();
+        this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
+        this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
+        this.submodelRepositoryClient = submodelRepositoryClientFactory.getClient();
         this.resourcesConsulClient = resourcesConsulClient;
         this.monitoringServiceUrl = monitoringServiceUrl;
         this.externalUrl = externalUrl;

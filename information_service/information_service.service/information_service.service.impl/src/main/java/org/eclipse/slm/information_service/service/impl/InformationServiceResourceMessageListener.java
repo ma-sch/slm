@@ -2,10 +2,7 @@ package org.eclipse.slm.information_service.service.impl;
 
 import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
-import org.eclipse.slm.common.aas.clients.AasRepositoryClient;
-import org.eclipse.slm.common.aas.clients.IDTASubmodelTemplates;
-import org.eclipse.slm.common.aas.clients.SubmodelRegistryClient;
-import org.eclipse.slm.common.aas.clients.SubmodelRepositoryClient;
+import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.messaging.resources.ResourceCreatedMessage;
 import org.eclipse.slm.common.messaging.resources.ResourceInformationFoundMessage;
 import org.eclipse.slm.common.messaging.resources.ResourceMessageListener;
@@ -42,15 +39,15 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
     public InformationServiceResourceMessageListener(@Value("${irs.url.internal}") String irsUrlInternal,
                                                      @Value("${irs.url.external}") String irsUrlExternal,
-                                                     AasRepositoryClient aasRepositoryClient,
-                                                     SubmodelRepositoryClient submodelRepositoryClient,
-                                                     SubmodelRegistryClient submodelRegistryClient,
+                                                     AasRepositoryClientFactory aasRepositoryClientFactory,
+                                                     SubmodelRepositoryClientFactory submodelRepositoryClientFactory,
+                                                     SubmodelRegistryClientFactory submodelRegistryClientFactory,
                                                      ResourceMessageSender resourceMessageSender) {
         this.irsUrlInternal = irsUrlInternal;
         this.irsUrlExternal = irsUrlExternal;
-        this.aasRepositoryClient = aasRepositoryClient;
-        this.submodelRepositoryClient = submodelRepositoryClient;
-        this.submodelRegistryClient = submodelRegistryClient;
+        this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
+        this.submodelRepositoryClient = submodelRepositoryClientFactory.getClient();
+        this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
         this.resourceMessageSender = resourceMessageSender;
 
         this.irsAasRepositoryClient = new AasRepositoryClient(this.irsUrlInternal + "/api/shell_repo");

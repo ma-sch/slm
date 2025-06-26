@@ -6,55 +6,26 @@ import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultKey;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultReference;
 import org.eclipse.digitaltwin.basyx.aasrepository.client.ConnectedAasRepository;
+import org.eclipse.digitaltwin.basyx.aasrepository.client.internal.AssetAdministrationShellRepositoryApi;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingIdentifierException;
 import org.eclipse.digitaltwin.basyx.core.exceptions.CollidingSubmodelReferenceException;
 import org.eclipse.digitaltwin.basyx.core.exceptions.ElementDoesNotExistException;
-import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.stereotype.Component;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.Optional;
 
-@Component
 public class AasRepositoryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(AasRepositoryClient.class);
 
-    private String aasRepositoryUrl;
-
     private final ConnectedAasRepository connectedAasRepository;
 
-    private final DiscoveryClient discoveryClient;
-
-    private final String aasRepositoryDiscoveryInstanceId = "aas-repository";
-
-    @Autowired
-    public AasRepositoryClient(@Value("${aas.aas-repository.url}") String aasRepositoryUrl,
-                               DiscoveryClient discoveryClient
-                               ) {
-        this.aasRepositoryUrl = aasRepositoryUrl;
-        this.discoveryClient = discoveryClient;
-
-        if (discoveryClient != null) {
-            var aasRepositoryServiceInstance = this.discoveryClient.getInstances(aasRepositoryDiscoveryInstanceId).get(0);
-            var path = "";
-            if (aasRepositoryServiceInstance.getMetadata().get("path") != null) {
-                path = aasRepositoryServiceInstance.getMetadata().get("path");
-            }
-            if (aasRepositoryServiceInstance != null) {
-                this.aasRepositoryUrl = "http://" + aasRepositoryServiceInstance.getHost()
-                        + ":" + aasRepositoryServiceInstance.getPort() + path;
-            } else {
-                LOG.warn("No service instance '" + aasRepositoryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
-                        + this.aasRepositoryUrl + "' from application.yml.");
-            }
-        }
-
-        this.connectedAasRepository = new ConnectedAasRepository(this.aasRepositoryUrl);
+    public AasRepositoryClient(String aasRepositoryUrl, JwtAuthenticationToken jwtAuthenticationToken) {
+        var apiClient = ClientUtils.getApiClient(aasRepositoryUrl, jwtAuthenticationToken);
+        var aasShellRepoApi = new AssetAdministrationShellRepositoryApi(apiClient);
+        this.connectedAasRepository = new ConnectedAasRepository(aasRepositoryUrl, aasShellRepoApi);
     }
 
     public AasRepositoryClient(String aasRepositoryUrl) {

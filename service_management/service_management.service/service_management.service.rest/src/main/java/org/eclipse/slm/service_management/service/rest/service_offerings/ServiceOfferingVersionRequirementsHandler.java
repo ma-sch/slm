@@ -27,15 +27,10 @@ public class ServiceOfferingVersionRequirementsHandler {
 
     private final SubmodelRegistryClient submodelRegistryClient;
 
-    private final SubmodelRepositoryClient submodelRepositoryClient;
-
-    public ServiceOfferingVersionRequirementsHandler(AasRegistryClient aasRegistryClient,
-                                              AasRepositoryClient aasRepositoryClient,
-                                              SubmodelRegistryClient submodelRegistryClient,
-                                              SubmodelRepositoryClient submodelRepositoryClient) {
-        this.aasRepositoryClient = aasRepositoryClient;
-        this.submodelRegistryClient = submodelRegistryClient;
-        this.submodelRepositoryClient = submodelRepositoryClient;
+    public ServiceOfferingVersionRequirementsHandler(AasRepositoryClientFactory aasRepositoryClientFactory,
+                                                     SubmodelRegistryClientFactory submodelRegistryClientFactory) {
+        this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
+        this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
     }
 
     public boolean isRequirementFulfilledByResource(ServiceRequirement serviceRequirement,

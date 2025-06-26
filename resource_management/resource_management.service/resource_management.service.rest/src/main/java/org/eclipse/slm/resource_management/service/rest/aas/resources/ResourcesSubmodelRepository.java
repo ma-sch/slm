@@ -33,16 +33,16 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
 
     private final DeviceInfoSubmodelServiceFactory deviceInfoSubmodelServiceFactory;
 
-    public ResourcesSubmodelRepository(String aasId, AasRegistryClient aasRegistryClient,
-                                       AasRepositoryClient aasRepositoryClient,
-                                       SubmodelRegistryClient submodelRegistryClient,
-                                       SubmodelRepositoryClient submodelRepositoryClient,
+    public ResourcesSubmodelRepository(String aasId, AasRegistryClientFactory aasRegistryClientFactory,
+                                       AasRepositoryClientFactory aasRepositoryClientFactory,
+                                       SubmodelRegistryClientFactory submodelRegistryClientFactory,
+                                       SubmodelRepositoryClientFactory submodelRepositoryClientFactory,
                                        DeviceInfoSubmodelServiceFactory deviceInfoSubmodelServiceFactory) {
         super(aasId);
-        this.aasRegistryClient = aasRegistryClient;
-        this.aasRepositoryClient = aasRepositoryClient;
-        this.submodelRegistryClient = submodelRegistryClient;
-        this.submodelRepositoryClient = submodelRepositoryClient;
+        this.aasRegistryClient = aasRegistryClientFactory.getClient();
+        this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
+        this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
+        this.submodelRepositoryClient = submodelRepositoryClientFactory.getClient();
         this.deviceInfoSubmodelServiceFactory = deviceInfoSubmodelServiceFactory;
         this.addSubmodelServiceFactory("DeviceInfo", deviceInfoSubmodelServiceFactory);
     }

@@ -13,10 +13,6 @@ import org.eclipse.digitaltwin.basyx.aasregistry.client.api.RegistryAndDiscovery
 import org.eclipse.digitaltwin.basyx.submodelregistry.client.model.SubmodelDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.stereotype.Component;
 
 import java.net.http.HttpClient;
 import java.util.ArrayList;
@@ -24,45 +20,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class AasRegistryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(AasRegistryClient.class);
 
-    private String aasRegistryUrl;
-
     private RegistryAndDiscoveryInterfaceApi aasRegistryApi;
 
-    private final DiscoveryClient discoveryClient;
+    public AasRegistryClient(String aasRegistryUrl) {
+        var objectMapper = new ObjectMapper();
+        var aasRegistryApiClient = new ApiClient(HttpClient.newBuilder(), objectMapper, aasRegistryUrl);
+        this.aasRegistryApi = new RegistryAndDiscoveryInterfaceApi(aasRegistryApiClient);
+    }
 
-    private final String aasRegistryDiscoveryInstanceId = "aas-registry";
-
-
-    private final ObjectMapper objectMapper;
-
-    @Autowired
-    public AasRegistryClient(@Value("${aas.aas-registry.url}") String aasRegistryUrl,
-                             DiscoveryClient discoveryClient,
-                             ObjectMapper objectMapper) {
-        this.aasRegistryUrl = aasRegistryUrl;
-        this.discoveryClient = discoveryClient;
-        this.objectMapper = objectMapper;
-
-        var aasRegistryServiceInstance = this.discoveryClient.getInstances(aasRegistryDiscoveryInstanceId).get(0);
-        var path = "";
-        if (aasRegistryServiceInstance.getMetadata().get("path") != null) {
-            path = aasRegistryServiceInstance.getMetadata().get("path");
-        }
-        if (aasRegistryServiceInstance != null) {
-            this.aasRegistryUrl = "http://" + aasRegistryServiceInstance.getHost()
-                    + ":" + aasRegistryServiceInstance.getPort() + path;
-        } else {
-            LOG.warn("No service instance '" + aasRegistryDiscoveryInstanceId + "' found via discovery client. Using default URL '"
-                    + this.aasRegistryUrl + "' from application.yml.");
-        }
-
-        var aasRegistryClient = new ApiClient(HttpClient.newBuilder(), objectMapper, this.aasRegistryUrl);
-        this.aasRegistryApi = new RegistryAndDiscoveryInterfaceApi(aasRegistryClient);
+    public AasRegistryClient(RegistryAndDiscoveryInterfaceApi aasRegistryApi) {
+        this.aasRegistryApi = aasRegistryApi;
     }
 
     public List<AssetAdministrationShellDescriptor> getAllShellDescriptors() {

@@ -4,7 +4,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.aasx.AASXDeserializer;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
-import org.eclipse.digitaltwin.basyx.submodelregistry.client.ApiException;
 import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
@@ -34,11 +33,15 @@ public class SubmodelManager {
 
     private final ConceptDescriptionRepositoryClient conceptDescriptionRepositoryClient;
 
-    SubmodelManager(AasRegistryClient aasRegistryClient, AasRepositoryClient aasRepositoryClient, SubmodelRegistryClient submodelRegistryClient, SubmodelRepositoryClient submodelRepositoryClient, ConceptDescriptionRepositoryClient conceptDescriptionRepositoryClient) {
-        this.aasRegistryClient = aasRegistryClient;
-        this.aasRepositoryClient = aasRepositoryClient;
-        this.submodelRegistryClient = submodelRegistryClient;
-        this.submodelRepositoryClient = submodelRepositoryClient;
+    SubmodelManager(AasRegistryClientFactory aasRegistryClientFactory,
+                    AasRepositoryClientFactory aasRepositoryClientFactory,
+                    SubmodelRegistryClientFactory submodelRegistryClientFactory,
+                    SubmodelRepositoryClientFactory submodelRepositoryClientFactory,
+                    ConceptDescriptionRepositoryClient conceptDescriptionRepositoryClient) {
+        this.aasRegistryClient = aasRegistryClientFactory.getClient();
+        this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
+        this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
+        this.submodelRepositoryClient = submodelRepositoryClientFactory.getClient();
         this.conceptDescriptionRepositoryClient = conceptDescriptionRepositoryClient;
     }
 

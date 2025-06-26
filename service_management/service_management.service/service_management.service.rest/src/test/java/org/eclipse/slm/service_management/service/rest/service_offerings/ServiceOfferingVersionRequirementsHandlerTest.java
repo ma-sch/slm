@@ -28,8 +28,7 @@ public class ServiceOfferingVersionRequirementsHandlerTest {
 
     @BeforeEach
     public void ServiceOfferingVersionRequirementsHandlerTest() {
-        this.serviceOfferingVersionRequirementsHandler = new ServiceOfferingVersionRequirementsHandler(
-                null, null, null, null);
+        this.serviceOfferingVersionRequirementsHandler = new ServiceOfferingVersionRequirementsHandler(null, null);
     }
 
     @Test
