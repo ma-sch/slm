@@ -23,6 +23,8 @@
         msg: "{{ lookup('community.general.consul_kv', 'config/resource_management/data', scheme=consul_scheme, host=consul_host, port=consul_port, token=consul_token) }}"
 
     - set_fact:
+        traefik_certificate_crt: "{{ lookup('community.general.consul_kv', 'certs/traefik/crt', scheme=consul_scheme, host=consul_host, port=consul_port, token=consul_token) }}"
+        traefik_certificate_key: "{{ lookup('community.general.consul_kv', 'certs/traefik/key', scheme=consul_scheme, host=consul_host, port=consul_port, token=consul_token) }}"
         keycloak_config: "{{ lookup('community.general.consul_kv', 'config/keycloak/data', scheme=consul_scheme, host=consul_host, port=consul_port, token=consul_token) | from_yaml }}"
         awx_config: "{{ lookup('community.general.consul_kv', 'config/awx/data', scheme=consul_scheme, host=consul_host, port=consul_port, token=consul_token) | from_yaml }}"
         consul_config: "{{ lookup('community.general.consul_kv', 'config/consul/data', scheme=consul_scheme, host=consul_host, port=consul_port, token=consul_token) | from_yaml }}"
@@ -111,3 +113,18 @@
         - src: /templates/ui/.env.development
           dest: /project/ui/.env.development
       when: CONFIGURE_CORE_PROJECT|default(false)|bool == true
+
+    - name: "Copy Traefik certificate"
+      block:
+        - file:
+            path: /project/ui/certs
+            state: directory
+        - copy:
+              content: "{{ item.content }}"
+              dest: "{{ item.dest }}"
+          with_items:
+            - content: "{{ traefik_certificate_crt }}"
+              dest: /project/ui/certs/cert.crt
+            - content: "{{ traefik_certificate_key }}"
+              dest: /project/ui/certs/cert.key
+          when: CONFIGURE_CORE_PROJECT|default(false)|bool == true
