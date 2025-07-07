@@ -39,6 +39,7 @@
         ListClaimMappings:
           groups: groups
           "/realm_access/roles": resources
+      MaxTokenTTL: "1m"
     status_code: 200
   register: output_put_auth_method
 
