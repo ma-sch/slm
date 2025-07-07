@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.rest.location;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.resource_management.model.resource.Location;
 import org.eclipse.slm.resource_management.model.resource.exceptions.LocationNotFoundException;
 import org.eclipse.slm.resource_management.persistence.api.LocationJpaRepository;
@@ -15,6 +16,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/resources/locations")
+@Tag(name = "Location")
 public class LocationRestController {
     private final static Logger LOG = LoggerFactory.getLogger(LocationRestController.class);
 

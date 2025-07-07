@@ -7,7 +7,7 @@ import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.service_management.model.offerings.ServiceOfferingVersion;
 import org.eclipse.slm.service_management.persistence.api.ServiceOfferingVersionJpaRepository;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.ServiceOfferingVersionAas;
-import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.ServiceOfferingVersionsSubmodelRepositoryApiHTTPController;
+import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.ServiceOfferingVersionsSubmodelRepositoryHTTPApiController;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.requirements.RequirementsSubmodel;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.softwarenameplate.SoftwareNameplateSubmodel;
 import org.eclipse.slm.service_management.service.rest.service_offerings.ServiceOfferingVersionEvent;
@@ -67,7 +67,7 @@ public class AasHandler implements ApplicationListener<ServiceOfferingVersionEve
     }
 
     private String getServiceOfferingVersionsSubmodelRepositoryUrl(Base64UrlEncodedIdentifier aasId) {
-        var basePath = ServiceOfferingVersionsSubmodelRepositoryApiHTTPController.class.getAnnotation(RequestMapping.class).value()[0];
+        var basePath = ServiceOfferingVersionsSubmodelRepositoryHTTPApiController.class.getAnnotation(RequestMapping.class).value()[0];
         basePath = basePath.replace("{aasId}", aasId.getEncodedIdentifier());
         var url = this.externalUrl + basePath;
 

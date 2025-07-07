@@ -1,191 +1,97 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
 import io.swagger.v3.oas.annotations.Operation;
-import org.eclipse.digitaltwin.aas4j.v3.model.Property;
-import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
-import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElementCollection;
-import org.eclipse.slm.common.aas.clients.*;
-import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
-import org.eclipse.slm.resource_management.model.resource.ResourceAas;
-import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.slm.common.minio.model.exceptions.*;
+import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceTypeNotFoundException;
+import org.eclipse.slm.resource_management.model.update.UpdateInformationResource;
+import org.eclipse.slm.resource_management.model.update.UpdateInformationResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.text.SimpleDateFormat;
+import java.io.IOException;
 import java.util.*;
 
 @RestController
 @RequestMapping("/resources")
+@Tag(name = "Updates")
 public class UpdatesRestController {
 
     private final static Logger LOG = LoggerFactory.getLogger(UpdatesRestController.class);
 
-    private final AasRepositoryClient aasRepositoryClient;
+    private final UpdateManager updateManager;
 
-    private final SubmodelRegistryClient submodelRegistryClient;
-
-    private final ResourcesManager resourcesManager;
-
-    public UpdatesRestController(AasRepositoryClientFactory aasRepositoryClientFactory,
-                                 SubmodelRegistryClientFactory submodelRegistryClientFactory,
-                                 ResourcesManager resourcesManager) {
-        this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
-        this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
-        this.resourcesManager = resourcesManager;
+    public UpdatesRestController(UpdateManager updateManager) {
+        this.updateManager = updateManager;
     }
 
     @RequestMapping(value = "/{resourceId}/updates", method = RequestMethod.GET)
     @Operation(summary = "Get available updates for resource")
-    public ResponseEntity<UpdateInformation> getUpdateInformationOfResource(
+    public ResponseEntity<UpdateInformationResource> getUpdateInformationOfResource(
             @PathVariable(name = "resourceId") UUID resourceId
     ) {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        var resourceAasId = ResourceAas.createAasIdFromResourceId(resourceId);
-        var resourceAasOptional = aasRepositoryClient.getAas(resourceAasId);
-        if (resourceAasOptional.isEmpty()) {
-            LOG.error("Resource AAS with ID {} not found", resourceAasId);
-            throw new ShellNotFoundException(resourceAasId);
-        }
-        var resourceAas = resourceAasOptional.get();
-
-        var softwareNameplateSubmodels = new ArrayList<Submodel>();
-        for (var submodelRef : resourceAas.getSubmodels()) {
-            var submodelId = submodelRef.getKeys().get(0).getValue();
-
-            this.submodelRegistryClient.findSubmodelDescriptor(submodelId).ifPresent(submodelDescriptor -> {
-                if (submodelDescriptor.getSemanticId() != null) {
-                    if (!submodelDescriptor.getSemanticId().getKeys().isEmpty()) {
-                        var semanticId = submodelDescriptor.getSemanticId().getKeys().get(0).getValue();
-
-                        if (semanticId.equals("https://admin-shell.io/idta/SoftwareNameplate/1/0")) {
-                            try {
-                                var submodelRepositoryClient = SubmodelRepositoryClient.FromSubmodelDescriptor(submodelDescriptor, jwtAuthenticationToken);
-                                var submodel = submodelRepositoryClient.getSubmodel(submodelDescriptor.getId());
-                                if (submodel != null) {
-                                    softwareNameplateSubmodels.add(submodel);
-                                }
-                            } catch (Exception e) {
-                                LOG.error("Error retrieving submodel {}: {}", submodelId, e.getMessage());
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        var availableFirmwareVersions = new ArrayList<FirmwareVersionDetails>();
-        for (var softwareNameplateSubmodel : softwareNameplateSubmodels) {
-            softwareNameplateSubmodel.getSubmodelElements()
-                    .stream().filter(se -> se.getIdShort().equals("SoftwareNameplateType"))
-                    .findAny().ifPresent(
-                            softwareNameplateTypeSmc -> {
-
-                                var firmwareVersionDetails = new FirmwareVersionDetails.Builder();
-                                firmwareVersionDetails.softwareNameplateSubmodelId(softwareNameplateSubmodel.getId());
-
-                                ((SubmodelElementCollection) softwareNameplateTypeSmc).getValue()
-                                        .stream().filter(se -> se.getIdShort().equals("Version"))
-                                        .findAny()
-                                        .ifPresent(
-                                                prop -> {
-                                                    var version = ((Property) prop).getValue();
-                                                    firmwareVersionDetails.version(version);
-                                                }
-                                        );
-
-                                ((SubmodelElementCollection) softwareNameplateTypeSmc).getValue()
-                                        .stream().filter(se -> se.getIdShort().equals("ReleaseDate"))
-                                        .findAny()
-                                        .ifPresent(
-                                                prop -> {
-                                                    var dateString = ((Property) prop).getValue();
-                                                    firmwareVersionDetails.date(dateString);
-                                                }
-                                        );
-
-                                ((SubmodelElementCollection) softwareNameplateTypeSmc).getValue()
-                                        .stream().filter(se -> se.getIdShort().equals("InstallationURI"))
-                                        .findAny()
-                                        .ifPresent(
-                                                prop -> {
-                                                    var installationUri = ((Property) prop).getValue();
-                                                    firmwareVersionDetails.installationUri(installationUri);
-                                                }
-                                        );
-
-                                ((SubmodelElementCollection) softwareNameplateTypeSmc).getValue()
-                                        .stream().filter(se -> se.getIdShort().equals("InstallationChecksum"))
-                                        .findAny()
-                                        .ifPresent(
-                                                prop -> {
-                                                    var installationChecksum = ((Property) prop).getValue();
-                                                    firmwareVersionDetails.installationChecksum(installationChecksum);
-                                                }
-                                        );
-
-                                availableFirmwareVersions.add(firmwareVersionDetails.build());
-                            }
-                    );
-        }
-
-        // Sort available firmware versions from new to old
-        availableFirmwareVersions.sort((o1, o2) -> {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            if (o1.getDate() == null || o1.getDate().isEmpty() || o2.getDate() == null || o2.getDate().isEmpty()) {
-                return 0;
-            }
-            try {
-                var date1 = formatter.parse(o1.getDate());
-                var date2 = formatter.parse(o2.getDate());
-
-                return date2.compareTo(date1);
-            } catch (Exception e) {
-                LOG.error("Error parsing date: {}", e.getMessage());
-                return 0;
-            }
-        });
-
-        var updateInformation = new UpdateInformation();
-        updateInformation.setFirmwareUpdateStatus(FirmwareUpdateStatus.UNKNOWN);
-        updateInformation.setAvailableFirmwareVersions(availableFirmwareVersions);
-
-        FirmwareVersionDetails currentFirmwareVersion = null;
-        var resourceOptional = resourcesManager.getResourceWithoutCredentials(resourceId);
-        if (resourceOptional.isPresent()) {
-
-            for (int i = 0; i < availableFirmwareVersions.size(); i++) {
-                var firmwareVersion = availableFirmwareVersions.get(i);
-                if (firmwareVersion.getVersion().equals(resourceOptional.get().getFirmwareVersion())) {
-                    currentFirmwareVersion = firmwareVersion;
-                    // If current firmware version is on top of sorted list of availableFirmwareVersions, it is up to date
-                    if (i == 0) {
-                        updateInformation.setFirmwareUpdateStatus(FirmwareUpdateStatus.UP_TO_DATE);
-                    }
-                    else {
-                        updateInformation.setFirmwareUpdateStatus(FirmwareUpdateStatus.UPDATE_AVAILABLE);
-                    }
-                }
-            }
-
-            if (currentFirmwareVersion == null) {
-                currentFirmwareVersion = new FirmwareVersionDetails(resourceOptional.get().getFirmwareVersion(), "", "", "", "");
-            }
-            updateInformation.setCurrentFirmwareVersion(currentFirmwareVersion);
-        }
-
-        if (!availableFirmwareVersions.isEmpty()) {
-            updateInformation.setLatestFirmwareVersion(availableFirmwareVersions.get(0));
-        }
+        var updateInformation = this.updateManager.getUpdateInformationOfResource(resourceId, jwtAuthenticationToken);
 
         return ResponseEntity.ok(updateInformation);
+    }
+
+    @RequestMapping(value = "/types/{resourceTypeName}/updates", method = RequestMethod.GET)
+    @Operation(summary = "Get available updates for resource")
+    public ResponseEntity<UpdateInformationResourceType> getUpdateInformationOfResourceType(
+            @PathVariable(name = "resourceTypeName") String resourceTypeName
+    ) throws ResourceTypeNotFoundException {
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
+        var updateInformation = this.updateManager.getUpdateInformationOfResourceType(resourceTypeName, jwtAuthenticationToken);
+
+        return ResponseEntity.ok(updateInformation);
+    }
+
+    @RequestMapping(value = "/updates/{softwareNameplateId}/file/{fileName}", method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "Get update file of a software nameplate of a resource")
+    public ResponseEntity<byte[]> getUpdateFileOfSoftwareNameplate(
+            @PathVariable(name = "softwareNameplateId") String softwareNameplateIdBase64Encoded,
+            @PathVariable(name = "fileName") String fileName
+    ) throws IOException {
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
+        var fileInputStream = this.updateManager.getUpdateFileOfSoftwareNameplate(
+                softwareNameplateIdBase64Encoded,
+                fileName,
+                jwtAuthenticationToken
+        );
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                .body(IOUtils.toByteArray(fileInputStream));
+    }
+
+    @RequestMapping(value = "/updates/{softwareNameplateId}/file",
+            method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary="Add or update firmware update file")
+    public void addOrUpdateFirmwareUpdateFile(
+            @PathVariable(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded,
+            @RequestPart("file") MultipartFile firmwareUpdateFile
+    ) throws MinioUploadException, MinioObjectPathNameException, MinioBucketNameException, MinioBucketCreateException, MinioRemoveObjectException {
+        updateManager.addOrUpdateFirmwareUpdateFile(softwareNameplateIdBase64Encoded, firmwareUpdateFile);
+    }
+
+    @RequestMapping(value = "/updates/{softwareNameplateId}/file", method = RequestMethod.DELETE)
+    @Operation(summary="Delete firmware update file")
+    public void deleteFirmwareUpdateFile(
+            @PathVariable(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded
+    ) throws MinioObjectPathNameException, MinioBucketNameException, MinioRemoveObjectException {
+        updateManager.deleteFirmwareUpdateFile(softwareNameplateIdBase64Encoded);
     }
 
 }

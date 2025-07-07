@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/services/offerings/{serviceOfferingId}/versions")
-@Tag(name = "Service Offering Version API")
+@Tag(name = "Service Offering Versions")
 public class ServiceOfferingVersionsRestController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServiceOfferingVersionsRestController.class);

@@ -49,7 +49,10 @@
 - name: "Create Minio access"
   include_tasks: "create_and_store_minio_config.yml"
   vars:
-    _app_name: "service_management"
+    _app_name: "{{ item }}"
+  with_items:
+    - "service_management"
+    - "resource_management"
 
 - name: "Get Keycloak admin access token"
   include_role:

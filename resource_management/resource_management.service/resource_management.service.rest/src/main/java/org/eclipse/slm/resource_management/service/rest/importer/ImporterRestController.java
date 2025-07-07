@@ -1,6 +1,7 @@
 package org.eclipse.slm.resource_management.service.rest.importer;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
@@ -11,8 +12,8 @@ import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNot
 import org.eclipse.slm.resource_management.service.importer.ExcelImporter;
 import org.eclipse.slm.resource_management.service.importer.ImportDefinition;
 import org.eclipse.slm.resource_management.service.importer.ZipImporter;
-import org.eclipse.slm.resource_management.service.rest.aas.SubmodelManager;
-import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3;
+import org.eclipse.slm.resource_management.service.rest.resources.aas.ResourcesSubmodelManager;
+import org.eclipse.slm.resource_management.service.rest.resources.aas.submodels.digitalnameplate.DigitalNameplateV3;
 import org.eclipse.slm.resource_management.service.rest.location.LocationHandler;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
 import org.springframework.http.MediaType;
@@ -27,19 +28,20 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/importer")
+@Tag(name = "Importer")
 public class ImporterRestController {
 
     private final ResourcesManager resourcesManager;
 
     private final LocationHandler locationHandler;
 
-    private final SubmodelManager submodelManager;
+    private final ResourcesSubmodelManager resourcesSubmodelManager;
 
 
-    public ImporterRestController(ResourcesManager resourcesManager, LocationHandler locationHandler, SubmodelManager submodelManager) {
+    public ImporterRestController(ResourcesManager resourcesManager, LocationHandler locationHandler, ResourcesSubmodelManager resourcesSubmodelManager) {
         this.resourcesManager = resourcesManager;
         this.locationHandler = locationHandler;
-        this.submodelManager = submodelManager;
+        this.resourcesSubmodelManager = resourcesSubmodelManager;
     }
 
     @RequestMapping(value = "/file", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
@@ -92,7 +94,7 @@ public class ImporterRestController {
         for (var aasxFilesEntry : importDefinition.getAasxFiles().entrySet()) {
             var resourceId = aasxFilesEntry.getKey();
             for (var aasxFile : aasxFilesEntry.getValue()) {
-                this.submodelManager.addSubmodelsFromAASX(ResourceAas.createAasIdFromResourceId(resourceId), aasxFile);
+                this.resourcesSubmodelManager.addSubmodelsFromAASX(ResourceAas.createAasIdFromResourceId(resourceId), aasxFile);
             }
         }
 

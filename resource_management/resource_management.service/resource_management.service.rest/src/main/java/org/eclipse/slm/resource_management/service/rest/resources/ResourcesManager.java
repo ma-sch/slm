@@ -13,10 +13,9 @@ import org.eclipse.slm.notification_service.model.JobGoal;
 import org.eclipse.slm.notification_service.model.JobTarget;
 import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
 import org.eclipse.slm.resource_management.model.resource.*;
-import org.eclipse.slm.resource_management.service.rest.aas.AasHandler;
-import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3;
+import org.eclipse.slm.resource_management.service.rest.resources.aas.ResourcesAasHandler;
+import org.eclipse.slm.resource_management.service.rest.resources.aas.submodels.digitalnameplate.DigitalNameplateV3;
 import org.eclipse.slm.resource_management.service.rest.capabilities.SingleHostCapabilitiesConsulClient;
-import org.eclipse.slm.resource_management.model.capabilities.CapabilityNotFoundException;
 import org.eclipse.slm.resource_management.model.consul.capability.CapabilityService;
 import org.eclipse.slm.resource_management.model.consul.capability.CapabilityServiceStatus;
 import org.eclipse.slm.resource_management.model.consul.capability.MultiHostCapabilityService;
@@ -33,7 +32,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
-import javax.net.ssl.SSLException;
 import java.util.*;
 
 @Component
@@ -49,7 +47,7 @@ public class ResourcesManager {
     private final SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient;
     private final LocationJpaRepository locationJpaRepository;
     private final ApplicationEventPublisher publisher;
-    private final AasHandler aasHandler;
+    private final ResourcesAasHandler resourcesAasHandler;
     private final ResourceMessageSender resourceMessageSender;
 
     @Autowired
@@ -63,7 +61,7 @@ public class ResourcesManager {
             CapabilitiesConsulClient capabilitiesConsulClient,
             SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient,
             LocationJpaRepository locationJpaRepository,
-            ApplicationEventPublisher publisher, AasHandler aasHandler,
+            ApplicationEventPublisher publisher, ResourcesAasHandler resourcesAasHandler,
             ResourceMessageSender resourceMessageSender
     ) {
         this.resourcesConsulClient = resourcesConsulClient;
@@ -76,7 +74,7 @@ public class ResourcesManager {
         this.singleHostCapabilitiesConsulClient = singleHostCapabilitiesConsulClient;
         this.locationJpaRepository = locationJpaRepository;
         this.publisher = publisher;
-        this.aasHandler = aasHandler;
+        this.resourcesAasHandler = resourcesAasHandler;
         this.resourceMessageSender = resourceMessageSender;
     }
 
@@ -278,7 +276,7 @@ public class ResourcesManager {
             }
         }
 
-        this.aasHandler.createResourceAasAndSubmodels(resource, digitalNameplateV3);
+        this.resourcesAasHandler.createResourceAasAndSubmodels(resource, digitalNameplateV3);
 
         notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.CREATE);
 

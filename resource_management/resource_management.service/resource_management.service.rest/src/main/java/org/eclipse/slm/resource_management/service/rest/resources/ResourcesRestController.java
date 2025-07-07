@@ -1,13 +1,14 @@
 package org.eclipse.slm.resource_management.service.rest.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.resource_management.model.capabilities.*;
 import org.eclipse.slm.resource_management.model.resource.ConnectionType;
 import org.eclipse.slm.resource_management.model.resource.ConnectionTypeDTO;
-import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceDefinitionException;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
+import org.eclipse.slm.resource_management.service.rest.resource_types.ResourceTypesManager;
 import org.eclipse.slm.resource_management.service.rest.utils.ConnectionTypeUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import org.modelmapper.ModelMapper;
@@ -21,26 +22,27 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import javax.net.ssl.SSLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/resources")
+@Tag(name = "Resources")
 public class ResourcesRestController {
 
     private final static Logger LOG = LoggerFactory.getLogger(ResourcesRestController.class);
 
     private final ResourcesManager resourcesManager;
 
+    private final ResourceTypesManager resourceTypeSManager;
+
     private ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     public ResourcesRestController(
-            ResourcesManager resourcesManager
+            ResourcesManager resourcesManager, ResourceTypesManager resourceTypeSManager
     ) {
         this.resourcesManager = resourcesManager;
+        this.resourceTypeSManager = resourceTypeSManager;
 
         // DTO >>> Entity
         modelMapper.typeMap(DeploymentCapabilityDTOApi.class, Capability.class)

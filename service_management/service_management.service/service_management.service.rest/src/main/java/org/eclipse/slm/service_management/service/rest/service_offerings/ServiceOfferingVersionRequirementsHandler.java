@@ -45,7 +45,7 @@ public class ServiceOfferingVersionRequirementsHandler {
             var submodelEndpoint = submodelDescriptor.get().getEndpoints().get(0).getProtocolInformation().getHref();
 
             if (submodelEndpoint.contains("/submodels/")) {
-                var scopedSubmodelRepositoryClient = SubmodelRepositoryClient.FromSubmodelDescriptor(submodelDescriptor.get(), jwtAuthenticationToken);
+                var scopedSubmodelRepositoryClient = SubmodelRepositoryClientFactory.FromSubmodelDescriptor(submodelDescriptor.get(), jwtAuthenticationToken);
                 var submodel = scopedSubmodelRepositoryClient.getSubmodel(submodelDescriptor.get().getId());
                 if (submodel != null) {
                     resourceSubmodels.add(submodel);

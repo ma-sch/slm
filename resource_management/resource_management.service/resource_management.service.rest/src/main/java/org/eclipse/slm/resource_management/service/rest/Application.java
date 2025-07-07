@@ -42,6 +42,7 @@ import java.util.concurrent.Executor;
         "org.eclipse.slm.common.awx",
         "org.eclipse.slm.common.consul",
         "org.eclipse.slm.common.keycloak",
+        "org.eclipse.slm.common.minio",
         "org.eclipse.slm.common.model",
         "org.eclipse.slm.common.parent",
         "org.eclipse.slm.common.utils",

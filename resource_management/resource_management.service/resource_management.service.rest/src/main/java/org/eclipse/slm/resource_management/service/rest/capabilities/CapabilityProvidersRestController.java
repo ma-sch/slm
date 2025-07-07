@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.rest.capabilities;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.awx.client.AwxCredential;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/resources/providers")
+@Tag(name = "Capability Providers")
 public class CapabilityProvidersRestController {
     private final static Logger LOG = LoggerFactory.getLogger(CapabilityProvidersRestController.class);
     private final VirtualResourceProviderHandler virtualResourceProviderHandler;

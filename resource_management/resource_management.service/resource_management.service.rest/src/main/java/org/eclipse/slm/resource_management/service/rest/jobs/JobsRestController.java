@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.rest.jobs;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.awx.client.AwxClient;
 import org.eclipse.slm.common.awx.model.Job;
 import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/jobs")
+@Tag(name = "Jobs")
 public class JobsRestController {
 
     @Autowired

@@ -158,8 +158,27 @@ export default {
             id: 'main-menu-button-resources',
             icon: 'mdi-desktop-classic',
             title: this.$t('drawer.section.resources.devices.title'),
-            to: '/resources',
+            text: true,
+            group: '/resources',
+            subGroup:true,
             visible: true,
+            goToChildOnClick: 0,
+            children: [
+              {
+                id: 'main-menu-button-admin-components',
+                title: this.$t('drawer.section.resources.devices.instances.title'),
+                icon: 'mdi-menu-open',
+                to: 'instances',
+                visible: true
+              },
+              {
+                id: 'main-menu-button-admin-service-categories',
+                title: this.$t('drawer.section.resources.devices.types.title'),
+                icon: 'mdi-format-list-group',
+                to: 'types',
+                visible: true
+              }
+            ]
           },
           {
             id: 'main-menu-button-clusters',
@@ -177,6 +196,7 @@ export default {
             text: true,
             to: '/discovery/inbox',
             visible: true,
+            goToChildOnClick: 0,
             children: [
               {
                 id: 'main-menu-button-admin-components',

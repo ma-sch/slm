@@ -10,7 +10,13 @@
       "resources": {
         "title": "Resources",
         "devices": {
-          "title": "Devices"
+          "title": "Devices",
+          "instances": {
+            "title": "Instances"
+          },
+          "types": {
+            "title": "Types"
+          }
         },
         "clusters": {
           "title": "Clusters"

@@ -153,6 +153,14 @@ vault:
     secret-id: your-secret-id
     app-role-path: approle
 
+### Minio
+minio:
+  scheme: http
+  host: localhost
+  port: 9091
+  access-key: admin
+  secret-key: password
+
 ### AAS
 aas:
   broker:

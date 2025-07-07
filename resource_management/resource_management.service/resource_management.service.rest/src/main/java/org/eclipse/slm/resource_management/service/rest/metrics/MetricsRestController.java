@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.rest.metrics;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.aas.clients.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/metrics")
+@Tag(name = "Metrics")
 public class MetricsRestController {
 
     private final Logger LOG = LoggerFactory.getLogger(MetricsRestController.class);

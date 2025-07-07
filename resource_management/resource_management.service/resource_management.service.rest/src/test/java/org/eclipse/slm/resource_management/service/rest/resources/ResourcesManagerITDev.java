@@ -22,7 +22,7 @@ import org.eclipse.slm.resource_management.model.resource.RemoteAccessService;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
 import org.eclipse.slm.resource_management.persistence.api.CapabilityJpaRepository;
 import org.eclipse.slm.resource_management.persistence.api.LocationJpaRepository;
-import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3;
+import org.eclipse.slm.resource_management.service.rest.resources.aas.submodels.digitalnameplate.DigitalNameplateV3;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesManager;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilityUtil;

@@ -15,8 +15,7 @@ import org.eclipse.slm.resource_management.service.discovery.driver.DiscoveryJob
 import org.eclipse.slm.resource_management.service.discovery.driver.DriverClientFactory;
 import org.eclipse.slm.resource_management.service.discovery.driver.DriverRegistryClient;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DriverNotFoundException;
-import org.eclipse.slm.resource_management.service.rest.aas.resources.digitalnameplate.DigitalNameplateV3;
-import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilityProvidersRestController;
+import org.eclipse.slm.resource_management.service.rest.resources.aas.submodels.digitalnameplate.DigitalNameplateV3;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

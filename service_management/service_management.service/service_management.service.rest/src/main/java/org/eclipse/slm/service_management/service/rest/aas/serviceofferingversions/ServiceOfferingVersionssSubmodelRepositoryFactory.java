@@ -1,6 +1,6 @@
 package org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions;
 
-import org.eclipse.slm.common.aas.repositories.SubmodelRepositoryFactory;
+import org.eclipse.slm.common.aas.repositories.submodels.SubmodelRepositoryFactory;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.requirements.RequirementsSubmodelServiceFactory;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.softwarenameplate.SoftwareNameplateSubmodelServiceFactory;
 import org.springframework.stereotype.Component;

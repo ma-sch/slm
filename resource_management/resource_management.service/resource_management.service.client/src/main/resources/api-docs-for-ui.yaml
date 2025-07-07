@@ -9,7 +9,7 @@ info:
     email: matthias.schneider@ipa.fraunhofer.de
   version: 1.4.0-SNAPSHOT
 servers:
-  - url: http://slm.local:9010
+  - url: https://slm.local/resource-management
     description: Generated server url
 security:
   - bearer_auth: []
@@ -18,7 +18,7 @@ paths:
   "/resources/{resourceId}":
     get:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Get resource
       operationId: getResource
       parameters:
@@ -37,7 +37,7 @@ paths:
                 "$ref": "#/components/schemas/BasicResource"
     put:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Add existing resource with id
       operationId: addExistingResourceWithId
       parameters:
@@ -62,7 +62,7 @@ paths:
                 type: string
     delete:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Delete resource
       operationId: deleteResource
       parameters:
@@ -82,7 +82,7 @@ paths:
   "/resources/{resourceId}/remote-access":
     put:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Set remote access of resource with id
       operationId: setRemoteAccessOfResource
       parameters:
@@ -124,7 +124,7 @@ paths:
   "/resources/{resourceId}/location":
     put:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Set location of resource with id
       operationId: setLocationOfResource
       parameters:
@@ -147,10 +147,35 @@ paths:
             "*/*":
               schema:
                 type: string
+  "/resources/{resourceId}/connection-parameters":
+    put:
+      tags:
+        - Resources
+      summary: Set connection parameters of resource with id
+      operationId: setConnectionParametersOfResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: connectionParameters
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
   "/resources/{resourceId}/capabilities":
     put:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Install capability on resource
       operationId: installCapabilityOnSingleHost
       parameters:
@@ -189,7 +214,7 @@ paths:
                 type: string
     delete:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Uninstall capability from resource
       operationId: removeCapabilityFromSingleHost
       parameters:
@@ -212,10 +237,75 @@ paths:
             "*/*":
               schema:
                 type: string
+  "/resources/updates/{softwareNameplateId}/file":
+    put:
+      tags:
+        - Updates
+      summary: Add or update firmware update file
+      operationId: addOrUpdateFirmwareUpdateFile
+      parameters:
+        - name: softwareNameplateId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+        - Updates
+      summary: Delete firmware update file
+      operationId: deleteFirmwareUpdateFile
+      parameters:
+        - name: softwareNameplateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  "/resources/locations/{locationId}":
+    put:
+      tags:
+        - Location
+      summary: Add new Location with id
+      operationId: addLocation
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/Location"
   "/resources":
     get:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Get all resources
       operationId: getResources
       responses:
@@ -229,7 +319,7 @@ paths:
                   "$ref": "#/components/schemas/BasicResource"
     post:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Add existing resource
       operationId: addExistingResource
       requestBody:
@@ -249,7 +339,7 @@ paths:
   "/resources/{resourceId}/submodels":
     get:
       tags:
-        - submodels-rest-controller
+        - Resources AAS
       summary: Get resource submodels
       operationId: getResourceSubmodels
       parameters:
@@ -268,7 +358,7 @@ paths:
                 type: string
     post:
       tags:
-        - submodels-rest-controller
+        - Resources AAS
       summary: Add submodels to existing resource
       operationId: addSubmodels
       parameters:
@@ -296,10 +386,130 @@ paths:
             "*/*":
               schema:
                 type: string
+  "/resources/types/aas/submodel-refs":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns all submodel references
+      operationId: getSubmodelReferences
+      parameters:
+        - name: limit
+          in: query
+          description: The maximum number of elements in the response array
+          required: false
+          schema:
+            minimum: 0
+            type: string
+            enum:
+              - '1'
+        - name: cursor
+          in: query
+          description: A server-generated identifier retrieved from pagingMetadata that
+            specifies from which position the result listing should continue
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+      responses:
+        '200':
+          description: Requested submodel references
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/GetReferencesResult"
+        '400':
+          description: Bad Request, e.g. the request parameters of the format of the
+            request body is wrong.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+    post:
+      tags:
+        - Resource Types
+      summary: Creates a submodel reference at the Asset Administration Shell
+      operationId: postSubmodelReferenceAas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Reference"
+        required: true
+      responses:
+        '201':
+          description: Submodel reference created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Reference"
+        '400':
+          description: Bad Request, e.g. the request parameters of the format of the
+            request body is wrong.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '409':
+          description: Conflict, a resource which shall be created exists already.
+            Might be thrown if a Submodel or SubmodelElement with the same ShortId
+            is contained in a POST request.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
   "/resources/providers/virtual-resource-provider/{virtualResourceProviderId}/vm":
     post:
       tags:
-        - capability-providers-rest-controller
+        - Capability Providers
       summary: Create Virtual Machine
       operationId: createVm
       parameters:
@@ -315,7 +525,7 @@ paths:
   "/resources/profiler":
     get:
       tags:
-        - profiler-rest-controller
+        - Profiler
       summary: Get all Profiler
       operationId: getProfiler
       responses:
@@ -329,7 +539,7 @@ paths:
                   "$ref": "#/components/schemas/Profiler"
     post:
       tags:
-        - profiler-rest-controller
+        - Profiler
       summary: Create Profiler
       operationId: createProfiler
       requestBody:
@@ -348,7 +558,7 @@ paths:
   "/resources/profiler/{profilerId}/execute":
     post:
       tags:
-        - profiler-rest-controller
+        - Profiler
       summary: Run one Profiler
       operationId: runProfiler
       parameters:
@@ -364,7 +574,7 @@ paths:
   "/resources/profiler/execute":
     post:
       tags:
-        - profiler-rest-controller
+        - Profiler
       summary: Run all Profiler
       operationId: runProfiler_1
       responses:
@@ -373,7 +583,7 @@ paths:
   "/resources/locations":
     get:
       tags:
-        - location-rest-controller
+        - Location
       summary: Get locations
       operationId: getLocations
       parameters:
@@ -394,16 +604,10 @@ paths:
                   "$ref": "#/components/schemas/Location"
     post:
       tags:
-        - location-rest-controller
-      summary: Create new Location
-      operationId: addLocation
+        - Location
+      summary: Add new Location
+      operationId: addLocation_1
       parameters:
-        - name: id
-          in: query
-          required: false
-          schema:
-            type: string
-            format: uuid
         - name: name
           in: query
           required: true
@@ -415,10 +619,10 @@ paths:
           content:
             "*/*":
               schema:
-                type: string
+                "$ref": "#/components/schemas/Location"
     delete:
       tags:
-        - location-rest-controller
+        - Location
       summary: Delete Location
       operationId: deleteLocation
       parameters:
@@ -431,14 +635,10 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            "*/*":
-              schema:
-                type: object
   "/resources/discovery/inbox/onboard":
     post:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: onboardDiscoveredResources
       requestBody:
         content:
@@ -452,7 +652,7 @@ paths:
   "/resources/discovery/inbox/ignore":
     post:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: ignoreDiscoveredResource
       parameters:
         - name: resultId
@@ -472,7 +672,7 @@ paths:
   "/resources/discovery/drivers/{driverId}/discover":
     post:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: discover
       parameters:
         - name: driverId
@@ -496,7 +696,7 @@ paths:
   "/resources/clusters":
     get:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Get all cluster resources of user
       operationId: getClusterResources
       responses:
@@ -510,7 +710,7 @@ paths:
                   "$ref": "#/components/schemas/Cluster"
     post:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Create a cluster
       operationId: createClusterResource
       requestBody:
@@ -525,7 +725,7 @@ paths:
   "/resources/clusters/{clusterUuid}/members":
     post:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Add new Member to cluster
       operationId: addClusterMember
       parameters:
@@ -546,7 +746,7 @@ paths:
           description: OK
     delete:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Remove member of cluster
       operationId: removeClusterMember
       parameters:
@@ -568,7 +768,7 @@ paths:
   "/resources/capabilities":
     get:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Get capabilities
       operationId: getCapabilities
       parameters:
@@ -591,7 +791,7 @@ paths:
                     - "$ref": "#/components/schemas/VirtualizationCapabilityDTOApi"
     post:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Add capability
       operationId: createCapability
       requestBody:
@@ -606,10 +806,30 @@ paths:
       responses:
         '200':
           description: OK
+  "/importer/file":
+    post:
+      tags:
+        - Importer
+      summary: Import from file
+      operationId: importFromFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
   "/resources/{resourceId}/updates":
     get:
       tags:
-        - updates-rest-controller
+        - Updates
       summary: Get available updates for resource
       operationId: getUpdateInformationOfResource
       parameters:
@@ -625,11 +845,11 @@ paths:
           content:
             "*/*":
               schema:
-                "$ref": "#/components/schemas/UpdateInformation"
+                "$ref": "#/components/schemas/UpdateInformationResource"
   "/resources/{resourceId}/deployment-capabilities":
     get:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Get deployment capabilities of resource
       operationId: getDeploymentCapabilitiesOfResource
       parameters:
@@ -651,7 +871,7 @@ paths:
   "/resources/{resourceId}/capability-services":
     get:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Get capability services of resource
       operationId: getCapabilityServicesOfResource
       parameters:
@@ -676,7 +896,7 @@ paths:
   "/resources/{resourceId}/aas-descriptor":
     get:
       tags:
-        - aas-rest-controller
+        - Resources AAS
       summary: Get AAS descriptor of resource
       operationId: getResourceAasDescriptor
       parameters:
@@ -696,7 +916,7 @@ paths:
   "/resources/{aasId}/aas/submodels":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns all Submodels
       operationId: getAllSubmodels
       parameters:
@@ -770,7 +990,7 @@ paths:
   "/resources/{aasId}/aas/submodels/{submodelIdentifier}":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns a specific Submodel
       operationId: getSubmodelById
       parameters:
@@ -828,7 +1048,7 @@ paths:
   "/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns all submodel elements including their hierarchy
       operationId: getAllSubmodelElements
       parameters:
@@ -902,7 +1122,7 @@ paths:
   "/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns a specific submodel element from the Submodel at a specified
         path
       operationId: getSubmodelElementByPathSubmodelRepo
@@ -967,7 +1187,7 @@ paths:
   "/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/$value":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns a specific submodel element from the Submodel at a specified
         path in the ValueOnly representation
       operationId: getSubmodelElementByPathValueOnlySubmodelRepo
@@ -1032,7 +1252,7 @@ paths:
   "/resources/{aasId}/aas/submodels/{submodelIdentifier}/$value":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns a specific Submodel in the value only representation
       operationId: getSubmodelByIdValueOnly
       parameters:
@@ -1090,7 +1310,7 @@ paths:
   "/resources/{aasId}/aas/submodels/{submodelIdentifier}/$metadata":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns the metadata attributes of a specific Submodel
       operationId: getSubmodelByIdMetadata
       parameters:
@@ -1138,7 +1358,7 @@ paths:
   "/resources/{aasId}/aas/submodels/$value":
     get:
       tags:
-        - resources-submodel-repository-api-http-controller
+        - Resources AAS
       summary: Returns all Submodels in their ValueOnly representation
       operationId: getAllSubmodelsValueOnly
       parameters:
@@ -1209,10 +1429,708 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/Result"
+  "/resources/updates/{softwareNameplateId}/file/{fileName}":
+    get:
+      tags:
+        - Updates
+      summary: Get update file of a software nameplate of a resource
+      operationId: getUpdateFileOfSoftwareNameplate
+      parameters:
+        - name: softwareNameplateId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: fileName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: byte
+  "/resources/types":
+    get:
+      tags:
+        - Resource Types
+      summary: Get available resource types
+      operationId: getResourceTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ResourceType"
+  "/resources/types/{resourceTypeName}/updates":
+    get:
+      tags:
+        - Updates
+      summary: Get available updates for resource
+      operationId: getUpdateInformationOfResourceType
+      parameters:
+        - name: resourceTypeName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/UpdateInformationResourceType"
+  "/resources/types/submodels":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns all Submodels
+      operationId: getAllSubmodels_1
+      parameters:
+        - name: semanticId
+          in: query
+          description: The value of the semantic id reference (UTF8-BASE64-URL-encoded)
+          required: false
+          schema:
+            type: string
+        - name: idShort
+          in: query
+          description: The Asset Administration Shell’s IdShort
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of elements in the response array
+          required: false
+          schema:
+            minimum: 1
+            type: string
+            enum:
+              - '1'
+        - name: cursor
+          in: query
+          description: A server-generated identifier retrieved from pagingMetadata that
+            specifies from which position the result listing should continue
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '200':
+          description: Requested Submodels
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/GetSubmodelsResult"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/{submodelIdentifier}":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns a specific Submodel
+      operationId: getSubmodelById_1
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '200':
+          description: Requested Submodel
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Submodel"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements":
+    get:
+      tags:
+        - Resource Types
+      operationId: getAllSubmodelElements_1
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of elements in the response array
+          required: false
+          schema:
+            minimum: 1
+            type: string
+            enum:
+              - '1'
+        - name: cursor
+          in: query
+          description: A server-generated identifier retrieved from pagingMetadata that
+            specifies from which position the result listing should continue
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements/{idShortPath}":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns a specific submodel element from the Submodel at a specified
+        path
+      operationId: getSubmodelElementByPathSubmodelRepo_1
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: idShortPath
+          in: path
+          description: IdShort path to the submodel element (dot-separated)
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '200':
+          description: Requested submodel element
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SubmodelElement"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements/{idShortPath}/$value":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns a specific submodel element from the Submodel at a specified
+        path in the ValueOnly representation
+      operationId: getSubmodelElementByPathValueOnlySubmodelRepo_1
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: idShortPath
+          in: path
+          description: IdShort path to the submodel element (dot-separated)
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '200':
+          description: Requested submodel element
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SubmodelElementValue"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/{submodelIdentifier}/$value":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns a specific Submodel in the value only representation
+      operationId: getSubmodelByIdValueOnly_1
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '200':
+          description: Requested Submodel in value only representation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SubmodelValueOnly"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/{submodelIdentifier}/$metadata":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns the metadata attributes of a specific Submodel
+      operationId: getSubmodelByIdMetadata_1
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+      responses:
+        '200':
+          description: Requested Submodel in the metadata representation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Submodel"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/submodels/aas/$value":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns all Submodels in their ValueOnly representation
+      operationId: getAllSubmodelsValueOnly_1
+      parameters:
+        - name: semanticId
+          in: query
+          description: The value of the semantic id reference (UTF8-BASE64-URL-encoded)
+          required: false
+          schema:
+            type: string
+        - name: idShort
+          in: query
+          description: The Asset Administration Shell’s IdShort
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of elements in the response array
+          required: false
+          schema:
+            minimum: 1
+            type: string
+            enum:
+              - '1'
+        - name: cursor
+          in: query
+          description: A server-generated identifier retrieved from pagingMetadata that
+            specifies from which position the result listing should continue
+          required: false
+          schema:
+            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+        - name: level
+          in: query
+          description: Determines the structural depth of the respective resource content
+          required: false
+          schema:
+            type: string
+            default: deep
+            enum:
+              - deep
+              - core
+        - name: extent
+          in: query
+          description: Determines to which extent the resource is being serialized
+          required: false
+          schema:
+            type: string
+            default: withoutBlobValue
+            enum:
+              - withBlobValue
+              - withoutBlobValue
+      responses:
+        '200':
+          description: Requested Submodels in value only representation
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/GetSubmodelsValueOnlyResult"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/aas":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns a specific Asset Administration Shell
+      operationId: getAssetAdministrationShell
+      responses:
+        '200':
+          description: Requested Asset Administration Shell
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AssetAdministrationShell"
+        '400':
+          description: Bad Request, e.g. the request parameters of the format of the
+            request body is wrong.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+  "/resources/types/aas/asset-information":
+    get:
+      tags:
+        - Resource Types
+      summary: Returns the Asset Information
+      operationId: getAssetInformation
+      responses:
+        '200':
+          description: Requested Asset Information
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AssetInformation"
+        '400':
+          description: Bad Request, e.g. the request parameters of the format of the
+            request body is wrong.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
   "/resources/providers/virtual-resource-provider":
     get:
       tags:
-        - capability-providers-rest-controller
+        - Capability Providers
       summary: Get all virtual resource provider
       operationId: getVirtualResourceProviders
       responses:
@@ -1227,7 +2145,7 @@ paths:
   "/resources/providers/service-hoster":
     get:
       tags:
-        - capability-providers-rest-controller
+        - Capability Providers
       summary: Get all service hoster
       operationId: getServiceHosters
       parameters:
@@ -1248,7 +2166,7 @@ paths:
   "/resources/profiler/{profilerId}":
     get:
       tags:
-        - profiler-rest-controller
+        - Profiler
       summary: Get Profiler
       operationId: getProfiler_1
       parameters:
@@ -1267,7 +2185,7 @@ paths:
                 "$ref": "#/components/schemas/Profiler"
     delete:
       tags:
-        - profiler-rest-controller
+        - Profiler
       summary: Delete Profiler
       operationId: deleteProfiler
       parameters:
@@ -1283,7 +2201,7 @@ paths:
   "/resources/discovery/jobs":
     get:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: getDiscoveryJobs
       responses:
         '200':
@@ -1297,7 +2215,7 @@ paths:
   "/resources/discovery/jobs/{discoveryJobId}":
     get:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: getDiscoveryJob
       parameters:
         - name: discoveryJobId
@@ -1316,7 +2234,7 @@ paths:
   "/resources/discovery/inbox":
     get:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: getDiscoveredResources
       parameters:
         - name: removeDuplicate
@@ -1355,7 +2273,7 @@ paths:
   "/resources/discovery/drivers":
     get:
       tags:
-        - discovery-rest-controller
+        - Discovery
       operationId: getRegisteredDrivers
       responses:
         '200':
@@ -1369,7 +2287,7 @@ paths:
   "/resources/connection-types":
     get:
       tags:
-        - resources-rest-controller
+        - Resources
       summary: Get available remote connection types
       operationId: getResourceConnectionTypes
       responses:
@@ -1384,7 +2302,7 @@ paths:
   "/resources/clusters/{clusterName}/members":
     get:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Get members of cluster
       operationId: getClusterMembers
       parameters:
@@ -1405,7 +2323,7 @@ paths:
   "/resources/clusters/types":
     get:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Get all available cluster types
       operationId: getClusterTypes
       responses:
@@ -1423,7 +2341,7 @@ paths:
   "/resources/aas":
     get:
       tags:
-        - aas-rest-controller
+        - Resources AAS
       summary: Get all AAS of resources
       operationId: getResourceAASDescriptors
       responses:
@@ -1438,7 +2356,7 @@ paths:
   "/metrics/{resourceId}":
     get:
       tags:
-        - metrics-rest-controller
+        - Metrics
       operationId: getMetric
       parameters:
         - name: resourceId
@@ -1459,7 +2377,7 @@ paths:
   "/jobs":
     get:
       tags:
-        - jobs-rest-controller
+        - Jobs
       operationId: getJobs
       responses:
         '200':
@@ -1471,7 +2389,7 @@ paths:
   "/aas/submodels/templates/{smTemplateSemanticId}/instances":
     get:
       tags:
-        - submodel-templates-rest-controller
+        - Submodel Templates
       summary: Get instances of submodel templates using semantic id
       operationId: getSubmodelTemplateInstancesBySemanticId
       parameters:
@@ -1496,7 +2414,7 @@ paths:
   "/resources/{resourceId}/submodels/{submodelIdBase64Encoded}":
     delete:
       tags:
-        - submodels-rest-controller
+        - Resources AAS
       summary: Delete resource submodel
       operationId: deleteSubmodel
       parameters:
@@ -1518,10 +2436,58 @@ paths:
             "*/*":
               schema:
                 type: string
+  "/resources/types/aas/submodel-refs/{submodelIdentifier}":
+    delete:
+      tags:
+        - Resource Types
+      summary: Deletes the submodel reference from the Asset Administration Shell.
+        Does not delete the submodel itself!
+      operationId: deleteSubmodelReferenceByIdAas
+      parameters:
+        - name: submodelIdentifier
+          in: path
+          description: The Submodel’s unique id (UTF8-BASE64-URL-encoded)
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Submodel reference deleted successfully
+        '400':
+          description: Bad Request, e.g. the request parameters of the format of the
+            request body is wrong.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '401':
+          description: Unauthorized, e.g. the server refused the authorization attempt.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Result"
   "/resources/clusters/{clusterUuid}":
     delete:
       tags:
-        - clusters-rest-controller
+        - Clusters
       summary: Delete cluster resource
       operationId: deleteClusterResource
       parameters:
@@ -1537,7 +2503,7 @@ paths:
   "/resources/capabilities/{capabilityId}":
     delete:
       tags:
-        - capabilities-rest-controller
+        - Capabilities
       summary: Delete capability
       operationId: deleteCapability
       parameters:
@@ -1616,6 +2582,94 @@ components:
         - WinRM
         - http
         - tcp
+    Location:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    Key:
+      type: object
+      properties:
+        type:
+          "$ref": "#/components/schemas/KeyTypes"
+        value:
+          type: string
+    KeyTypes:
+      type: string
+      enum:
+        - ANNOTATED_RELATIONSHIP_ELEMENT
+        - ASSET_ADMINISTRATION_SHELL
+        - BASIC_EVENT_ELEMENT
+        - BLOB
+        - CAPABILITY
+        - CONCEPT_DESCRIPTION
+        - DATA_ELEMENT
+        - ENTITY
+        - EVENT_ELEMENT
+        - FILE
+        - FRAGMENT_REFERENCE
+        - GLOBAL_REFERENCE
+        - IDENTIFIABLE
+        - MULTI_LANGUAGE_PROPERTY
+        - OPERATION
+        - PROPERTY
+        - RANGE
+        - REFERABLE
+        - REFERENCE_ELEMENT
+        - RELATIONSHIP_ELEMENT
+        - SUBMODEL
+        - SUBMODEL_ELEMENT
+        - SUBMODEL_ELEMENT_COLLECTION
+        - SUBMODEL_ELEMENT_LIST
+    Reference:
+      type: object
+      properties:
+        type:
+          "$ref": "#/components/schemas/ReferenceTypes"
+        keys:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Key"
+        referredSemanticId:
+          "$ref": "#/components/schemas/Reference"
+    ReferenceTypes:
+      type: string
+      enum:
+        - EXTERNAL_REFERENCE
+        - MODEL_REFERENCE
+    Message:
+      type: object
+      properties:
+        text:
+          type: string
+        timestamp:
+          type: string
+        messageType:
+          "$ref": "#/components/schemas/MessageTypeEnum"
+        correlationId:
+          type: string
+        code:
+          type: string
+    MessageTypeEnum:
+      type: string
+      enum:
+        - ERROR
+        - EXCEPTION
+        - INFO
+        - WARNING
+    Result:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Message"
     Action:
       required:
         - actionClass
@@ -2096,13 +3150,13 @@ components:
           "$ref": "#/components/schemas/ConnectionType"
         executionEnvironment:
           "$ref": "#/components/schemas/ExecutionEnvironment"
+        isCluster:
+          type: boolean
         connectionTypes:
           uniqueItems: true
           type: array
           items:
             "$ref": "#/components/schemas/ConnectionType"
-        isCluster:
-          type: boolean
       discriminator:
         propertyName: capabilityClass
     CapabilityService:
@@ -2205,17 +3259,6 @@ components:
               type: array
               items:
                 "$ref": "#/components/schemas/DeploymentType"
-    Location:
-      required:
-        - id
-        - name
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
     MultiHostCapabilityService:
       required:
         - ID
@@ -2325,6 +3368,24 @@ components:
       type: object
       allOf:
         - "$ref": "#/components/schemas/Capability"
+    FirmwareUpdateFile:
+      required:
+        - downloadUrl
+        - fileName
+        - fileSizeBytes
+        - uploadDate
+      type: object
+      properties:
+        fileName:
+          type: string
+        fileSizeBytes:
+          type: integer
+          format: int64
+        uploadDate:
+          type: string
+          format: date-time
+        downloadUrl:
+          type: string
     FirmwareUpdateStatus:
       type: string
       enum:
@@ -2342,7 +3403,11 @@ components:
           type: string
         installationChecksum:
           type: string
-    UpdateInformation:
+        softwareNameplateSubmodelId:
+          type: string
+        firmwareUpdateFile:
+          "$ref": "#/components/schemas/FirmwareUpdateFile"
+    UpdateInformationResource:
       type: object
       properties:
         availableFirmwareVersions:
@@ -2375,28 +3440,32 @@ components:
       properties:
         id:
           type: string
+        idShort:
+          type: string
         endpoints:
           type: array
           items:
             "$ref": "#/components/schemas/Endpoint"
-        idShort:
-          type: string
-        submodelDescriptors:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SubmodelDescriptor"
         specificAssetIds:
           type: array
           items:
             "$ref": "#/components/schemas/SpecificAssetId"
+        submodelDescriptors:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SubmodelDescriptor"
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        assetKind:
-          "$ref": "#/components/schemas/AssetKind"
-        assetType:
-          type: string
         globalAssetId:
           type: string
+        assetType:
+          type: string
+        assetKind:
+          "$ref": "#/components/schemas/AssetKind"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
@@ -2405,10 +3474,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
     AssetKind:
       type: string
       enum:
@@ -2483,40 +3548,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
-    Key:
-      type: object
-      properties:
-        type:
-          "$ref": "#/components/schemas/KeyTypes"
-        value:
-          type: string
-    KeyTypes:
-      type: string
-      enum:
-        - ANNOTATED_RELATIONSHIP_ELEMENT
-        - ASSET_ADMINISTRATION_SHELL
-        - BASIC_EVENT_ELEMENT
-        - BLOB
-        - CAPABILITY
-        - CONCEPT_DESCRIPTION
-        - DATA_ELEMENT
-        - ENTITY
-        - EVENT_ELEMENT
-        - FILE
-        - FRAGMENT_REFERENCE
-        - GLOBAL_REFERENCE
-        - IDENTIFIABLE
-        - MULTI_LANGUAGE_PROPERTY
-        - OPERATION
-        - PROPERTY
-        - RANGE
-        - REFERABLE
-        - REFERENCE_ELEMENT
-        - RELATIONSHIP_ELEMENT
-        - SUBMODEL
-        - SUBMODEL_ELEMENT
-        - SUBMODEL_ELEMENT_COLLECTION
-        - SUBMODEL_ELEMENT_LIST
     LangStringNameType:
       type: object
       properties:
@@ -2538,10 +3569,6 @@ components:
           type: string
         endpointProtocol:
           type: string
-        subprotocolBody:
-          type: string
-        subprotocol:
-          type: string
         endpointProtocolVersion:
           type: array
           items:
@@ -2552,22 +3579,10 @@ components:
             "$ref": "#/components/schemas/SecurityAttributeObject"
         subprotocolBodyEncoding:
           type: string
-    Reference:
-      type: object
-      properties:
-        type:
-          "$ref": "#/components/schemas/ReferenceTypes"
-        keys:
-          type: array
-          items:
-            "$ref": "#/components/schemas/Key"
-        referredSemanticId:
-          "$ref": "#/components/schemas/Reference"
-    ReferenceTypes:
-      type: string
-      enum:
-        - EXTERNAL_REFERENCE
-        - MODEL_REFERENCE
+        subprotocolBody:
+          type: string
+        subprotocol:
+          type: string
     SecurityAttributeObject:
       type: object
       properties:
@@ -2603,20 +3618,24 @@ components:
       properties:
         id:
           type: string
+        idShort:
+          type: string
         endpoints:
           type: array
           items:
             "$ref": "#/components/schemas/Endpoint"
         semanticId:
           "$ref": "#/components/schemas/Reference"
-        idShort:
-          type: string
         supplementalSemanticId:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
@@ -2625,10 +3644,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
     Base64UrlEncodedCursor:
       type: object
       properties:
@@ -2636,33 +3651,6 @@ components:
           type: string
         decodedCursor:
           type: string
-    Message:
-      type: object
-      properties:
-        text:
-          type: string
-        timestamp:
-          type: string
-        messageType:
-          "$ref": "#/components/schemas/MessageTypeEnum"
-        correlationId:
-          type: string
-        code:
-          type: string
-    MessageTypeEnum:
-      type: string
-      enum:
-        - ERROR
-        - EXCEPTION
-        - INFO
-        - WARNING
-    Result:
-      type: object
-      properties:
-        messages:
-          type: array
-          items:
-            "$ref": "#/components/schemas/Message"
     GetSubmodelsResult:
       type: object
       properties:
@@ -2690,12 +3678,12 @@ components:
           type: string
         value:
           type: string
-        valueId:
-          "$ref": "#/components/schemas/Reference"
         kind:
           "$ref": "#/components/schemas/QualifierKind"
         valueType:
           "$ref": "#/components/schemas/DataTypeDefXsd"
+        valueId:
+          "$ref": "#/components/schemas/Reference"
         semanticId:
           "$ref": "#/components/schemas/Reference"
         supplementalSemanticIds:
@@ -2719,14 +3707,14 @@ components:
           type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        displayName:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringNameType"
         description:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringTextType"
+        displayName:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringNameType"
         idShort:
           type: string
         category:
@@ -2758,14 +3746,14 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/EmbeddedDataSpecification"
-        displayName:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringNameType"
         description:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringTextType"
+        displayName:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringNameType"
         idShort:
           type: string
         category:
@@ -2802,6 +3790,100 @@ components:
           type: boolean
       additionalProperties:
         type: object
+    ResourceType:
+      required:
+        - manufacturerName
+        - resourceInstanceIds
+        - softwareNameplateIds
+        - typeName
+      type: object
+      properties:
+        typeName:
+          type: string
+        manufacturerName:
+          type: string
+        resourceInstanceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        softwareNameplateIds:
+          type: array
+          items:
+            type: string
+    UpdateInformationResourceType:
+      type: object
+      properties:
+        availableFirmwareVersions:
+          type: array
+          items:
+            "$ref": "#/components/schemas/FirmwareVersionDetails"
+    AssetAdministrationShell:
+      type: object
+      properties:
+        assetInformation:
+          "$ref": "#/components/schemas/AssetInformation"
+        submodels:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Reference"
+        derivedFrom:
+          "$ref": "#/components/schemas/Reference"
+        id:
+          type: string
+        administration:
+          "$ref": "#/components/schemas/AdministrativeInformation"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
+        displayName:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringNameType"
+        idShort:
+          type: string
+        category:
+          type: string
+        extensions:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Extension"
+        embeddedDataSpecifications:
+          type: array
+          items:
+            "$ref": "#/components/schemas/EmbeddedDataSpecification"
+    AssetInformation:
+      type: object
+      properties:
+        specificAssetIds:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SpecificAssetId"
+        defaultThumbnail:
+          "$ref": "#/components/schemas/Resource"
+        globalAssetId:
+          type: string
+        assetType:
+          type: string
+        assetKind:
+          "$ref": "#/components/schemas/AssetKind"
+    Resource:
+      type: object
+      properties:
+        contentType:
+          type: string
+        path:
+          type: string
+    GetReferencesResult:
+      type: object
+      properties:
+        paging_metadata:
+          "$ref": "#/components/schemas/PagedResultPagingMetadata"
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Reference"
     VirtualResourceProvider:
       required:
         - capabilityClass
@@ -2862,6 +3944,8 @@ components:
         macAddress:
           type: string
         firmwareVersion:
+          type: string
+        connectionParameters:
           type: string
         ignored:
           type: boolean
@@ -3108,72 +4192,15 @@ components:
           format: uuid
         capabilityHostType:
           "$ref": "#/components/schemas/CapabilityHostType"
-    AssetAdministrationShell:
-      type: object
-      properties:
-        submodels:
-          type: array
-          items:
-            "$ref": "#/components/schemas/Reference"
-        assetInformation:
-          "$ref": "#/components/schemas/AssetInformation"
-        derivedFrom:
-          "$ref": "#/components/schemas/Reference"
-        id:
-          type: string
-        administration:
-          "$ref": "#/components/schemas/AdministrativeInformation"
-        displayName:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringNameType"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
-        idShort:
-          type: string
-        category:
-          type: string
-        extensions:
-          type: array
-          items:
-            "$ref": "#/components/schemas/Extension"
-        embeddedDataSpecifications:
-          type: array
-          items:
-            "$ref": "#/components/schemas/EmbeddedDataSpecification"
-    AssetInformation:
-      type: object
-      properties:
-        specificAssetIds:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SpecificAssetId"
-        assetKind:
-          "$ref": "#/components/schemas/AssetKind"
-        assetType:
-          type: string
-        globalAssetId:
-          type: string
-        defaultThumbnail:
-          "$ref": "#/components/schemas/Resource"
-    Resource:
-      type: object
-      properties:
-        contentType:
-          type: string
-        path:
-          type: string
   securitySchemes:
     spring_oauth:
       type: oauth2
       description: Oauth2 flow
       flows:
         authorizationCode:
-          authorizationUrl: http://slm.local:7080/auth/realms/fabos/protocol/openid-connect/auth
-          tokenUrl: http://slm.local:7080/auth/realms/fabos/protocol/openid-connect/token
-          refreshUrl: http://slm.local:7080/auth/realms/fabos/protocol/openid-connect/token
+          authorizationUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/auth
+          tokenUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/token
+          refreshUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/token
           scopes: {}
     bearer_auth:
       type: http

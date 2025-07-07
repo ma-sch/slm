@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.service.rest.clusters;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.catalog.CatalogService;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/resources/clusters")
+@Tag(name = "Clusters")
 public class ClustersRestController {
     private final static Logger LOG = LoggerFactory.getLogger(ClustersRestController.class);
     private final ResourcesManager resourcesManager;

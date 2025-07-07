@@ -8,6 +8,7 @@ import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import FirmwareUpdateStatusIcon from "@/components/updates/FirmwareUpdateStatusIcon.vue";
 import formatDate from "@/utils/dateUtils";
+import axios from 'axios'
 
 const props = defineProps({
   resourceId: {
@@ -33,11 +34,11 @@ onMounted(() => {
   )
 });
 
-const tableHeaders = [
-  { title: 'Version', key: 'version', value: 'version' },
-  { title: 'Date', key: 'date', value: 'date' },
-  { title: 'Installation URI', key: 'installationUri', value: 'installationUri' },
-  { title: 'Installation Checksum', key: 'installationChecksum', value: 'installationChecksum' },
+const tableHeadersFiles = [
+  { title: 'Name', key: 'fileName', value: 'fileName' },
+  { title: 'Size', key: 'fileSize', value: 'fileSizeBytes' },
+  { title: 'Date', key: 'fileUploadDate', value: 'uploadDate' },
+  { title: 'Actions', key: 'fileActions', value: 'fileActions' },
 ];
 
 const installedVersionText = computed(() => {
@@ -48,6 +49,23 @@ const installedVersionText = computed(() => {
   const date = updateInformation.value.currentFirmwareVersion?.date;
   return date ? `${version} (${formatDate(date)})` : version;
 });
+
+function humanFileSize(size) {
+  var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
+
+function downloadItem (item) {
+  axios.get(item.downloadUrl, { responseType: 'blob' })
+      .then(response => {
+        const blob = new Blob([response.data])
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = item.fileName
+        link.click()
+        URL.revokeObjectURL(link.href)
+      }).catch(console.error)
+}
 
 </script>
 
@@ -112,6 +130,45 @@ const installedVersionText = computed(() => {
               label="Checksum"
               :text="firmwareVersion.installationChecksum"
             />
+            <RowWithLabel
+              label="File"
+            >
+              <template #content>
+                <v-data-table
+                  v-if="firmwareVersion.firmwareUpdateFile"
+                  :headers="tableHeadersFiles"
+                  :items="[ firmwareVersion.firmwareUpdateFile ]"
+                  hide-default-footer
+                >
+                  <template #item.fileSize="{ item }">
+                    {{ humanFileSize(item.fileSizeBytes) }}
+                  </template>
+                  <template #item.fileUploadDate="{ item }">
+                    {{ formatDate(item.uploadDate) }}
+                  </template>
+                  <template #item.fileActions="{ item }">
+                    <v-icon
+                      class="ml-4"
+                      color="secondary"
+                      @click.prevent="downloadItem(item)"
+                    >
+                      mdi-download
+                    </v-icon>
+
+                    <!--                    <v-icon-->
+                    <!--                      class="ml-4"-->
+                    <!--                      color="error"-->
+                    <!--                      @click="deleteItem(firmwareVersion.softwareNameplateSubmodelId)"-->
+                    <!--                    >-->
+                    <!--                      mdi-delete-->
+                    <!--                    </v-icon>-->
+                  </template>
+                </v-data-table>
+                <div v-else>
+                  No file available
+                </div>
+              </template>
+            </RowWithLabel>
           </template>
         </v-expansion-panel>
       </v-expansion-panels>

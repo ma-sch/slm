@@ -54,9 +54,14 @@ const routes = [
       },
       // Resources
       {
-        name: 'Resources',
-        path: '/resources',
-        component: () => import('@/pages/ResourcesPage.vue'),
+        name: 'Resource Instances',
+        path: '/resources/instances',
+        component: () => import('@/pages/ResourceInstancesPage.vue'),
+      },
+      {
+        name: 'Resource Types',
+        path: '/resources/types',
+        component: () => import('@/pages/ResourceTypesPage.vue'),
       },
       // Clusters
       {

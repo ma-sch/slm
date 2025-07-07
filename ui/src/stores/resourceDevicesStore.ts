@@ -10,6 +10,7 @@ interface ResourceDevicesStoreState{
     apiState: number,
 
     resources: any[],
+    resourceTypes: any[],
     resourceAasDescriptors: any[],
     resourceAASValues: {}
     resourceConnectionTypes: any[],
@@ -27,6 +28,7 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
         apiState: ApiState.INIT,
 
         resources: [],
+        resourceTypes: [],
         resourceAasDescriptors: [],
         resourceAASValues: [],
         resourceConnectionTypes: [],
@@ -213,6 +215,21 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
                             })
                         }
                     }
+                })
+        },
+
+        async getResourceTypes() {
+            return await ResourceManagementClient.resourceTypesApi.getResourceTypes()
+                .then(
+                    response => {
+                        if (response.data){
+                            this.resourceTypes = response.data;
+                        }
+                    }
+                )
+                .catch(e => {
+                    console.debug(e)
+                    this.profiler = [];
                 })
         },
 

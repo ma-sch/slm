@@ -1,6 +1,7 @@
 package org.eclipse.slm.resource_management.service.rest.capabilities;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.resource_management.model.capabilities.*;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/resources")
+@Tag(name = "Capabilities")
 public class CapabilitiesRestController {
     private final static Logger LOG = LoggerFactory.getLogger(CapabilitiesRestController.class);
 

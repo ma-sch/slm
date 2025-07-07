@@ -1,6 +1,7 @@
 package org.eclipse.slm.resource_management.service.rest.discovery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.resource_management.model.capabilities.CapabilityNotFoundException;
 import org.eclipse.slm.resource_management.model.discovery.*;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/resources/discovery")
+@Tag(name = "Discovery")
 public class DiscoveryRestController {
 
     private final DriverRegistryClient driverRegistryClient;

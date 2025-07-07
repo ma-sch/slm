@@ -1,6 +1,7 @@
 package org.eclipse.slm.resource_management.service.rest.profiler;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.resource_management.model.profiler.Profiler;
 import org.eclipse.slm.resource_management.model.profiler.ProfilerDTOApi;
 import org.modelmapper.ModelMapper;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/resources/profiler")
+@Tag(name = "Profiler")
 public class ProfilerRestController {
     private static final Logger LOG = LoggerFactory.getLogger(ProfilerRestController.class);
     private final ProfilerManager profilerManager;
