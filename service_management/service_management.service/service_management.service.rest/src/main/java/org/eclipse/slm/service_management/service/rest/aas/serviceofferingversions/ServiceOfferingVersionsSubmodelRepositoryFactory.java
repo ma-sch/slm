@@ -6,13 +6,14 @@ import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversio
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceOfferingVersionssSubmodelRepositoryFactory implements SubmodelRepositoryFactory {
+public class ServiceOfferingVersionsSubmodelRepositoryFactory implements SubmodelRepositoryFactory {
 
     private final SoftwareNameplateSubmodelServiceFactory softwareNameplateSubmodelServiceFactory;
 
     private final RequirementsSubmodelServiceFactory requirementsSubmodelServiceFactory;
 
-    public ServiceOfferingVersionssSubmodelRepositoryFactory(SoftwareNameplateSubmodelServiceFactory softwareNameplateSubmodelServiceFactory, RequirementsSubmodelServiceFactory requirementsSubmodelServiceFactory) {
+    public ServiceOfferingVersionsSubmodelRepositoryFactory(SoftwareNameplateSubmodelServiceFactory softwareNameplateSubmodelServiceFactory,
+                                                            RequirementsSubmodelServiceFactory requirementsSubmodelServiceFactory) {
         this.softwareNameplateSubmodelServiceFactory = softwareNameplateSubmodelServiceFactory;
         this.requirementsSubmodelServiceFactory = requirementsSubmodelServiceFactory;
     }

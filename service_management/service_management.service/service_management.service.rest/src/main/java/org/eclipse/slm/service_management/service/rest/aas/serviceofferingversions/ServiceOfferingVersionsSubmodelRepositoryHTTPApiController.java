@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ServiceOfferingVersionsSubmodelRepositoryHTTPApiController extends MultiSubmodelRepositoryHTTPApiController {
 
     @Autowired
-    public ServiceOfferingVersionsSubmodelRepositoryHTTPApiController(ServiceOfferingVersionssSubmodelRepositoryFactory submodelRepositoryFactory) {
+    public ServiceOfferingVersionsSubmodelRepositoryHTTPApiController(ServiceOfferingVersionsSubmodelRepositoryFactory submodelRepositoryFactory) {
         super(submodelRepositoryFactory);
     }
 

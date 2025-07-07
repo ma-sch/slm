@@ -2,6 +2,7 @@ package org.eclipse.slm.service_management.service.rest.aas.serviceofferingversi
 
 import org.eclipse.slm.common.aas.repositories.submodels.AbstractSubmodelRepository;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.requirements.RequirementsSubmodel;
+import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.requirements.RequirementsSubmodelService;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.requirements.RequirementsSubmodelServiceFactory;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.softwarenameplate.SoftwareNameplateSubmodel;
 import org.eclipse.slm.service_management.service.rest.aas.serviceofferingversions.softwarenameplate.SoftwareNameplateSubmodelServiceFactory;
