@@ -97,6 +97,7 @@ public class ResourcesRestController {
                 createResourceRequest.getResourceHostname(),
                 createResourceRequest.getResourceIp(),
                 null,
+                null,
                 createResourceRequest.getDigitalNameplateV3()
         );
 
@@ -117,6 +118,7 @@ public class ResourcesRestController {
                 null,
                 createResourceRequest.getResourceHostname(),
                 createResourceRequest.getResourceIp(),
+                null,
                 null,
                 createResourceRequest.getDigitalNameplateV3()
         );
