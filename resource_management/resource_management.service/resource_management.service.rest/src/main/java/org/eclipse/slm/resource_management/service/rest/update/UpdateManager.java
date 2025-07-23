@@ -3,10 +3,13 @@ package org.eclipse.slm.resource_management.service.rest.update;
 import org.eclipse.digitaltwin.aas4j.v3.model.Property;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElementCollection;
+import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
+import org.eclipse.slm.common.aas.repositories.exceptions.SubmodelNotFoundException;
 import org.eclipse.slm.common.minio.client.MinioClient;
 import org.eclipse.slm.common.minio.model.exceptions.*;
+import org.eclipse.slm.common.utils.files.FileDownloader;
 import org.eclipse.slm.resource_management.model.resource.ResourceAas;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceTypeNotFoundException;
 import org.eclipse.slm.resource_management.model.update.*;
@@ -146,6 +149,39 @@ public class UpdateManager {
         } catch (IOException e) {
             throw new MinioUploadException(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
         }
+    }
+
+    public void downloadFirmwareUpdateFileFromVendor(String softwareNameplateId, JwtAuthenticationToken jwtAuthenticationToken) {
+        var softwareNameplateOptional = this.submodelRegistryClient.findSubmodelDescriptor(softwareNameplateId);
+        if (softwareNameplateOptional.isEmpty()) {
+            LOG.error("Software nameplate with ID {} not found", softwareNameplateId);
+            throw new SubmodelNotFoundException(softwareNameplateId);
+        }
+
+        var submodelRepositoryClient = SubmodelRepositoryClientFactory.FromSubmodelDescriptor(softwareNameplateOptional.get(), jwtAuthenticationToken);
+
+        var softwareNameplateSubmodel = submodelRepositoryClient.getSubmodel(softwareNameplateId);
+        softwareNameplateSubmodel.getSubmodelElements().stream()
+                .filter(se -> se.getIdShort().equals("SoftwareNameplateType"))
+                .findAny()
+                .ifPresent(softwareNameplateTypeSmc -> {
+
+                    ((SubmodelElementCollection) softwareNameplateTypeSmc).getValue()
+                            .stream().filter(se -> se.getIdShort().equals("InstallationURI"))
+                            .findAny()
+                            .ifPresent(prop -> {
+                                var installationUri = ((Property) prop).getValue();
+                                if (installationUri != null && !installationUri.isEmpty()) {
+                                    try {
+                                        var firmwareUpdateFile = FileDownloader.downloadFile(installationUri);
+                                        var softwareNameplateIdBase64Encoded = Base64.getEncoder().encodeToString(softwareNameplateId.getBytes());
+                                        this.addOrUpdateFirmwareUpdateFile(softwareNameplateIdBase64Encoded, firmwareUpdateFile);
+                                    } catch (Exception e) {
+                                        LOG.error("Error downloading firmware update file: {}", e.getMessage());
+                                    }
+                                }
+                            });
+                });
     }
 
     private List<Submodel> getSoftwareNameplateSubmodelsOfResource(UUID resourceId, JwtAuthenticationToken jwtAuthenticationToken) {
