@@ -186,6 +186,7 @@ public class ResourcesManagerITDev {
                     "test-host-ssh",
                     "1.2.3.4",
                     null,
+                    null,
                     digitalNameplate
             );
             resourcesManager.setRemoteAccessOfResource(
@@ -205,6 +206,7 @@ public class ResourcesManagerITDev {
                     null,
                     "test-host-winrm",
                     "1.2.3.5",
+                    null,
                     null,
                     digitalNameplate
             );
@@ -361,6 +363,7 @@ public class ResourcesManagerITDev {
                     hostname,
                     ip,
                     null,
+                    null,
                     digitalNameplate
             );
 
@@ -461,6 +464,7 @@ public class ResourcesManagerITDev {
                     hostname,
                     ip,
                     null,
+                    null,
                     digitalNameplate
             );
 
@@ -479,6 +483,7 @@ public class ResourcesManagerITDev {
                     hostname,
                     ip,
                     null,
+                    null,
                     digitalNameplate
             );
 
@@ -494,6 +499,7 @@ public class ResourcesManagerITDev {
                     null,
                     hostname,
                     ip,
+                    null,
                     null,
                     digitalNameplate
             );

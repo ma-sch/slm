@@ -33,7 +33,7 @@ import javax.net.ssl.SSLException;
 import java.util.*;
 
 @Component
-class ClusterDeleteFunctions extends AbstractClusterFunctions implements IAwxJobObserverListener {
+public class ClusterDeleteFunctions extends AbstractClusterFunctions implements IAwxJobObserverListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(ClusterDeleteFunctions.class);
 

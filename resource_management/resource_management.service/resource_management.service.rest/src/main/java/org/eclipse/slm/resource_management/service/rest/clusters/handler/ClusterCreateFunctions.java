@@ -43,7 +43,7 @@ import java.io.StringReader;
 import java.util.*;
 
 @Component
-class ClusterCreateFunctions extends AbstractClusterFunctions implements IAwxJobObserverListener {
+public class ClusterCreateFunctions extends AbstractClusterFunctions implements IAwxJobObserverListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(ClusterCreateFunctions.class);
     private final ConsulKeyValueApiClient consulKeyValueApiClient;

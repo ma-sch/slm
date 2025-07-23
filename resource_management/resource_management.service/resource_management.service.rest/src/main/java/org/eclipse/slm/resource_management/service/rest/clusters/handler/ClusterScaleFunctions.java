@@ -38,7 +38,7 @@ import javax.net.ssl.SSLException;
 import java.util.*;
 
 @Component
-class ClusterScaleFunctions extends AbstractClusterFunctions implements IAwxJobObserverListener {
+public class ClusterScaleFunctions extends AbstractClusterFunctions implements IAwxJobObserverListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(ClusterScaleFunctions.class);
 

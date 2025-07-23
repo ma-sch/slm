@@ -26,7 +26,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.util.*;
 
 @Component
-class ClusterGetFunctions extends AbstractClusterFunctions {
+public class ClusterGetFunctions extends AbstractClusterFunctions {
     private final static Logger LOG = LoggerFactory.getLogger(ClusterGetFunctions.class);
 
     public ClusterGetFunctions(
