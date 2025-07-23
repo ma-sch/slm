@@ -1,4 +1,4 @@
-package org.eclipse.slm.resource_management.service.rest.handler;
+package org.eclipse.slm.resource_management.service.rest.clusters.handler;
 
 import org.eclipse.slm.common.awx.client.AwxCredential;
 import org.eclipse.slm.common.awx.client.observer.AwxJobExecutor;

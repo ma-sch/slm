@@ -15,6 +15,7 @@ import org.eclipse.slm.resource_management.model.cluster.ClusterCreateRequest;
 import org.eclipse.slm.resource_management.model.consul.capability.MultiHostCapabilityService;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
 import org.eclipse.slm.resource_management.persistence.api.CapabilityJpaRepository;
+import org.eclipse.slm.resource_management.service.rest.clusters.handler.*;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesConsulClient;
 import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.*;

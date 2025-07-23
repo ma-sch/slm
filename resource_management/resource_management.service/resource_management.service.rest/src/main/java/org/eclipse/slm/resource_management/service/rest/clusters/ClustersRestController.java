@@ -18,7 +18,7 @@ import org.eclipse.slm.resource_management.model.capabilities.DeploymentCapabili
 import org.eclipse.slm.resource_management.model.capabilities.DeploymentCapabilityDTOApi;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
 import org.eclipse.slm.resource_management.persistence.api.CapabilityJpaRepository;
-import org.eclipse.slm.resource_management.service.rest.handler.ClusterHandler;
+import org.eclipse.slm.resource_management.service.rest.clusters.handler.ClusterHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.commons.lang3.NotImplementedException;
 import org.modelmapper.ModelMapper;
