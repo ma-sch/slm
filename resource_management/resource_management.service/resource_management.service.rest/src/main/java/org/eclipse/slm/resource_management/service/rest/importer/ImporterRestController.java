@@ -71,7 +71,7 @@ public class ImporterRestController {
 
         for (var device : importDefinition.getDevices()) {
             var addedResource = resourcesManager.addExistingResource(jwtAuthenticationToken,
-                    device.resourceId, device.assetId, device.hostname, device.ipAddress, device.firmwareVersion, new DigitalNameplateV3());
+                    device.resourceId, device.assetId, device.hostname, device.ipAddress, device.firmwareVersion, null, new DigitalNameplateV3());
 
             if (device.connectionPort != null
                 && device.connectionType != null

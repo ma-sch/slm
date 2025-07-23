@@ -30,6 +30,8 @@ class BasicResource
 
     var remoteAccessService: RemoteAccessService? = null
 
+    var driverId: String? = null
+
     constructor(id: UUID, hostname: String, ip: String) : this(id) {
         this.hostname = hostname;
         this.ip = ip;

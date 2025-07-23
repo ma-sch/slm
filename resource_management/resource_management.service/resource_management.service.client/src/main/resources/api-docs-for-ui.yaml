@@ -336,6 +336,75 @@ paths:
               schema:
                 type: string
                 format: uuid
+  "/resources/{resourceId}/updates/jobs":
+    get:
+      tags:
+        - Updates
+      summary: Get firmware updates jobs of resource
+      operationId: getFirmwareUpdateJobsOfResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/FirmwareUpdateJob"
+    post:
+      tags:
+        - Updates
+      summary: Start firmware update job for a resource
+      operationId: prepareFirmwareUpdateOnResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: softwareNameplateId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  "/resources/{resourceId}/updates/jobs/{firmwareUpdateJobId}":
+    post:
+      tags:
+        - Updates
+      summary: Prepare firmware update on resource
+      operationId: prepareFirmwareUpdateOnResource_1
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: firmwareUpdateJobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: event
+          in: query
+          required: true
+          schema:
+            "$ref": "#/components/schemas/FirmwareUpdateEvents"
+      responses:
+        '200':
+          description: OK
   "/resources/{resourceId}/submodels":
     get:
       tags:
@@ -386,6 +455,21 @@ paths:
             "*/*":
               schema:
                 type: string
+  "/resources/updates/{softwareNameplateId}/file/download":
+    post:
+      tags:
+        - Updates
+      summary: Download firmware update file from vendor
+      operationId: downloadFirmwareUpdateFileFromVendor
+      parameters:
+        - name: softwareNameplateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
   "/resources/types/aas/submodel-refs":
     get:
       tags:
@@ -2593,13 +2677,24 @@ components:
           format: uuid
         name:
           type: string
+    FirmwareUpdateEvents:
+      type: string
+      enum:
+        - PREPARATION_COMPLETED
+        - PREPARATION_FAILED
+        - ACTIVATION_TRIGGERED
+        - ACTIVATION_COMPLETED
+        - ACTIVATION_FAILED
+        - CANCEL_TRIGGERED
+        - CANCEL_COMPLETED
+        - CANCEL_FAILED
     Key:
       type: object
       properties:
-        type:
-          "$ref": "#/components/schemas/KeyTypes"
         value:
           type: string
+        type:
+          "$ref": "#/components/schemas/KeyTypes"
     KeyTypes:
       type: string
       enum:
@@ -3109,6 +3204,8 @@ components:
               - "$ref": "#/components/schemas/SingleHostCapabilityService"
         remoteAccessService:
           "$ref": "#/components/schemas/RemoteAccessService"
+        driverId:
+          type: string
     Capability:
       required:
         - actions
@@ -3420,17 +3517,42 @@ components:
           "$ref": "#/components/schemas/FirmwareVersionDetails"
         firmwareUpdateStatus:
           "$ref": "#/components/schemas/FirmwareUpdateStatus"
+    FirmwareUpdateJob:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        resourceId:
+          type: string
+          format: uuid
+        softwareNameplateId:
+          type: string
+        firmwareUpdateState:
+          "$ref": "#/components/schemas/FirmwareUpdateStates"
+    FirmwareUpdateStates:
+      type: string
+      enum:
+        - PREPARING
+        - PREPARED
+        - ACTIVATING
+        - ACTIVATED
+        - CANCELING
+        - CANCELED
+        - FAILED
     AdministrativeInformation:
       type: object
       properties:
         version:
           type: string
-        creator:
-          "$ref": "#/components/schemas/Reference"
-        revision:
-          type: string
         templateId:
           type: string
+        revision:
+          type: string
+        creator:
+          "$ref": "#/components/schemas/Reference"
         embeddedDataSpecifications:
           type: array
           items:
@@ -3446,14 +3568,6 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Endpoint"
-        specificAssetIds:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SpecificAssetId"
-        submodelDescriptors:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SubmodelDescriptor"
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
         globalAssetId:
@@ -3462,10 +3576,14 @@ components:
           type: string
         assetKind:
           "$ref": "#/components/schemas/AssetKind"
-        description:
+        specificAssetIds:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringTextType"
+            "$ref": "#/components/schemas/SpecificAssetId"
+        submodelDescriptors:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SubmodelDescriptor"
         displayName:
           type: array
           items:
@@ -3474,6 +3592,10 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
     AssetKind:
       type: string
       enum:
@@ -3518,10 +3640,10 @@ components:
     EmbeddedDataSpecification:
       type: object
       properties:
-        dataSpecificationContent:
-          "$ref": "#/components/schemas/DataSpecificationContent"
         dataSpecification:
           "$ref": "#/components/schemas/Reference"
+        dataSpecificationContent:
+          "$ref": "#/components/schemas/DataSpecificationContent"
     Endpoint:
       type: object
       properties:
@@ -3567,8 +3689,6 @@ components:
       properties:
         href:
           type: string
-        endpointProtocol:
-          type: string
         endpointProtocolVersion:
           type: array
           items:
@@ -3579,19 +3699,21 @@ components:
             "$ref": "#/components/schemas/SecurityAttributeObject"
         subprotocolBodyEncoding:
           type: string
-        subprotocolBody:
+        endpointProtocol:
           type: string
         subprotocol:
+          type: string
+        subprotocolBody:
           type: string
     SecurityAttributeObject:
       type: object
       properties:
-        type:
-          "$ref": "#/components/schemas/SecurityTypeEnum"
         value:
           type: string
         key:
           type: string
+        type:
+          "$ref": "#/components/schemas/SecurityTypeEnum"
     SecurityTypeEnum:
       type: string
       enum:
@@ -3626,16 +3748,12 @@ components:
             "$ref": "#/components/schemas/Endpoint"
         semanticId:
           "$ref": "#/components/schemas/Reference"
+        administration:
+          "$ref": "#/components/schemas/AdministrativeInformation"
         supplementalSemanticId:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
-        administration:
-          "$ref": "#/components/schemas/AdministrativeInformation"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
@@ -3644,6 +3762,10 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/Extension"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
     Base64UrlEncodedCursor:
       type: object
       properties:
@@ -3674,9 +3796,9 @@ components:
     Qualifier:
       type: object
       properties:
-        type:
-          type: string
         value:
+          type: string
+        type:
           type: string
         kind:
           "$ref": "#/components/schemas/QualifierKind"
@@ -3707,14 +3829,14 @@ components:
           type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringNameType"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         idShort:
           type: string
         category:
@@ -3746,14 +3868,14 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/EmbeddedDataSpecification"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringNameType"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         idShort:
           type: string
         category:
@@ -3821,26 +3943,26 @@ components:
     AssetAdministrationShell:
       type: object
       properties:
-        assetInformation:
-          "$ref": "#/components/schemas/AssetInformation"
         submodels:
           type: array
           items:
             "$ref": "#/components/schemas/Reference"
+        assetInformation:
+          "$ref": "#/components/schemas/AssetInformation"
         derivedFrom:
           "$ref": "#/components/schemas/Reference"
         id:
           type: string
         administration:
           "$ref": "#/components/schemas/AdministrativeInformation"
-        description:
-          type: array
-          items:
-            "$ref": "#/components/schemas/LangStringTextType"
         displayName:
           type: array
           items:
             "$ref": "#/components/schemas/LangStringNameType"
+        description:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LangStringTextType"
         idShort:
           type: string
         category:
@@ -3856,24 +3978,24 @@ components:
     AssetInformation:
       type: object
       properties:
-        specificAssetIds:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SpecificAssetId"
-        defaultThumbnail:
-          "$ref": "#/components/schemas/Resource"
         globalAssetId:
           type: string
         assetType:
           type: string
         assetKind:
           "$ref": "#/components/schemas/AssetKind"
+        specificAssetIds:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SpecificAssetId"
+        defaultThumbnail:
+          "$ref": "#/components/schemas/Resource"
     Resource:
       type: object
       properties:
-        contentType:
-          type: string
         path:
+          type: string
+        contentType:
           type: string
     GetReferencesResult:
       type: object

@@ -1,0 +1,12 @@
+package org.eclipse.slm.resource_management.model.update;
+
+public enum FirmwareUpdateEvents {
+    PREPARATION_COMPLETED,
+    PREPARATION_FAILED,
+    ACTIVATION_TRIGGERED,
+    ACTIVATION_COMPLETED,
+    ACTIVATION_FAILED,
+    CANCEL_TRIGGERED,
+    CANCEL_COMPLETED,
+    CANCEL_FAILED
+}

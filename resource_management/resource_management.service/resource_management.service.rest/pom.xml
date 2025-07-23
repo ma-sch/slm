@@ -160,6 +160,11 @@
             <version>${spring-cloud-contract-wiremock.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.statemachine</groupId>
+            <artifactId>spring-statemachine-core</artifactId>
+            <version>${spring.statemachine.version}</version>
+        </dependency>
         <!-- Utils !-->
         <dependency>
             <groupId>commons-validator</groupId>

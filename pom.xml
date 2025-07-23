@@ -60,6 +60,7 @@
         <spring.boot.version>3.3.9</spring.boot.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
+        <spring.statemachine.version>4.0.0</spring.statemachine.version>
         <springaddons-c4-soft.version>7.8.10</springaddons-c4-soft.version>
         <springdoc.openapi.version>2.5.0</springdoc.openapi.version>
         <swagger.version>2.2.22</swagger.version>

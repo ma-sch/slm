@@ -1,8 +1,7 @@
-package org.eclipse.slm.service_management.model
+package org.eclipse.slm.common.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import org.eclipse.slm.service_management.model.offerings.ServiceOffering
 import org.springframework.data.domain.Persistable
 import java.util.*
 import kotlin.jvm.Transient
@@ -34,8 +33,7 @@ abstract class AbstractBaseEntityUuid(id: UUID? = null) : Persistable<UUID> {
         return when {
             this === other -> true
             other == null -> false
-            other !is ServiceOffering -> false
-            else -> getId() == other.id
+            else -> false
         }
     }
 

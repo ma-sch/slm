@@ -1,4 +1,4 @@
-package org.eclipse.slm.resource_management.service.rest.handler;
+package org.eclipse.slm.resource_management.service.rest.clusters.handler;
 
 import org.eclipse.slm.common.awx.client.observer.AwxJobObserver;
 import org.eclipse.slm.common.consul.client.apis.ConsulAclApiClient;
@@ -12,7 +12,6 @@ import org.eclipse.slm.common.vault.client.VaultClient;
 import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.service.rest.capabilities.MultiHostCapabilitiesConsulClient;
-import org.eclipse.slm.resource_management.service.rest.handler.ClusterJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

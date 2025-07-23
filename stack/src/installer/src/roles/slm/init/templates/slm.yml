@@ -263,7 +263,8 @@ services:
       AAS_SUBMODELREGISTRY_URL: "{{ aas.submodel_registry.url.internal }}"
       AAS_SUBMODELREPOSITORY_URL: "{{ aas.submodel_repository.url.internal }}"
       AAS_CONCEPTDESCRIPTIONSREPOSITORY_URL: "{{ aas.concept_description_repository.url.internal }}"
-      IRS_URL: "{{ irs.url.internal }}"
+      IRS_URL_INTERNAL: "{{ irs.url.internal }}"
+      IRS_URL_EXTERNAL: "{{ irs.url.external }}"
       KEYCLOAK_AUTHSERVERURL: "{{ keycloak.url.external }}"
     networks:
       default:

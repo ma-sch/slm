@@ -1,10 +1,9 @@
 package org.eclipse.slm.resource_management.service.rest.capabilities;
 
-import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockAuthentication;
 import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockJwtAuth;
 import org.eclipse.slm.resource_management.persistence.api.CapabilityJpaRepository;
-import org.eclipse.slm.resource_management.service.rest.handler.provider.ServiceHosterHandler;
-import org.eclipse.slm.resource_management.service.rest.handler.provider.VirtualResourceProviderHandler;
+import org.eclipse.slm.resource_management.service.rest.clusters.handler.provider.ServiceHosterHandler;
+import org.eclipse.slm.resource_management.service.rest.clusters.handler.provider.VirtualResourceProviderHandler;
 import org.eclipse.slm.resource_management.model.capabilities.CapabilityType;
 import org.eclipse.slm.resource_management.model.capabilities.VirtualizationCapability;
 import org.eclipse.slm.resource_management.model.actions.AwxAction;

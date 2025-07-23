@@ -1,4 +1,4 @@
-package org.eclipse.slm.service_management.model
+package org.eclipse.slm.common.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*

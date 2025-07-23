@@ -250,15 +250,21 @@ public class ResourcesManager {
             String resourceHostname,
             String resourceIp,
             String firmwareVersion,
+            String driverId,
             DigitalNameplateV3 digitalNameplateV3
     ) throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException {
         /// Create realm role in Keycloak for new resource
         var resourceKeycloakRoleName = "resource_" + resourceId;
         this.keycloakUtil.createRealmRoleAndAssignToUser(jwtAuthenticationToken, resourceKeycloakRoleName);
 
+        if (driverId == null) {
+            driverId = "N/A";
+        }
+
         var resource = new BasicResource(resourceId, resourceHostname, resourceIp);
         resource.setAssetId(assetId);
         resource.setFirmwareVersion(firmwareVersion);
+        resource.setDriverId(driverId);
         resource = this.resourcesConsulClient.addResource(resource);
 
         //Add Health Checks if Capabilities with Health Checks are available:

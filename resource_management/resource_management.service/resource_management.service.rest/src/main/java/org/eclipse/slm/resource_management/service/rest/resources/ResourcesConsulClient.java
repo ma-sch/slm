@@ -32,6 +32,7 @@ public class ResourcesConsulClient {
     private static final String META_KEY_ASSET_ID = "assetId";
     private static final String META_KEY_FIRMWARE_VERSION = "firmwareVersion";
     private static final String META_KEY_CONNECTION_TYPE = "resourceConnectionType";
+    private static final String META_KEY_DRIVER_ID = "driverId";
     private final ConsulNodesApiClient consulNodesApiClient;
     private final ConsulAclApiClient consulAclApiClient;
     private final ConsulServicesApiClient consulServicesApiClient;
@@ -240,6 +241,9 @@ public class ResourcesConsulClient {
         }
         if (resource.getFirmwareVersion() != null) {
             meta.put(META_KEY_FIRMWARE_VERSION, resource.getFirmwareVersion());
+        }
+        if (resource.getDriverId() != null) {
+            meta.put(META_KEY_DRIVER_ID, resource.getDriverId());
         }
         node.setNodeMeta(meta);
 

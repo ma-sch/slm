@@ -3,19 +3,28 @@ package org.eclipse.slm.resource_management.service.rest.update;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.slm.common.minio.model.exceptions.*;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceTypeNotFoundException;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvents;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJob;
 import org.eclipse.slm.resource_management.model.update.UpdateInformationResource;
 import org.eclipse.slm.resource_management.model.update.UpdateInformationResourceType;
+import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobsJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
+import javax.ws.rs.QueryParam;
 import java.io.IOException;
 import java.util.*;
 
@@ -28,8 +37,20 @@ public class UpdatesRestController {
 
     private final UpdateManager updateManager;
 
-    public UpdatesRestController(UpdateManager updateManager) {
+    private final FirmwareUpdateJobsJpaRepository firmwareUpdateJobsJpaRepository;
+
+    private final FirmwareUpdateJobFactory firmwareUpdateJobFactory;
+
+    private final FirmwareUpdateJobStateMachineFactory firmwareUpdateJobStateMachineFactory;
+
+    public UpdatesRestController(UpdateManager updateManager,
+                                 FirmwareUpdateJobsJpaRepository firmwareUpdateJobsJpaRepository,
+                                 FirmwareUpdateJobFactory firmwareUpdateJobFactory,
+                                 FirmwareUpdateJobStateMachineFactory firmwareUpdateJobStateMachineFactory) {
         this.updateManager = updateManager;
+        this.firmwareUpdateJobsJpaRepository = firmwareUpdateJobsJpaRepository;
+        this.firmwareUpdateJobFactory = firmwareUpdateJobFactory;
+        this.firmwareUpdateJobStateMachineFactory = firmwareUpdateJobStateMachineFactory;
     }
 
     @RequestMapping(value = "/{resourceId}/updates", method = RequestMethod.GET)
@@ -93,5 +114,59 @@ public class UpdatesRestController {
     ) throws MinioObjectPathNameException, MinioBucketNameException, MinioRemoveObjectException {
         updateManager.deleteFirmwareUpdateFile(softwareNameplateIdBase64Encoded);
     }
+
+    @RequestMapping(value = "/updates/{softwareNameplateId}/file/download",
+            method = RequestMethod.POST)
+    @Operation(summary="Download firmware update file from vendor")
+    public void downloadFirmwareUpdateFileFromVendor(
+            @PathVariable(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded
+    ) throws MinioUploadException, MinioObjectPathNameException, MinioBucketNameException, MinioBucketCreateException, MinioRemoveObjectException {
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        var softwareNameplateId = Base64UrlEncodedIdentifier.fromEncodedValue(softwareNameplateIdBase64Encoded).getIdentifier();
+
+        updateManager.downloadFirmwareUpdateFileFromVendor(softwareNameplateId, jwtAuthenticationToken);
+    }
+
+    @RequestMapping(value = "/{resourceId}/updates/jobs",
+            method = RequestMethod.GET)
+    @Operation(summary="Get firmware updates jobs of resource")
+    public ResponseEntity<List<FirmwareUpdateJob>> getFirmwareUpdateJobsOfResource(
+            @PathVariable(name = "resourceId")  UUID resourceId
+    ) {
+        var firmwareUpdateJobs = this.firmwareUpdateJobsJpaRepository.findByResourceId(resourceId);
+
+        return ResponseEntity.ok(firmwareUpdateJobs);
+    }
+
+    @RequestMapping(value = "/{resourceId}/updates/jobs",
+            method = RequestMethod.POST)
+    @Operation(summary="Start firmware update job for a resource")
+    public void prepareFirmwareUpdateOnResource(
+            @PathVariable(name = "resourceId")  UUID resourceId,
+            @RequestParam(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded
+    ) throws Exception {
+        var softwareNameplateId = Base64UrlEncodedIdentifier.fromEncodedValue(softwareNameplateIdBase64Encoded).getIdentifier();
+
+        this.firmwareUpdateJobFactory.create(resourceId, softwareNameplateId);
+    }
+
+    @RequestMapping(value = "/{resourceId}/updates/jobs/{firmwareUpdateJobId}",
+            method = RequestMethod.POST)
+    @Operation(summary="Prepare firmware update on resource")
+    public void prepareFirmwareUpdateOnResource(
+            @PathVariable(name = "resourceId")  UUID resourceId,
+            @PathVariable(name = "firmwareUpdateJobId")  UUID firmwareUpdateJobId,
+            @RequestParam(name = "event") FirmwareUpdateEvents event
+            ) throws Exception {
+        var firmwareUpdateJobStateMachine = firmwareUpdateJobStateMachineFactory.create(firmwareUpdateJobId);
+
+        Message<FirmwareUpdateEvents> message = MessageBuilder.withPayload(event)
+                        .setHeader("resourceId", resourceId)
+                        .setHeader("firmwareUpdateJobId", firmwareUpdateJobId)
+                        .build();
+
+        firmwareUpdateJobStateMachine.sendEvent(Mono.just(message)).blockFirst();
+    }
+
 
 }

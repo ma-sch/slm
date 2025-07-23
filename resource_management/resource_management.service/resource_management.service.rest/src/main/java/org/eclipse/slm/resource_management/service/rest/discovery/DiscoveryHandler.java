@@ -187,6 +187,7 @@ public class DiscoveryHandler implements DiscoveryJobListener {
                         discoveredResource.getIpAddress(),
                         discoveredResource.getIpAddress(),
                         discoveredResource.getFirmwareVersion(),
+                        discoveryJob.getDriverId(),
                         digitalNameplateV3.build());
 
                 resourcesManager.setConnectionParametersOfResource(resourceId, discoveredResource.getConnectionParameters());

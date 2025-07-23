@@ -1,4 +1,4 @@
-package org.eclipse.slm.resource_management.service.rest.handler.provider;
+package org.eclipse.slm.resource_management.service.rest.clusters.handler.provider;
 
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;

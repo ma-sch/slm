@@ -69,10 +69,10 @@ const onRowClickResourceInstance = (click, row) => {
             @click:row="onRowClickResourceInstance"
           >
             <template #item.hostname="{ item }">
-              {{ resourceDevicesStore.resourceById(item.id).hostname }}
+              {{ resourceDevicesStore.resourceById(item.id)?.hostname ?? "N/A" }}
             </template>
             <template #item.ip="{ item }">
-              {{ resourceDevicesStore.resourceById(item.id).ip }}
+              {{ resourceDevicesStore.resourceById(item.id)?.ip ?? "N/A" }}
             </template>
             <template #item.id="{ item }">
               {{ item.id }}
@@ -96,7 +96,7 @@ const onRowClickResourceInstance = (click, row) => {
 }
 
 .expanded-row-highlight {
-  background:  rgba(var(--v-theme-secondary), 0.1);
+  background:  rgba(var(--v-theme-secondary), 0.04);
 }
 
 .expanded-table {

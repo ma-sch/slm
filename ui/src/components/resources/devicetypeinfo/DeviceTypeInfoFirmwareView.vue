@@ -9,6 +9,7 @@ import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import formatDate from "@/utils/dateUtils";
 import axios from 'axios'
 import {useToast} from "vue-toast-notification";
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 
 const $toast = useToast();
 
@@ -48,7 +49,7 @@ function humanFileSize(size) {
   return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
-function downloadItem (item) {
+function downloadFile (item) {
   axios.get(item.downloadUrl, { responseType: 'blob' })
       .then(response => {
         const blob = new Blob([response.data])
@@ -58,6 +59,33 @@ function downloadItem (item) {
         link.click()
         URL.revokeObjectURL(link.href)
       }).catch(console.error)
+}
+
+
+const firmwareDownloadFromVendorActive = ref(false);
+const showConfirmFirmwareUpdateDownloadFromVendorDialog = ref(false);
+const firmwareUpdateDownloadFromVendorConfirmed = ref(false);
+function triggerFileDownloadFromVendor (firmwareVersion) {
+  if (firmwareVersion.firmwareUpdateFile && !firmwareUpdateDownloadFromVendorConfirmed.value) {
+    showConfirmFirmwareUpdateDownloadFromVendorDialog.value = true
+    return;
+  }
+
+  let softwareNameplateIdBase64Encoded = btoa(firmwareVersion.softwareNameplateSubmodelId)
+  firmwareDownloadFromVendorActive.value = true;
+  ResourceManagementClient.resourcesUpdatesApi.downloadFirmwareUpdateFileFromVendor(softwareNameplateIdBase64Encoded)
+      .then(() => {
+        firmwareDownloadFromVendorActive.value = false;
+        $toast.success("Firmware update successfully downloaded from vendor");
+        refreshUpdateInformation();   // Refresh the update information after file download
+      })
+      .catch(error => {
+        firmwareDownloadFromVendorActive.value = false;
+        $toast.success("Failed to download firmware update from vendor");
+        logRequestError(error)
+      })
+
+  firmwareUpdateDownloadFromVendorConfirmed.value = false;
 }
 
 // File handling
@@ -73,20 +101,14 @@ async function uploadFile(softwareNameplateId) {
   const formData = new FormData();
   formData.append("file", selectedFile.value);
 
-  // Beispiel-Upload-Request (URL anpassen)
   try {
-    console.log(softwareNameplateId)
     let softwareNameplateIdBase64Encoded = btoa(softwareNameplateId)
     ResourceManagementClient.resourcesUpdatesApi.addOrUpdateFirmwareUpdateFile(softwareNameplateIdBase64Encoded, selectedFile.value)
         .then(() => {
           $toast.success("File uploaded successfully");
-          // Refresh the update information after upload
-          ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResourceType(props.resourceType.typeName)
-              .then(response => {
-                updateInformation.value = response.data;
-              }).catch(logRequestError);
+          selectedFile.value = null;
+          refreshUpdateInformation();   // Refresh the update information after upload
         })
-
   } catch (e) {
     $toast.error("Failed to upload file");
     console.log(e)
@@ -97,13 +119,16 @@ function deleteItem (softwareNameplateSubmodelId) {
   let softwareNameplateIdBase64Encoded = btoa(softwareNameplateSubmodelId)
   ResourceManagementClient.resourcesUpdatesApi.deleteFirmwareUpdateFile(softwareNameplateIdBase64Encoded).then(
       () => {
-        // Refresh the update information after deletion
-        ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResourceType(props.resourceType.typeName)
-            .then(response => {
-              updateInformation.value = response.data;
-            }).catch(logRequestError);
+        refreshUpdateInformation();   // Refresh the update information after deletion
       }
   )
+}
+
+function refreshUpdateInformation() {
+  ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResourceType(props.resourceType.typeName)
+      .then(response => {
+        updateInformation.value = response.data;
+      }).catch(logRequestError);
 }
 
 </script>
@@ -146,6 +171,29 @@ function deleteItem (softwareNameplateSubmodelId) {
                   :href="firmwareVersion.installationUri"
                   target="_blank"
                 >{{ firmwareVersion.installationUri }}</a>
+
+                <v-icon
+                    v-if="!firmwareDownloadFromVendorActive"
+                    class="ml-4"
+                    color="secondary"
+                    @click.prevent="triggerFileDownloadFromVendor(firmwareVersion)"
+                >
+                  mdi-download
+                </v-icon>
+                <v-progress-circular
+                    v-if="firmwareDownloadFromVendorActive"
+                    indeterminate
+                    class="mx-5"
+                    color="secondary"
+                    size="16"
+                    width="2"/>
+                <ConfirmDialog
+                    :show="showConfirmFirmwareUpdateDownloadFromVendorDialog"
+                    title="Firmware update file already exists"
+                    text="Do you want to replace the existing firmware update file?"
+                    @confirmed="showConfirmFirmwareUpdateDownloadFromVendorDialog = false; firmwareUpdateDownloadFromVendorConfirmed = true; triggerFileDownloadFromVendor(firmwareVersion)"
+                    @canceled="showConfirmFirmwareUpdateDownloadFromVendorDialog = false; firmwareUpdateDownloadFromVendorConfirmed = false;"
+                />
               </template>
             </RowWithLabel>
             <RowWithLabel
@@ -172,7 +220,7 @@ function deleteItem (softwareNameplateSubmodelId) {
                     <v-icon
                       class="ml-4"
                       color="secondary"
-                      @click.prevent="downloadItem(item)"
+                      @click.prevent="downloadFile(item)"
                     >
                       mdi-download
                     </v-icon>
