@@ -126,4 +126,47 @@ public class UpdatesRestController {
 
         updateManager.downloadFirmwareUpdateFileFromVendor(softwareNameplateId, jwtAuthenticationToken);
     }
+
+    @RequestMapping(value = "/{resourceId}/updates/jobs",
+            method = RequestMethod.GET)
+    @Operation(summary="Get firmware updates jobs of resource")
+    public ResponseEntity<List<FirmwareUpdateJob>> getFirmwareUpdateJobsOfResource(
+            @PathVariable(name = "resourceId")  UUID resourceId
+    ) {
+        var firmwareUpdateJobs = this.firmwareUpdateJobsJpaRepository.findByResourceId(resourceId);
+
+        return ResponseEntity.ok(firmwareUpdateJobs);
+    }
+
+    @RequestMapping(value = "/{resourceId}/updates/jobs",
+            method = RequestMethod.POST)
+    @Operation(summary="Start firmware update job for a resource")
+    public void prepareFirmwareUpdateOnResource(
+            @PathVariable(name = "resourceId")  UUID resourceId,
+            @RequestParam(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded
+    ) throws Exception {
+        var softwareNameplateId = Base64UrlEncodedIdentifier.fromEncodedValue(softwareNameplateIdBase64Encoded).getIdentifier();
+
+        this.firmwareUpdateJobFactory.create(resourceId, softwareNameplateId);
+    }
+
+    @RequestMapping(value = "/{resourceId}/updates/jobs/{firmwareUpdateJobId}",
+            method = RequestMethod.POST)
+    @Operation(summary="Prepare firmware update on resource")
+    public void prepareFirmwareUpdateOnResource(
+            @PathVariable(name = "resourceId")  UUID resourceId,
+            @PathVariable(name = "firmwareUpdateJobId")  UUID firmwareUpdateJobId,
+            @RequestParam(name = "event") FirmwareUpdateEvents event
+            ) throws Exception {
+        var firmwareUpdateJobStateMachine = firmwareUpdateJobStateMachineFactory.create(firmwareUpdateJobId);
+
+        Message<FirmwareUpdateEvents> message = MessageBuilder.withPayload(event)
+                        .setHeader("resourceId", resourceId)
+                        .setHeader("firmwareUpdateJobId", firmwareUpdateJobId)
+                        .build();
+
+        firmwareUpdateJobStateMachine.sendEvent(Mono.just(message)).blockFirst();
+    }
+
+
 }
