@@ -9,6 +9,10 @@ import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import FirmwareUpdateStatusIcon from "@/components/updates/FirmwareUpdateStatusIcon.vue";
 import formatDate from "@/utils/dateUtils";
 import axios from 'axios'
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
+import {useToast} from "vue-toast-notification";
+
+const $toast = useToast();
 
 const props = defineProps({
   resourceId: {
@@ -67,6 +71,14 @@ function downloadItem (item) {
       }).catch(console.error)
 }
 
+const selectedFirmwareVersion = ref(undefined);
+const showConfirmFirmwareUpdateInstallation = ref(false);
+function installFirmwareUpdate() {
+  $toast.success("Firmware update started");
+  console.log(selectedFirmwareVersion);
+  selectedFirmwareVersion.value = undefined;
+}
+
 </script>
 
 <template>
@@ -104,9 +116,41 @@ function downloadItem (item) {
         <v-expansion-panel
           v-for="firmwareVersion in updateInformation.availableFirmwareVersions"
           :key="firmwareVersion.version"
-          :title="firmwareVersion.version"
           expand
         >
+          <template #title>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <v-row>
+                <v-col cols="11">
+                  <span>{{ firmwareVersion.version }}</span>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn
+                    v-if="firmwareVersion.version === updateInformation?.currentFirmwareVersion?.version"
+                    color="secondary"
+                    size="small"
+                  >
+                    Installed
+                  </v-btn>
+                  <v-btn
+                    v-else
+                    color="primary"
+                    size="small"
+                    @click.stop="selectedFirmwareVersion = firmwareVersion; showConfirmFirmwareUpdateInstallation = true;"
+                  >
+                    Install
+                    <ConfirmDialog
+                      :show="showConfirmFirmwareUpdateInstallation"
+                      :title="`Install firmware update`"
+                      :text="`Do you want to update the firmware of the device to version '${selectedFirmwareVersion?.version}'?`"
+                      @confirmed="showConfirmFirmwareUpdateInstallation = false; installFirmwareUpdate()"
+                      @canceled="showConfirmFirmwareUpdateInstallation = false"
+                    />
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </div>
+          </template>
           <template #text>
             <RowWithLabel
               label="Version"
@@ -154,14 +198,6 @@ function downloadItem (item) {
                     >
                       mdi-download
                     </v-icon>
-
-                    <!--                    <v-icon-->
-                    <!--                      class="ml-4"-->
-                    <!--                      color="error"-->
-                    <!--                      @click="deleteItem(firmwareVersion.softwareNameplateSubmodelId)"-->
-                    <!--                    >-->
-                    <!--                      mdi-delete-->
-                    <!--                    </v-icon>-->
                   </template>
                 </v-data-table>
                 <div v-else>
