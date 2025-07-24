@@ -132,21 +132,23 @@ function installFirmwareUpdate() {
                   >
                     Installed
                   </v-btn>
-                  <v-btn
-                    v-else
-                    color="primary"
-                    size="small"
-                    @click.stop="selectedFirmwareVersion = firmwareVersion; showConfirmFirmwareUpdateInstallation = true;"
-                  >
-                    Install
-                    <ConfirmDialog
-                      :show="showConfirmFirmwareUpdateInstallation"
-                      :title="`Install firmware update`"
-                      :text="`Do you want to update the firmware of the device to version '${selectedFirmwareVersion?.version}'?`"
-                      @confirmed="showConfirmFirmwareUpdateInstallation = false; installFirmwareUpdate()"
-                      @canceled="showConfirmFirmwareUpdateInstallation = false"
-                    />
-                  </v-btn>
+                  <div v-else>
+                    <v-btn
+                      v-if="firmwareVersion.firmwareUpdateFile"
+                      color="primary"
+                      size="small"
+                      @click.stop="selectedFirmwareVersion = firmwareVersion; showConfirmFirmwareUpdateInstallation = true;"
+                    >
+                      Install
+                      <ConfirmDialog
+                        :show="showConfirmFirmwareUpdateInstallation"
+                        :title="`Install firmware update`"
+                        :text="`Do you want to update the firmware of the device to version '${selectedFirmwareVersion?.version}'?`"
+                        @confirmed="showConfirmFirmwareUpdateInstallation = false; installFirmwareUpdate()"
+                        @canceled="showConfirmFirmwareUpdateInstallation = false"
+                      />
+                    </v-btn>
+                  </div>
                 </v-col>
               </v-row>
             </div>
