@@ -13,7 +13,7 @@
           Delete Service Instance '{{ service.id }}'
         </v-toolbar>
         <v-card-text>
-          Do your really want to delete this service instance?
+          Do your want to delete this service instance?
         </v-card-text>
         <v-card-actions class="justify-center">
           <v-spacer />

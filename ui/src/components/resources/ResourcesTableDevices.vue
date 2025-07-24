@@ -180,7 +180,7 @@
     <confirm-dialog
       :show="resourceToDelete != null"
       :title="'Delete resource ' + (resourceToDelete == null ? '' : resourceToDelete.hostname)"
-      text="Do you really want to delete this resource?"
+      text="Do you want to delete this resource?"
       :attention="true"
       @confirmed="deleteResource(resourceToDelete)"
       @canceled="resourceToDelete = null"
