@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface FirmwareUpdateJobsJpaRepository extends JpaRepository<FirmwareUpdateJob, UUID> {
+public interface FirmwareUpdateJobJpaRepository extends JpaRepository<FirmwareUpdateJob, UUID> {
 
         List<FirmwareUpdateJob> findByResourceId(UUID resourceId);
 

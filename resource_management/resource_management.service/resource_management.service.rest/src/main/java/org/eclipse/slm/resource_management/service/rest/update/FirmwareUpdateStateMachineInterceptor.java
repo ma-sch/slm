@@ -1,8 +1,11 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvents;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJob;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJobStateTransition;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateStates;
-import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobsJpaRepository;
+import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobJpaRepository;
+import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobStateTransitionJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -13,6 +16,7 @@ import org.springframework.statemachine.support.StateMachineInterceptor;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,10 +25,14 @@ public class FirmwareUpdateStateMachineInterceptor implements StateMachineInterc
 
     public final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdateStateMachineInterceptor.class);
 
-    private final FirmwareUpdateJobsJpaRepository firmwareUpdateJobsJpaRepository;
+    private final FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository;
 
-    public FirmwareUpdateStateMachineInterceptor(FirmwareUpdateJobsJpaRepository firmwareUpdateJobsJpaRepository) {
-        this.firmwareUpdateJobsJpaRepository = firmwareUpdateJobsJpaRepository;
+    private final FirmwareUpdateJobStateTransitionJpaRepository firmwareUpdateJobStateTransitionJpaRepository;
+
+    public FirmwareUpdateStateMachineInterceptor(FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository,
+                                                 FirmwareUpdateJobStateTransitionJpaRepository firmwareUpdateJobStateTransitionJpaRepository) {
+        this.firmwareUpdateJobJpaRepository = firmwareUpdateJobJpaRepository;
+        this.firmwareUpdateJobStateTransitionJpaRepository = firmwareUpdateJobStateTransitionJpaRepository;
     }
 
     @Override
@@ -53,16 +61,20 @@ public class FirmwareUpdateStateMachineInterceptor implements StateMachineInterc
                                 StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> stateMachine,
                                 StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> stateMachine1) {
 
-
         Optional.ofNullable(message)
                 .flatMap(msg -> Optional.ofNullable(msg.getHeaders().get("firmwareUpdateJobId", UUID.class)))
                 .ifPresent(firmwareUpdateProcessId -> {
                     LOG.info("Updating firmware update process state to: {}", state.getId());
-                    var firmwareUpdateProcess = firmwareUpdateJobsJpaRepository.findById(firmwareUpdateProcessId);
-                    firmwareUpdateProcess.ifPresent(persistedFirmwareUpdateProcess -> {
+                    var firmwareUpdateJob = this.firmwareUpdateJobJpaRepository.findById(firmwareUpdateProcessId);
+                    firmwareUpdateJob.ifPresent(persistedFirmwareUpdateJob -> {
                         try {
-                            persistedFirmwareUpdateProcess.setFirmwareUpdateState(state.getId());
-                            firmwareUpdateJobsJpaRepository.save(persistedFirmwareUpdateProcess);
+                            persistedFirmwareUpdateJob.setFirmwareUpdateState(state.getId());
+                            this.firmwareUpdateJobJpaRepository.save(persistedFirmwareUpdateJob);
+
+                            this.saveFirmwareUpdateJobStateTransition(
+                                    transition.getSource().getId(),
+                                    transition.getTarget().getId(),
+                                    firmwareUpdateJob.get());
                         } catch (Exception e) {
                             LOG.error("Error while updating firmware update process state: {}", e.getMessage(), e);
                         }
@@ -87,6 +99,17 @@ public class FirmwareUpdateStateMachineInterceptor implements StateMachineInterc
             StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> stateMachine,
             Exception e) {
         return e;
+    }
+
+    private void saveFirmwareUpdateJobStateTransition(FirmwareUpdateStates sourceState,
+                                                     FirmwareUpdateStates targetState,
+                                                     FirmwareUpdateJob firmwareUpdateJob) {
+        try {
+            var jobStateTransition = new FirmwareUpdateJobStateTransition(sourceState, targetState, new Date(), firmwareUpdateJob);
+            this.firmwareUpdateJobStateTransitionJpaRepository.save(jobStateTransition);
+        } catch (Exception e) {
+            LOG.error("Error while saving firmware update job state transition: {}", e.getMessage(), e);
+        }
     }
 
 }

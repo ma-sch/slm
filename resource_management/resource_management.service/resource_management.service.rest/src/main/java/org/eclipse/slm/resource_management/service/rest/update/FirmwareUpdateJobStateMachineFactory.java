@@ -1,8 +1,9 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
+import org.eclipse.slm.common.model.exceptions.EventNotAcceptedException;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvents;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateStates;
-import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobsJpaRepository;
+import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -10,6 +11,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineBuilder;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
+import org.springframework.statemachine.support.StateMachineInterceptor;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -19,19 +21,21 @@ public class FirmwareUpdateJobStateMachineFactory {
 
     public final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdateJobStateMachineFactory.class);
 
-    private final FirmwareUpdateJobsJpaRepository firmwareUpdateJobsJpaRepository;
+    private final FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository;
 
     private final FirmwareUpdateStateMachineInterceptor firmwareUpdateStateMachineInterceptor;
+    private final StateMachineInterceptor stateMachineInterceptor;
 
-    public FirmwareUpdateJobStateMachineFactory(FirmwareUpdateJobsJpaRepository firmwareUpdateJobsJpaRepository,
-                                                FirmwareUpdateStateMachineInterceptor firmwareUpdateStateMachineInterceptor) {
-        this.firmwareUpdateJobsJpaRepository = firmwareUpdateJobsJpaRepository;
+    public FirmwareUpdateJobStateMachineFactory(FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository,
+                                                FirmwareUpdateStateMachineInterceptor firmwareUpdateStateMachineInterceptor, StateMachineInterceptor stateMachineInterceptor) {
+        this.firmwareUpdateJobJpaRepository = firmwareUpdateJobJpaRepository;
         this.firmwareUpdateStateMachineInterceptor = firmwareUpdateStateMachineInterceptor;
+        this.stateMachineInterceptor = stateMachineInterceptor;
     }
 
     public StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> create(UUID firmwareUpdateJobId) throws Exception {
 
-        var firmwareUpdateJob = firmwareUpdateJobsJpaRepository.findById(firmwareUpdateJobId)
+        var firmwareUpdateJob = firmwareUpdateJobJpaRepository.findById(firmwareUpdateJobId)
                 .orElseThrow(() -> new IllegalArgumentException("Firmware update process not found with ID: " + firmwareUpdateJobId));
 
         var stateMachineBuilder = new StateMachineBuilder.Builder<FirmwareUpdateStates, FirmwareUpdateEvents>();
