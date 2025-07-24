@@ -76,7 +76,7 @@ function triggerFileDownloadFromVendor (firmwareVersion) {
   ResourceManagementClient.resourcesUpdatesApi.downloadFirmwareUpdateFileFromVendor(softwareNameplateIdBase64Encoded)
       .then(() => {
         firmwareDownloadFromVendorActive.value = false;
-        $toast.success("Firmware update successfully downloaded from vendor");
+        $toast.success("Firmware successfully downloaded from vendor");
         refreshUpdateInformation();   // Refresh the update information after file download
       })
       .catch(error => {
