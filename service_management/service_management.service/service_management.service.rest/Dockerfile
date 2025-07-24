@@ -1,4 +1,4 @@
-FROM openjdk:19-jdk-slim-buster
+FROM openjdk:19-jdk-buster
 MAINTAINER Matthias Schneider (matthias.schneider@ipa.fraunhofer.de)
 
 ENV CONSUL_SCHEME="http" \

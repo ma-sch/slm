@@ -1,4 +1,4 @@
-FROM openjdk:19-jdk-slim-buster
+FROM openjdk:19-jdk-buster
 
 ENV RESOURCEMANAGEMENT_URL="http://resource-management:9010" \
     RESOURCEMANAGEMENT_INITDIRECTORIES="/init/" \

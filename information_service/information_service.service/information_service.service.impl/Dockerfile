@@ -1,4 +1,4 @@
-FROM openjdk:19-jdk-slim-buster
+FROM openjdk:19-jdk-buster
 
 ENV CONSUL_SCHEME="http" \
     CONSUL_HOST="consul" \
