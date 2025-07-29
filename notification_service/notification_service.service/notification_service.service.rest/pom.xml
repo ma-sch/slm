@@ -71,6 +71,12 @@
             <artifactId>notification_service.communication.websocket</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
+            <artifactId>notification_service.messaging</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

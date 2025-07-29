@@ -12,7 +12,7 @@ import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.vault.client.VaultClient;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.common.vault.client.VaultCredentialType;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.capabilities.CapabilityNotFoundException;
 import org.eclipse.slm.resource_management.model.consul.capability.CapabilityServiceStatus;
 import org.eclipse.slm.resource_management.model.resource.BasicResource;
@@ -72,7 +72,7 @@ public class ResourcesManagerITDev {
     private ResourcesManagerITDevConfig config = new ResourcesManagerITDevConfig();
     //region MockBeans
     @MockBean
-    NotificationServiceClient notificationServiceClient;
+    NotificationMessageSender notificationMessageSender;
     @MockBean
     ConsulHealthApiClient consulHealthApiClient;
     @MockBean

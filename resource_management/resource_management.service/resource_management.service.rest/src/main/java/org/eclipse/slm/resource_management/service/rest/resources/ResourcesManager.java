@@ -6,12 +6,11 @@ import org.eclipse.slm.common.consul.client.apis.ConsulAclApiClient;
 import org.eclipse.slm.common.consul.model.catalog.NodeService;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
-import org.eclipse.slm.common.messaging.resources.ResourceMessageSender;
 import org.eclipse.slm.common.vault.client.VaultCredential;
-import org.eclipse.slm.notification_service.model.Category;
-import org.eclipse.slm.notification_service.model.JobGoal;
-import org.eclipse.slm.notification_service.model.JobTarget;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
+import org.eclipse.slm.notification_service.model.*;
+import org.eclipse.slm.resource_management.messaging.ResourceCreatedMessage;
 import org.eclipse.slm.resource_management.model.resource.*;
 import org.eclipse.slm.resource_management.service.rest.resources.aas.ResourcesAasHandler;
 import org.eclipse.slm.resource_management.service.rest.resources.aas.submodels.digitalnameplate.DigitalNameplateV3;
@@ -37,7 +36,7 @@ import java.util.*;
 @Component
 public class ResourcesManager {
     private final static Logger LOG = LoggerFactory.getLogger(ResourcesManager.class);
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
     private final KeycloakUtil keycloakUtil;
     private final ResourcesConsulClient resourcesConsulClient;
     private final ResourcesVaultClient resourcesVaultClient;
@@ -48,26 +47,26 @@ public class ResourcesManager {
     private final LocationJpaRepository locationJpaRepository;
     private final ApplicationEventPublisher publisher;
     private final ResourcesAasHandler resourcesAasHandler;
-    private final ResourceMessageSender resourceMessageSender;
+    private final ResourceCreatedMessageSender resourceCreatedMessageSender;
 
     @Autowired
     public ResourcesManager(
             ResourcesConsulClient resourcesConsulClient,
             ResourcesVaultClient resourcesVaultClient,
             ConsulAclApiClient consulAclApiClient,
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             KeycloakUtil keycloakUtil,
             CapabilitiesManager capabilitiesManager,
             CapabilitiesConsulClient capabilitiesConsulClient,
             SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient,
             LocationJpaRepository locationJpaRepository,
             ApplicationEventPublisher publisher, ResourcesAasHandler resourcesAasHandler,
-            ResourceMessageSender resourceMessageSender
+            ResourceCreatedMessageSender resourceCreatedMessageSender
     ) {
         this.resourcesConsulClient = resourcesConsulClient;
         this.resourcesVaultClient = resourcesVaultClient;
         this.consulAclApiClient = consulAclApiClient;
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.keycloakUtil = keycloakUtil;
         this.capabilitiesManager = capabilitiesManager;
         this.capabilitiesConsulClient = capabilitiesConsulClient;
@@ -75,7 +74,7 @@ public class ResourcesManager {
         this.locationJpaRepository = locationJpaRepository;
         this.publisher = publisher;
         this.resourcesAasHandler = resourcesAasHandler;
-        this.resourceMessageSender = resourceMessageSender;
+        this.resourceCreatedMessageSender = resourceCreatedMessageSender;
     }
 
     public List<BasicResource> getResourcesWithCredentialsByRemoteAccessService(
@@ -284,9 +283,14 @@ public class ResourcesManager {
 
         this.resourcesAasHandler.createResourceAasAndSubmodels(resource, digitalNameplateV3);
 
-        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.CREATE);
+        var notificationMessage = new NotificationMessage(
+                jwtAuthenticationToken.getToken().getSubject(),
+                NotificationCategory.RESOURCES, NotificationSubCategory.RESOURCE, EventType.CREATED,
+                resource
+        );
+        this.notificationMessageSender.sendMessage(notificationMessage);
 
-        resourceMessageSender.sendResourceCreatedMessage(resource.getId(), resource.getAssetId());
+        resourceCreatedMessageSender.sendMessage(new ResourceCreatedMessage(resource.getId(), resource.getAssetId()));
 
         return resource;
     }
@@ -321,7 +325,13 @@ public class ResourcesManager {
                     remoteAccessServiceId
             );
 
-        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.RESOURCE, JobGoal.DELETE);
+        var notificationMessage = new NotificationMessage(
+                jwtAuthenticationToken.getToken().getSubject(),
+                NotificationCategory.RESOURCES, NotificationSubCategory.RESOURCE, EventType.DELETED,
+                resource
+        );
+        this.notificationMessageSender.sendMessage(notificationMessage);
+
         publisher.publishEvent(new ResourceEvent(this, resourceId, ResourceEvent.Operation.DELETE));
     }
     //endregion

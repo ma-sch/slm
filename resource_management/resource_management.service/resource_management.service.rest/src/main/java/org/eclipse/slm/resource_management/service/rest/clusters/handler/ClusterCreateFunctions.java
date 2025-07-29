@@ -15,11 +15,13 @@ import org.eclipse.slm.common.consul.model.catalog.CatalogNode;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.keycloak.config.MultiTenantKeycloakRegistration;
+import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
 import org.eclipse.slm.common.vault.client.VaultClient;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.common.vault.model.KvPath;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.actions.AwxAction;
 import org.eclipse.slm.resource_management.model.actions.ActionConfigParameter;
 import org.eclipse.slm.resource_management.model.actions.ActionConfigParameterRequiredType;
@@ -49,7 +51,7 @@ public class ClusterCreateFunctions extends AbstractClusterFunctions implements 
     private final ConsulKeyValueApiClient consulKeyValueApiClient;
 
     public ClusterCreateFunctions(
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             AwxJobExecutor awxJobExecutor,
             MultiTenantKeycloakRegistration multiTenantKeycloakRegistration,
             ConsulServicesApiClient consulServicesApiClient,
@@ -62,7 +64,7 @@ public class ClusterCreateFunctions extends AbstractClusterFunctions implements 
             AwxJobObserverInitializer awxJobObserverInitializer,
             VaultClient vaultClient) {
         super(
-                notificationServiceClient,
+                notificationMessageSender,
                 awxJobExecutor,
                 multiTenantKeycloakRegistration,
                 consulServicesApiClient,
@@ -174,7 +176,6 @@ public class ClusterCreateFunctions extends AbstractClusterFunctions implements 
 
         if (!clusterCreateRequest.getSkipInstall()) {
             this.clusterJobMap.put(clusterJob.getAwxJobObserver(), clusterJob);
-            this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, clusterJob.getAwxJobObserver());
         }
         else {
             this.processSuccessfulClusterInstall(jwtAuthenticationToken, multiHostCapabilityService, clusterCreateRequest);
@@ -359,12 +360,11 @@ public class ClusterCreateFunctions extends AbstractClusterFunctions implements 
             LOG.error(e.getMessage());
         }
 
-        this.notificationServiceClient.postNotification(
-                jwtAuthenticationToken,
-                Category.RESOURCES,
-                JobTarget.RESOURCE,
-                JobGoal.CREATE
-        );
+        this.notificationMessageSender.sendMessage(new NotificationMessage(
+                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                NotificationCategory.RESOURCES, NotificationSubCategory.CLUSTER, EventType.CREATED,
+                null
+        ));
     }
 
     @Override

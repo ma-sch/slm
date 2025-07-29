@@ -1,8 +1,7 @@
 package org.eclipse.slm.notification_service.model;
 
-public enum Category {
+public enum NotificationCategory {
     JOBS,
     RESOURCES,
-    SERVICES,
-    PROJECTS
+    SERVICES
 }

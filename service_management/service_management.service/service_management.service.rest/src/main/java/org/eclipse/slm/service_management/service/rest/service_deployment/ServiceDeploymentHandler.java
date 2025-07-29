@@ -9,8 +9,9 @@ import org.eclipse.slm.common.awx.model.ExtraVars;
 import org.eclipse.slm.common.consul.client.apis.ConsulServicesApiClient;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.actions.ActionType;
 import org.eclipse.slm.resource_management.model.consul.capability.SingleHostCapabilityService;
 import org.eclipse.slm.resource_management.service.client.ResourceManagementApiClientInitializer;
@@ -45,7 +46,7 @@ public class ServiceDeploymentHandler  extends AbstractServiceDeploymentHandler 
 
     private final static Logger LOG = LoggerFactory.getLogger(ServiceDeploymentHandler.class);
 
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
 
     private final ConsulServicesApiClient consulServicesApiClient;
 
@@ -58,14 +59,14 @@ public class ServiceDeploymentHandler  extends AbstractServiceDeploymentHandler 
 
     public ServiceDeploymentHandler(AwxJobObserverInitializer awxJobObserverInitializer,
                                     AwxJobExecutor awxJobExecutor,
-                                    NotificationServiceClient notificationServiceClient,
+                                    NotificationMessageSender notificationMessageSender,
                                     ConsulServicesApiClient consulServicesApiClient,
                                     KeycloakUtil keycloakUtil,
                                     ResourceManagementApiClientInitializer resourceManagementApiClientInitializer,
                                     ServiceOrderJpaRepository serviceOrderJpaRepository,
                                     ServiceInstancesConsulClient serviceInstancesConsulClient) {
         super(resourceManagementApiClientInitializer, serviceInstancesConsulClient, awxJobObserverInitializer, awxJobExecutor);
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.consulServicesApiClient = consulServicesApiClient;
         this.keycloakUtil = keycloakUtil;
         this.serviceOrderJpaRepository = serviceOrderJpaRepository;
@@ -114,7 +115,6 @@ public class ServiceDeploymentHandler  extends AbstractServiceDeploymentHandler 
                 var extraVars = new ExtraVars(extraVarsMap);
 
                 awxJobObserver = this.runAwxCapabilityAction(awxCapabilityAction, jwtAuthenticationToken, extraVars, JobGoal.CREATE, this);
-                this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
                 break;
             }
             case KUBERNETES: {
@@ -132,7 +132,6 @@ public class ServiceDeploymentHandler  extends AbstractServiceDeploymentHandler 
                 extraVarsMap = this.addExtraVarsForServiceRepositories(extraVarsMap, serviceOfferingVersion);
 
                 awxJobObserver = this.runAwxCapabilityAction(awxCapabilityAction, jwtAuthenticationToken, new ExtraVars(extraVarsMap), JobGoal.CREATE, this);
-                this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
                 break;
             }
 
@@ -149,7 +148,6 @@ public class ServiceDeploymentHandler  extends AbstractServiceDeploymentHandler 
                 extraVarsMap = this.addExtraVarsForServiceRepositories(extraVarsMap, serviceOfferingVersion);
 
                 awxJobObserver = this.runAwxCapabilityAction(awxCapabilityAction, jwtAuthenticationToken, new ExtraVars(extraVarsMap), JobGoal.CREATE, this);
-                this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
             }
             break;
             default:
@@ -313,7 +311,11 @@ public class ServiceDeploymentHandler  extends AbstractServiceDeploymentHandler 
                     this.serviceInstancesConsulClient.registerConsulServiceForServiceInstance(serviceInstance);
 
                     serviceOrder.setServiceOrderResult(ServiceOrderResult.SUCCESSFULL);
-                    this.notificationServiceClient.postNotification(jwtAuthenticationToken, Category.SERVICES, JobTarget.SERVICE, JobGoal.CREATE);
+                    this.notificationMessageSender.sendMessage(new NotificationMessage(
+                            KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                            NotificationCategory.SERVICES, NotificationSubCategory.SERVICE, EventType.CREATED,
+                            serviceInstance
+                    ));
                 }
 
                 default -> {

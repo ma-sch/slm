@@ -37,7 +37,7 @@ import java.util.concurrent.Executor;
         "org.eclipse.slm.resource_management.persistence",
         "org.eclipse.slm.resource_management.service.rest",
         "org.eclipse.slm.resource_management.service.discovery",
-        "org.eclipse.slm.notification_service.service.client",
+        "org.eclipse.slm.notification_service.messaging",
         "org.eclipse.slm.common.aas",
         "org.eclipse.slm.common.awx",
         "org.eclipse.slm.common.consul",

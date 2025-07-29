@@ -3,7 +3,6 @@ package org.eclipse.slm.resource_management.service.rest.jobs;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.awx.client.AwxClient;
 import org.eclipse.slm.common.awx.model.Job;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -18,9 +17,6 @@ public class JobsRestController {
 
     @Autowired
     AwxClient awxClient;
-
-    @Autowired
-    NotificationServiceClient notificationServiceClient;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public Iterable<Job> getJobs() {

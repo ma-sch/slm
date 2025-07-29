@@ -2,11 +2,11 @@ package org.eclipse.slm.resource_management.service.rest.discovery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
+import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
 import org.eclipse.slm.common.utils.objectmapper.ObjectMapperUtils;
-import org.eclipse.slm.notification_service.model.Category;
-import org.eclipse.slm.notification_service.model.JobGoal;
-import org.eclipse.slm.notification_service.model.JobTarget;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
+import org.eclipse.slm.notification_service.model.*;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.capabilities.CapabilityNotFoundException;
 import org.eclipse.slm.resource_management.model.discovery.*;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
@@ -37,7 +37,7 @@ public class DiscoveryHandler implements DiscoveryJobListener {
 
     private final DriverClientFactory driverClientFactory;
 
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
 
     private final Map<UUID, JwtAuthenticationToken> jobIdToTokenMap = new HashMap<>();
 
@@ -48,11 +48,11 @@ public class DiscoveryHandler implements DiscoveryJobListener {
     public DiscoveryHandler(DiscoveryJobRepository discoveryJobRepository,
                             DriverRegistryClient driverRegistryClient,
                             DriverClientFactory driverClientFactory,
-                            NotificationServiceClient notificationServiceClient, ResourcesManager resourcesManager) {
+                            NotificationMessageSender notificationMessageSender, ResourcesManager resourcesManager) {
         this.discoveryJobRepository = discoveryJobRepository;
         this.driverRegistryClient = driverRegistryClient;
         this.driverClientFactory = driverClientFactory;
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.resourcesManager = resourcesManager;
     }
 
@@ -155,9 +155,11 @@ public class DiscoveryHandler implements DiscoveryJobListener {
         var driverInfo = jobIdToDriverInfoMap.get(completedDiscoveryJob.getId());
         jobIdToDriverInfoMap.remove(completedDiscoveryJob.getId());
 
-        var notificationText = "Discovery of driver " + driverInfo.getName() + " completed";
-
-        this.notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.DISCOVERY, JobGoal.ADD, notificationText);
+        this.notificationMessageSender.sendMessage(new NotificationMessage(
+                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                NotificationCategory.RESOURCES, NotificationSubCategory.DISCOVERY, EventType.UPDATED,
+                completedDiscoveryJob
+        ));
     }
 
     public void onboard(JwtAuthenticationToken jwtAuthenticationToken, String resultId)

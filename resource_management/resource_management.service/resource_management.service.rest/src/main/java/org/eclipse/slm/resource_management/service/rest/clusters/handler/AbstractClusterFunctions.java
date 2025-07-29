@@ -9,7 +9,7 @@ import org.eclipse.slm.common.keycloak.config.MultiTenantKeycloakRegistration;
 import org.eclipse.slm.common.awx.client.observer.AwxJobExecutor;
 import org.eclipse.slm.common.awx.client.observer.AwxJobObserverInitializer;
 import org.eclipse.slm.common.vault.client.VaultClient;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.service.rest.capabilities.MultiHostCapabilitiesConsulClient;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ class AbstractClusterFunctions {
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractClusterFunctions.class);
 
-    protected final NotificationServiceClient notificationServiceClient;
+    protected final NotificationMessageSender notificationMessageSender;
 
     protected final KeycloakUtil keycloakUtil;
 
@@ -46,7 +46,7 @@ class AbstractClusterFunctions {
     protected Map<AwxJobObserver, ClusterJob> clusterJobMap = new HashMap<>();
     protected MultiHostCapabilitiesConsulClient multiHostCapabilitiesConsulClient;
 
-    public AbstractClusterFunctions(NotificationServiceClient notificationServiceClient,
+    public AbstractClusterFunctions(NotificationMessageSender notificationMessageSender,
                                     AwxJobExecutor awxJobExecutor,
                                     MultiTenantKeycloakRegistration multiTenantKeycloakRegistration,
                                     ConsulServicesApiClient consulServicesApiClient,
@@ -57,7 +57,7 @@ class AbstractClusterFunctions {
                                     KeycloakUtil keycloakUtil,
                                     AwxJobObserverInitializer awxJobObserverInitializer,
                                     VaultClient vaultClient) {
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.awxJobExecutor = awxJobExecutor;
         this.multiTenantKeycloakRegistration = multiTenantKeycloakRegistration;
         this.consulServicesApiClient = consulServicesApiClient;

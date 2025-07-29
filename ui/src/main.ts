@@ -35,7 +35,7 @@ import {useNotificationStore} from "@/stores/notificationStore";
 import {useJobsStore} from "@/stores/jobsStore";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import * as yup from "yup";
-import {createI18n} from "vue-i18n";
+import i18nInstance from '@/utils/i18n'
 import {de, en} from "vuetify/locale";
 import yupValidateIPv4 from "@/utils/yup.custom";
 import {VueKeycloakInstance} from "@dsb-norge/vue-keycloak-js/dist/types";
@@ -167,16 +167,8 @@ const messages = {
     },
 };
 
-const i18n = createI18n({
-    globalInjection: true,
-    legacy: false,
-    locale: envStore.i18nLocale,
-    fallbackLocale: envStore.i18nLocaleFallback,
-    silentTranslationWarn: true,
-    messages
-});
 
-app.use(i18n);
+app.use(i18nInstance);
 
 app.use(VueToast,{
     position: 'bottom',

@@ -18,7 +18,7 @@ import org.eclipse.slm.common.model.DeploymentType;
 import org.eclipse.slm.notification_service.model.JobFinalState;
 import org.eclipse.slm.notification_service.model.JobGoal;
 import org.eclipse.slm.notification_service.model.JobTarget;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.capabilities.*;
 import org.eclipse.slm.resource_management.model.actions.AwxAction;
 import org.eclipse.slm.resource_management.model.actions.ActionType;
@@ -65,7 +65,7 @@ public class CapabilitiesManagerTest {
     @MockBean
     AwxJobExecutor awxJobExecutor;
     @MockBean
-    NotificationServiceClient notificationServiceClient;
+    NotificationMessageSender notificationMessageSender;
     @MockBean
     AwxJobObserverInitializer awxJobObserverInitializer;
     @MockBean

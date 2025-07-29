@@ -17,9 +17,9 @@ public class NotificationMessage extends AbstractMessage {
 
     private Date timestamp = new Date();
 
-    private Categories category;
+    private NotificationCategory category;
 
-    private SubCategories subCategory;
+    private NotificationSubCategory subCategory;
 
     private EventType eventType;
 
@@ -30,8 +30,8 @@ public class NotificationMessage extends AbstractMessage {
     }
 
     public NotificationMessage(String userId,
-                               Categories category,
-                               SubCategories subCategory,
+                               NotificationCategory category,
+                               NotificationSubCategory subCategory,
                                EventType eventType,
                                Object payload) {
         this();
@@ -67,19 +67,19 @@ public class NotificationMessage extends AbstractMessage {
         this.payload = payload;
     }
 
-    public Categories getCategory() {
+    public NotificationCategory getCategory() {
         return category;
     }
 
-    public void setCategory(Categories categories) {
+    public void setCategory(NotificationCategory categories) {
         this.category = categories;
     }
 
-    public SubCategories getSubCategory() {
+    public NotificationSubCategory getSubCategory() {
         return subCategory;
     }
 
-    public void setSubCategory(SubCategories subCategory) {
+    public void setSubCategory(NotificationSubCategory subCategory) {
         this.subCategory = subCategory;
     }
 

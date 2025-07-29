@@ -16,8 +16,9 @@ import org.eclipse.slm.common.keycloak.config.MultiTenantKeycloakRegistration;
 import org.eclipse.slm.common.vault.client.VaultClient;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.common.vault.model.KvPath;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.service.rest.capabilities.MultiHostCapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.model.actions.AwxAction;
@@ -38,7 +39,7 @@ public class ClusterDeleteFunctions extends AbstractClusterFunctions implements 
     private final static Logger LOG = LoggerFactory.getLogger(ClusterDeleteFunctions.class);
 
     public ClusterDeleteFunctions(
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             AwxJobExecutor awxJobExecutor,
             MultiTenantKeycloakRegistration multiTenantKeycloakRegistration,
             ConsulServicesApiClient consulServicesApiClient,
@@ -50,7 +51,7 @@ public class ClusterDeleteFunctions extends AbstractClusterFunctions implements 
             AwxJobObserverInitializer awxJobObserverInitializer,
             VaultClient vaultClient) {
         super(
-                notificationServiceClient,
+                notificationMessageSender,
                 awxJobExecutor,
                 multiTenantKeycloakRegistration,
                 consulServicesApiClient,
@@ -104,8 +105,6 @@ public class ClusterDeleteFunctions extends AbstractClusterFunctions implements 
                 new ConsulCredential(),
                 multiHostCapabilityService
         );
-
-        this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, clusterJob.getAwxJobObserver());
     }
 
     public void delete(JwtAuthenticationToken jwtAuthenticationToken, UUID consulServiceUuid
@@ -181,11 +180,12 @@ public class ClusterDeleteFunctions extends AbstractClusterFunctions implements 
                 LOG.error("Failed to delete MultiHostCapabilityService [id = '"+multiHostCapabilityService.getId()+"'] due to login error");
             }
 
-            this.notificationServiceClient.postNotification(
-                    clusterJob.getJwtAuthenticationToken(),
-                    Category.RESOURCES,
-                    jobTarget,
-                    jobGoal
+            this.notificationMessageSender.sendMessage(new NotificationMessage(
+                    jwtAuthenticationToken.getToken().getSubject(),
+                    NotificationCategory.RESOURCES,
+                    NotificationSubCategory.CLUSTER,
+                    EventType.DELETED,
+                    null)
             );
             this.clusterJobMap.remove(sender.jobId);
         }

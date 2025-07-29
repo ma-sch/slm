@@ -11,5 +11,3 @@ public class NotificationMessageSender extends GenericMessageSender<Notification
     }
 
 }
-
-

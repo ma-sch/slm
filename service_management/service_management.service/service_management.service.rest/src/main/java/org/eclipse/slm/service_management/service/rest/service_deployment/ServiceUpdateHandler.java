@@ -10,8 +10,9 @@ import org.eclipse.slm.common.consul.client.apis.ConsulServicesApiClient;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.capabilities.DeploymentCapability;
 import org.eclipse.slm.resource_management.model.actions.ActionType;
 import org.eclipse.slm.resource_management.service.client.ResourceManagementApiClientInitializer;
@@ -43,7 +44,7 @@ public class ServiceUpdateHandler extends AbstractServiceDeploymentHandler imple
 
     public final static Logger LOG = LoggerFactory.getLogger(ServiceUpdateHandler.class);
 
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
 
     private final ConsulServicesApiClient consulServicesApiClient;
 
@@ -55,14 +56,14 @@ public class ServiceUpdateHandler extends AbstractServiceDeploymentHandler imple
 
     public ServiceUpdateHandler(AwxJobObserverInitializer awxJobObserverInitializer,
                                 AwxJobExecutor awxJobExecutor,
-                                NotificationServiceClient notificationServiceClient,
+                                NotificationMessageSender notificationMessageSender,
                                 ConsulServicesApiClient consulServicesApiClient,
                                 KeycloakUtil keycloakUtil,
                                 ResourceManagementApiClientInitializer resourceManagementApiClientInitializer,
                                 ServiceOrderJpaRepository serviceOrderJpaRepository,
                                 ServiceInstancesConsulClient serviceInstancesConsulClient) {
         super(resourceManagementApiClientInitializer, serviceInstancesConsulClient, awxJobObserverInitializer, awxJobExecutor);
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.consulServicesApiClient = consulServicesApiClient;
         this.keycloakUtil = keycloakUtil;
         this.serviceOrderJpaRepository = serviceOrderJpaRepository;
@@ -102,7 +103,6 @@ public class ServiceUpdateHandler extends AbstractServiceDeploymentHandler imple
                 var extraVars = new ExtraVars(extraVarsMap);
 
                 var awxJobObserver = this.runAwxCapabilityAction(awxCapabilityAction, jwtAuthenticationToken, extraVars, JobGoal.UPDATE, this);
-                this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
 
                 var updateServiceOrder = new ServiceOrder();
                 updateServiceOrder.setServiceInstanceId(latestServiceOrder.getServiceInstanceId());
@@ -183,7 +183,11 @@ public class ServiceUpdateHandler extends AbstractServiceDeploymentHandler imple
                     LOG.info("Service '" + serviceInstanceId + "' update for user '" + userUuid + "' to version '" + serviceOfferingVersion.getVersion() + "' successful");
 
                     serviceOrder.setServiceOrderResult(ServiceOrderResult.SUCCESSFULL);
-                    notificationServiceClient.postNotification(jwtAuthenticationToken, Category.SERVICES, JobTarget.SERVICE, JobGoal.UPDATE);
+                    notificationMessageSender.sendMessage(new NotificationMessage(
+                                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                                NotificationCategory.SERVICES, NotificationSubCategory.SERVICE, EventType.UPDATED,
+                                serviceInstance
+                            ));
                 } catch (ConsulLoginFailedException | ServiceInstanceNotFoundException e) {
                     LOG.error(e.getMessage());
                 }

@@ -1,3 +1,4 @@
+---
 openapi: 3.0.1
 info:
   title: Notification Service
@@ -8,193 +9,182 @@ info:
     email: matthias.schneider@ipa.fraunhofer.de
   version: 1.4.0-SNAPSHOT
 servers:
-- url: http://localhost:9001
-  description: Generated server url
+  - url: https://slm.local/notification-service
+    description: Generated server url
 security:
-- bearer_auth: []
-- spring_oauth: []
+  - bearer_auth: []
+  - spring_oauth: []
 paths:
-  /observer/job:
+  "/observer/job":
     post:
       tags:
-      - observer-rest-controller
+        - observer-rest-controller
       summary: Create observer for running job
       operationId: createJobObserver
       parameters:
-      - name: userUuid
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: jobId
-        in: query
-        required: true
-        schema:
-          type: integer
-          format: int32
-      - name: jobTarget
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/JobTarget'
-      - name: jobGoal
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/JobGoal'
-      - name: Realm
-        in: header
-        description: Keycloak Realm
-        required: false
-        schema:
-          type: string
-          default: fabos
+        - name: userUuid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: jobId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: jobTarget
+          in: query
+          required: true
+          schema:
+            "$ref": "#/components/schemas/JobTarget"
+        - name: jobGoal
+          in: query
+          required: true
+          schema:
+            "$ref": "#/components/schemas/JobGoal"
       responses:
-        "200":
+        '200':
           description: OK
-  /notification:
+  "/notification":
     post:
       tags:
-      - notification-rest-controller
-      summary: Create new notifications
+        - notification-rest-controller
+      summary: Create new notification
       operationId: createNotification
-      parameters:
-      - name: category
-        in: query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Notification"
         required: true
-        schema:
-          $ref: '#/components/schemas/Category'
-      - name: jobTarget
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/JobTarget'
-      - name: jobGoal
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/JobGoal'
-      - name: Realm
-        in: header
-        description: Keycloak Realm
-        required: false
-        schema:
-          type: string
-          default: fabos
       responses:
-        "200":
+        '200':
           description: OK
-  /notifications/read:
+  "/notifications/read":
     patch:
       tags:
-      - notification-rest-controller
+        - notification-rest-controller
       summary: Set read property of notifications
       operationId: setReadOfNotifications
       parameters:
-      - name: read
-        in: query
-        required: true
-        schema:
-          type: boolean
-      - name: Realm
-        in: header
-        description: Keycloak Realm
-        required: false
-        schema:
-          type: string
-          default: fabos
+        - name: read
+          in: query
+          required: true
+          schema:
+            type: boolean
       requestBody:
         content:
           application/json:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Notification'
+                type: integer
+                format: int64
         required: true
       responses:
-        "200":
+        '200':
           description: OK
-  /notifications:
+  "/notifications":
     get:
       tags:
-      - notification-rest-controller
+        - notification-rest-controller
       summary: Get notifications of a user
       operationId: getNotifications
       parameters:
-      - name: isRead
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: Realm
-        in: header
-        description: Keycloak Realm
-        required: false
-        schema:
-          type: string
-          default: fabos
+        - name: isRead
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
-        "200":
+        '200':
           description: OK
           content:
-            '*/*':
+            "*/*":
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Notification'
+                  "$ref": "#/components/schemas/Notification"
 components:
   schemas:
     JobTarget:
       type: string
       enum:
-      - PROJECT
-      - RESOURCE
-      - SERVICE
-      - DEPLOYMENT_CAPABILITY
-      - BASE_CONFIGURATION_CAPABILITY
+        - PROJECT
+        - RESOURCE
+        - SERVICE
+        - DEPLOYMENT_CAPABILITY
+        - BASE_CONFIGURATION_CAPABILITY
+        - DISCOVERY
     JobGoal:
       type: string
       enum:
-      - CREATE
-      - DELETE
-      - UPDATE
-      - UPGRADE
-      - MOVE
-      - MODIFY
-      - ADD
-    Category:
+        - CREATE
+        - DELETE
+        - UPDATE
+        - UPGRADE
+        - MOVE
+        - MODIFY
+        - ADD
+    EventType:
       type: string
       enum:
-      - Jobs
-      - Resources
-      - Services
-      - Projects
+        - CREATED
+        - DELETED
+        - UPDATED
+        - UPGRADED
+        - MOVED
+        - MODIFYED
+        - ADDED
+        - INSTALLED
+        - UNINSTALLED
+        - FAILED
     Notification:
+      required:
+        - id
       type: object
       properties:
         id:
           type: integer
           format: int64
-        category:
-          $ref: '#/components/schemas/Category'
-        text:
+        userId:
           type: string
-        owner:
-          type: string
-        date:
+        timestamp:
           type: string
           format: date-time
+        category:
+          "$ref": "#/components/schemas/NotificationCategory"
+        subCategory:
+          "$ref": "#/components/schemas/NotificationSubCategory"
+        eventType:
+          "$ref": "#/components/schemas/EventType"
         read:
           type: boolean
+    NotificationCategory:
+      type: string
+      enum:
+        - JOBS
+        - RESOURCES
+        - SERVICES
+    NotificationSubCategory:
+      type: string
+      enum:
+        - RESOURCE
+        - CLUSTER
+        - SERVICE
+        - JOB
+        - CAPABILITY
+        - DISCOVERY
   securitySchemes:
     spring_oauth:
       type: oauth2
       description: Oauth2 flow
       flows:
         authorizationCode:
-          authorizationUrl: http://fabos.local:7080/auth/realms/fabos/protocol/openid-connect/auth
-          tokenUrl: http://fabos.local:7080/auth/realms/fabos/protocol/openid-connect/token
-          refreshUrl: http://fabos.local:7080/auth/realms/fabos/protocol/openid-connect/token
+          authorizationUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/auth
+          tokenUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/token
+          refreshUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/token
           scopes: {}
     bearer_auth:
       type: http

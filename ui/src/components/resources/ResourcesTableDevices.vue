@@ -247,7 +247,7 @@ onMounted(() => {
 });
 
 const getDeploymentCapabilityServices = (capabilityServices) => {
-  return capabilityServices.filter(cs => cs.capability.capabilityClass !== "BaseConfigurationCapability");
+  return capabilityServices?.filter(cs => cs.capability.capabilityClass !== "BaseConfigurationCapability");
 };
 
 const deleteResource = (resource) => {

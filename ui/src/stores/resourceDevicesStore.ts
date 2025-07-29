@@ -71,6 +71,16 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
     },
 
     actions: {
+        addResource(resource) {
+            if (this.resources === undefined) {
+                this.resources = [];
+            }
+            this.resources.push(resource);
+        },
+        deleteResource(resourceId: string) {
+            this.resources = this.resources.filter(resource => resource.id !== resourceId)
+        },
+
         setResources(newResources){
             try {
                 if (this.resources !== undefined) {

@@ -3,7 +3,6 @@ package org.eclipse.slm.resource_management.service.rest.update;
 import org.eclipse.digitaltwin.aas4j.v3.model.Property;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElementCollection;
-import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.eclipse.slm.common.aas.repositories.exceptions.SubmodelNotFoundException;

@@ -8,6 +8,14 @@ import logRequestError from "@/api/restApiHelper";
 import {useDiscoveryStore} from "@/stores/discoveryStore";
 import ApiState from "@/api/apiState";
 import {useToast} from "vue-toast-notification";
+import {
+  EventType,
+  Notification,
+  NotificationCategory,
+  NotificationSubCategory
+} from "@/api/notification-service/client";
+import NotificationTextGenerator from "@/utils/notificationTextGenerator";
+import i18n from '@/utils/i18n';
 
 export interface NotificationStoreState {
   apiState: number,
@@ -34,49 +42,46 @@ export const useNotificationStore = defineStore('notificationStore', {
         this.notifications = response.data;
       }).catch(logRequestError);
     },
+    addNotification (notification: Notification) {
+      this.notifications.push(notification)
+    },
 
-    processIncomingNotification (notification: any) {
+    processIncomingNotification (notification: Notification) {
       const $toast = useToast();
+      this.addNotification(notification)
 
-      this.getNotifications();
+      $toast.info(NotificationTextGenerator.generateLocalizedText(notification, i18n.global))
 
-      if (notification.category !== undefined) {
-        $toast.info(notification.text)
-        const resourceDevicesStore = useResourceDevicesStore();
-        const resourceClustersStore = useResourceClustersStore();
-        const serviceInstancesStore = useServiceInstancesStore();
-        const discoveryStore = useDiscoveryStore();
-        switch (notification.category) {
-          case 'JOBS':
-            const jobsStore = useJobsStore();
+      const resourceDevicesStore = useResourceDevicesStore();
+      const resourceClustersStore = useResourceClustersStore();
+      const serviceInstancesStore = useServiceInstancesStore();
 
-            jobsStore.updateStore();
-            resourceDevicesStore.updateStore();
-            resourceClustersStore.updateStore();
-            serviceInstancesStore.updateStore();
-            break
-          case 'RESOURCES':
-            if (notification.target === 'DISCOVERY') {
-              discoveryStore.updateDiscoveryStore();
-            }
-            else {
-              resourceDevicesStore.updateStore();
-              resourceClustersStore.updateStore();
-            }
-            break
-          case 'SERVICES':
-            serviceInstancesStore.updateStore();
-          case 'PROJECTS':
-            serviceInstancesStore.updateStore();
-            break
-          default:
-            console.debug(`Update ${notification.category} store`)
-            break
+      switch (notification.category) {
+        case NotificationCategory.Jobs: {
+          const jobsStore = useJobsStore();
+
+          jobsStore.updateStore();
+          resourceDevicesStore.updateStore();
+          resourceClustersStore.updateStore();
+          serviceInstancesStore.updateStore();
+          break;
         }
+        case NotificationCategory.Resources: {
+          handleResourcesCategoryNotification(notification);
+          break;
+        }
+        case NotificationCategory.Services: {
+          serviceInstancesStore.updateStore();
+          break;
+        }
+        default:
+          console.debug(`Update ${notification.category} store`)
+          break
       }
     },
-    markAsRead () {
-      NotificationServiceClient.api.setReadOfNotifications(true, this.notifications_unread)
+    markAllAsRead () {
+      const unreadNotificationIds = this.notifications_unread.map((note) => note.id);
+      NotificationServiceClient.api.setReadOfNotifications(true, unreadNotificationIds)
           .then(response => {
         this.updateStore();
       }).catch(logRequestError)
@@ -101,3 +106,42 @@ export const useNotificationStore = defineStore('notificationStore', {
     },
   },
 });
+
+function handleResourcesCategoryNotification(notification: Notification) {
+  const resourceDevicesStore = useResourceDevicesStore();
+  const resourceClustersStore = useResourceClustersStore();
+  const discoveryStore = useDiscoveryStore();
+
+  switch (notification.subCategory) {
+    case NotificationSubCategory.Resource: {
+      switch (notification.eventType) {
+        case EventType.Created: {
+          resourceDevicesStore.addResource(notification.payload)
+          break;
+        }
+        case EventType.Deleted: {
+          resourceDevicesStore.deleteResource(notification.payload.id)
+          break;
+        }
+        default: {
+          resourceDevicesStore.updateStore();
+          break;
+        }
+      }
+      break;
+    }
+    case NotificationSubCategory.Cluster: {
+      resourceClustersStore.updateStore();
+      break;
+    }
+    case NotificationSubCategory.Discovery: {
+      discoveryStore.updateDiscoveryStore();
+      break;
+    }
+    default: {
+      resourceDevicesStore.updateStore();
+      resourceClustersStore.updateStore();
+      break;
+    }
+  }
+}

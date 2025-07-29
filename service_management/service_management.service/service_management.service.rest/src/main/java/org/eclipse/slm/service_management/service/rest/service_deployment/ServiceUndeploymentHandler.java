@@ -11,8 +11,9 @@ import org.eclipse.slm.common.consul.model.catalog.CatalogService;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.actions.ActionType;
 import org.eclipse.slm.resource_management.service.client.ResourceManagementApiClientInitializer;
 import org.eclipse.slm.resource_management.service.client.handler.ApiException;
@@ -36,7 +37,7 @@ public class ServiceUndeploymentHandler extends AbstractServiceDeploymentHandler
 
     public final static Logger LOG = LoggerFactory.getLogger(ServiceUndeploymentHandler.class);
 
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
 
     private final ConsulServicesApiClient consulServicesApiClient;
 
@@ -49,7 +50,7 @@ public class ServiceUndeploymentHandler extends AbstractServiceDeploymentHandler
     public ServiceUndeploymentHandler(
             AwxJobObserverInitializer awxJobObserverInitializer,
             AwxJobExecutor awxJobExecutor,
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             ConsulServicesApiClient consulServicesApiClient,
             KeycloakUtil keycloakUtil,
             ResourceManagementApiClientInitializer resourceManagementApiClientInitializer,
@@ -57,7 +58,7 @@ public class ServiceUndeploymentHandler extends AbstractServiceDeploymentHandler
             ServiceInstancesConsulClient serviceInstancesConsulClient
     ) {
         super(resourceManagementApiClientInitializer, serviceInstancesConsulClient, awxJobObserverInitializer, awxJobExecutor);
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.consulServicesApiClient = consulServicesApiClient;
         this.keycloakUtil = keycloakUtil;
         this.serviceOfferingVersionHandler = serviceOfferingVersionHandler;
@@ -106,7 +107,6 @@ public class ServiceUndeploymentHandler extends AbstractServiceDeploymentHandler
         var awxJobId = awxJobExecutor.executeJob(new AwxCredential(jwtAuthenticationToken), awxGitRepoOfProject, awxGitBranchOfProject, awxPlaybook, extraVars);
         var awxJobObserver = awxJobObserverInitializer.initNewObserver(awxJobId, jobTarget, jobGoal, this);
         this.observedAwxJobsToUndeploymentJobDetails.put(awxJobObserver, new UndeploymentJobRun(jwtAuthenticationToken, serviceInstance.getId(), serviceInstance.getResourceId()));
-        this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobId, jobTarget, jobGoal);
     }
     @Override
     public void onJobStateChanged(AwxJobObserver sender, JobState newState) {
@@ -131,7 +131,11 @@ public class ServiceUndeploymentHandler extends AbstractServiceDeploymentHandler
                     try {
                         var serviceInstance = this.serviceInstancesConsulClient.getServiceInstance(serviceInstanceId);
                         this.serviceInstancesConsulClient.deregisterConsulServiceForServiceInstance(serviceInstance);
-                        notificationServiceClient.postNotification(jwtAuthenticationToken, Category.SERVICES, JobTarget.SERVICE, JobGoal.DELETE);
+                        this.notificationMessageSender.sendMessage(new NotificationMessage(
+                                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                                NotificationCategory.SERVICES, NotificationSubCategory.SERVICE, EventType.DELETED,
+                                serviceInstance
+                        ));
 
                     } catch (ConsulLoginFailedException | ServiceInstanceNotFoundException e) {
                         LOG.error(e.getMessage());

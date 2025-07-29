@@ -119,6 +119,12 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
+            <artifactId>notification_service.messaging</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- Testing !-->
         <dependency>
             <groupId>com.c4-soft.springaddons</groupId>

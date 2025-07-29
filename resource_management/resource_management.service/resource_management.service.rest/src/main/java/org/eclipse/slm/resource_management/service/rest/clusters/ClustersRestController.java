@@ -11,7 +11,7 @@ import org.eclipse.slm.resource_management.model.consul.capability.MultiHostCapa
 import org.eclipse.slm.resource_management.model.cluster.Cluster;
 import org.eclipse.slm.common.awx.client.observer.AwxJobExecutor;
 import org.eclipse.slm.common.vault.client.VaultClient;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.capabilities.Capability;
 import org.eclipse.slm.resource_management.model.capabilities.CapabilityDTOApi;
 import org.eclipse.slm.resource_management.model.capabilities.DeploymentCapability;
@@ -42,7 +42,7 @@ public class ClustersRestController {
     private final ResourcesManager resourcesManager;
     private final ClusterHandler clusterHandler;
     private final AwxJobExecutor awxJobExecutor;
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
     private final VaultClient vaultClient;
     @Autowired
     private CapabilityJpaRepository capabilityJpaRepository;
@@ -53,13 +53,13 @@ public class ClustersRestController {
             ResourcesManager resourcesManager,
             ClusterHandler clusterHandler,
             AwxJobExecutor awxJobExecutor,
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             VaultClient vaultClient
     ) {
         this.resourcesManager = resourcesManager;
         this.clusterHandler = clusterHandler;
         this.awxJobExecutor = awxJobExecutor;
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.vaultClient = vaultClient;
 
         // DTO >>> Entity

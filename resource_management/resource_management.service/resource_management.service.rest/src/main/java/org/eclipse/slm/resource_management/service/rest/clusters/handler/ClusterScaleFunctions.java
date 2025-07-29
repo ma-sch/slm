@@ -14,9 +14,11 @@ import org.eclipse.slm.common.consul.model.catalog.NodeService;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.keycloak.config.MultiTenantKeycloakRegistration;
+import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
 import org.eclipse.slm.common.vault.client.VaultClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.consul.capability.MultiHostCapabilityService;
 import org.eclipse.slm.resource_management.model.consul.capability.ScaleDownOperation;
 import org.eclipse.slm.resource_management.model.consul.capability.ScaleOperation;
@@ -46,7 +48,7 @@ public class ClusterScaleFunctions extends AbstractClusterFunctions implements I
     protected ResourcesConsulClient resourcesConsulClient;
 
     public ClusterScaleFunctions(
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             AwxJobExecutor awxJobExecutor,
             MultiTenantKeycloakRegistration multiTenantKeycloakRegistration,
             ConsulServicesApiClient consulServicesApiClient,
@@ -58,7 +60,7 @@ public class ClusterScaleFunctions extends AbstractClusterFunctions implements I
             AwxJobObserverInitializer awxJobObserverInitializer,
             VaultClient vaultClient) {
         super(
-                notificationServiceClient,
+                notificationMessageSender,
                 awxJobExecutor,
                 multiTenantKeycloakRegistration,
                 consulServicesApiClient,
@@ -126,7 +128,6 @@ public class ClusterScaleFunctions extends AbstractClusterFunctions implements I
                 jobGoal,
                 this
         );
-        this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
 
         var clusterJob = new ClusterJob(service);
         clusterJob.setJwtAuthenticationToken(jwtAuthenticationToken);
@@ -176,7 +177,6 @@ public class ClusterScaleFunctions extends AbstractClusterFunctions implements I
         );
 
         var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(jobId, jobTarget, jobGoal, this);
-        this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobObserver);
 
         var clusterJob = new ClusterJob(service);
         clusterJob.setJwtAuthenticationToken(jwtAuthenticationToken);
@@ -215,12 +215,11 @@ public class ClusterScaleFunctions extends AbstractClusterFunctions implements I
                     multiHostCapabilityService.getId()
             );
 
-            this.notificationServiceClient.postNotification(
-                    clusterJob.getJwtAuthenticationToken(),
-                    Category.RESOURCES,
-                    jobTarget,
-                    jobGoal
-            );
+            this.notificationMessageSender.sendMessage(new NotificationMessage(
+                    KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                    NotificationCategory.RESOURCES, NotificationSubCategory.CLUSTER, EventType.MODIFYED,
+                    null
+            ));
             this.clusterJobMap.remove(sender.jobId);
         }
     }

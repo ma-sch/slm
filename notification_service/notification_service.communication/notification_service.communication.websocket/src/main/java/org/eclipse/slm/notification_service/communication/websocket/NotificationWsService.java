@@ -19,11 +19,9 @@ public class NotificationWsService {
     }
 
     public void notifyFrontend(final Notification notification) {
-        String prefix = simpleMessageTemplate.getUserDestinationPrefix();
+        logger.info("Send notification '" + notification.toString() + "' to user '" + notification.getUserId() + "'");
 
-        logger.info("Send notification '" + notification.getText() + "' to user '" + notification.getOwner() + "'");
-
-        simpleMessageTemplate.convertAndSendToUser(notification.getOwner(), "/topic/notifications", notification);
-        simpleMessageTemplate.convertAndSend("/topic/notifications/"+notification.getOwner(), notification);
+        simpleMessageTemplate.convertAndSendToUser(notification.getUserId(), "/topic/notifications", notification);
+        simpleMessageTemplate.convertAndSend("/topic/notifications/"+notification.getUserId(), notification);
     }
 }

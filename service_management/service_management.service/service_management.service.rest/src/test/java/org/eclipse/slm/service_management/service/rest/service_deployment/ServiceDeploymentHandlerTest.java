@@ -10,7 +10,7 @@ import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.awx.client.observer.AwxJobExecutor;
 import org.eclipse.slm.common.awx.client.observer.AwxJobObserverInitializer;
 import org.eclipse.slm.notification_service.model.JobFinalState;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.service.client.ResourceManagementApiClientInitializer;
 import org.eclipse.slm.resource_management.service.client.handler.ApiClient;
 import org.eclipse.slm.resource_management.service.client.handler.ApiException;
@@ -64,7 +64,7 @@ public class ServiceDeploymentHandlerTest {
     private AwxJobExecutor awxJobExecutor;
 
     @Mock
-    private NotificationServiceClient notificationServiceClient;
+    private NotificationMessageSender notificationMessageSender;
 
     @Mock
     private ConsulServicesApiClient consulServicesApiClient;
@@ -158,7 +158,7 @@ public class ServiceDeploymentHandlerTest {
 
         this.serviceDeploymentHandler = new ServiceDeploymentHandler(
                 awxJobObserverInitializer, awxJobExecutor,
-                notificationServiceClient,
+                notificationMessageSender,
                 consulServicesApiClient,
                 keycloakUtil,
                 resourceManagementApiClientInitializer,

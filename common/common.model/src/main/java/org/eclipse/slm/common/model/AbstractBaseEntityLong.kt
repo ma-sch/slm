@@ -9,7 +9,7 @@ abstract class AbstractBaseEntityLong {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     @Column(name = "id", unique = true, nullable = false)
-    val id: Long = 0
+    open val id: Long = 0
 
     @Version
     @JsonIgnore

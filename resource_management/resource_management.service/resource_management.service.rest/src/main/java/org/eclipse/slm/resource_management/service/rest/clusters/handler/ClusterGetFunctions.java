@@ -13,7 +13,7 @@ import org.eclipse.slm.common.keycloak.config.MultiTenantKeycloakRegistration;
 import org.eclipse.slm.common.vault.client.VaultClient;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.common.vault.model.KvPath;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.service.rest.capabilities.CapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.service.rest.capabilities.MultiHostCapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.model.cluster.Cluster;
@@ -30,7 +30,7 @@ public class ClusterGetFunctions extends AbstractClusterFunctions {
     private final static Logger LOG = LoggerFactory.getLogger(ClusterGetFunctions.class);
 
     public ClusterGetFunctions(
-            NotificationServiceClient notificationServiceClient,
+            NotificationMessageSender notificationMessageSender,
             AwxJobExecutor awxJobExecutor,
             MultiTenantKeycloakRegistration multiTenantKeycloakRegistration,
             ConsulServicesApiClient consulServicesApiClient,
@@ -42,7 +42,7 @@ public class ClusterGetFunctions extends AbstractClusterFunctions {
             AwxJobObserverInitializer awxJobObserverInitializer,
             VaultClient vaultClient) {
         super(
-                notificationServiceClient,
+                notificationMessageSender,
                 awxJobExecutor,
                 multiTenantKeycloakRegistration,
                 consulServicesApiClient,

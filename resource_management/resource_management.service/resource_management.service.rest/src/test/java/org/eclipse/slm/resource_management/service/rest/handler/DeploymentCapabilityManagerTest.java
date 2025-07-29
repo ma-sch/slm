@@ -31,7 +31,7 @@
 //import org.eclipse.slm.notification_service.model.JobFinalState;
 //import org.eclipse.slm.notification_service.model.JobGoal;
 //import org.eclipse.slm.notification_service.model.JobTarget;
-//import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+//import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 //import org.eclipse.slm.resource_management.model.resource.ConnectionType;
 //import org.eclipse.slm.resource_management.model.resource.CredentialUsernamePassword;
 //import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
@@ -128,7 +128,7 @@
 //    @Autowired
 //    private AwxJobObserverInitializer awxJobObserverInitializer;
 //    @MockBean
-//    NotificationServiceClient notificationServiceClient;
+//    NotificationMessageSender notificationMessageSender;
 //    @MockBean
 //    MultiTenantKeycloakRegistration multiTenantKeycloakRegistration;
 //    @MockBean

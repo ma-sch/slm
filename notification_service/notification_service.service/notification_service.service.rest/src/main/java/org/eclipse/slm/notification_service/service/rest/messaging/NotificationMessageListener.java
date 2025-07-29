@@ -35,7 +35,7 @@ public class NotificationMessageListener extends GenericMessageListener<Notifica
                 notificationMessage.getPayload()
         );
 
-//        notificationRepository.save(notification);
+        notificationRepository.save(notification);
         notificationWsService.notifyFrontend(notification);
         LOG.info("Create new notification: " + notification);
     }

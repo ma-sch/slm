@@ -9,7 +9,7 @@ import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
 import org.eclipse.slm.common.keycloak.config.MultiTenantKeycloakRegistration;
 import org.eclipse.slm.common.vault.client.VaultClient;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.cluster.Cluster;
 import org.eclipse.slm.resource_management.model.cluster.ClusterCreateRequest;
 import org.eclipse.slm.resource_management.model.consul.capability.MultiHostCapabilityService;
@@ -90,7 +90,7 @@ public class ClusterHandlerITDev {
     @MockBean
     AwxJobExecutor awxJobExecutor;
     @MockBean
-    NotificationServiceClient notificationServiceClient;
+    NotificationMessageSender NotificationMessageSender;
     @MockBean
     AwxJobObserverInitializer awxJobObserverInitializer;
     @MockBean

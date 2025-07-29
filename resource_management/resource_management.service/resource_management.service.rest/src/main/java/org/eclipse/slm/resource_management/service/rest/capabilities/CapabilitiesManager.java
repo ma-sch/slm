@@ -13,9 +13,11 @@ import org.eclipse.slm.common.awx.model.*;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakUtil;
+import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
 import org.eclipse.slm.common.vault.client.VaultCredential;
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
 import org.eclipse.slm.notification_service.model.*;
-import org.eclipse.slm.notification_service.service.client.NotificationServiceClient;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
 import org.eclipse.slm.resource_management.model.capabilities.*;
 import org.eclipse.slm.resource_management.model.actions.AwxAction;
 import org.eclipse.slm.resource_management.model.actions.ActionType;
@@ -50,7 +52,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
     private final CapabilitiesConsulClient capabilitiesConsulClient;
     private final SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient;
     private final AwxJobExecutor awxJobExecutor;
-    private final NotificationServiceClient notificationServiceClient;
+    private final NotificationMessageSender notificationMessageSender;
     private final AwxJobObserverInitializer awxJobObserverInitializer;
     private final AwxClient awxClient;
     private final CapabilityJpaRepository capabilityJpaRepository;
@@ -73,7 +75,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
         MultiHostCapabilitiesConsulClient multiHostCapabilitiesConsulClient,
         SingleHostCapabilitiesVaultClient singleHostCapabilitiesVaultClient,
         AwxJobExecutor awxJobExecutor,
-        NotificationServiceClient notificationServiceClient,
+        NotificationMessageSender notificationMessageSender,
         AwxJobObserverInitializer awxJobObserverInitializer,
         AwxClient awxClient,
         CapabilityJpaRepository capabilityJpaRepository,
@@ -86,7 +88,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
         this.capabilitiesConsulClient = capabilitiesConsulClient;
         this.singleHostCapabilitiesVaultClient = singleHostCapabilitiesVaultClient;
         this.awxJobExecutor = awxJobExecutor;
-        this.notificationServiceClient = notificationServiceClient;
+        this.notificationMessageSender = notificationMessageSender;
         this.awxJobObserverInitializer = awxJobObserverInitializer;
         this.awxClient = awxClient;
         this.capabilityJpaRepository = capabilityJpaRepository;
@@ -414,7 +416,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
             CapabilityService newCapabilityService,
             AwxCredential awxCredential,
             ConsulCredential consulCredential,
-            String keycloakToken,
+            JwtAuthenticationToken jwtAuthenticationToken,
             Map<String,String> configParameters
     ) throws SSLException, CapabilityNotFoundException, ConsulLoginFailedException, ResourceNotFoundException, JsonProcessingException {
         UUID capabilityId = newCapabilityService.getCapability().getId();
@@ -432,7 +434,7 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                 );
 
                 Map<String, Object> extraVars = new HashMap<>();
-                extraVars.put("keycloak_token", keycloakToken);
+                extraVars.put("keycloak_token", KeycloakTokenUtil.getToken(jwtAuthenticationToken));
                 extraVars.put("resource_id", resourceId.toString());
                 extraVars.put("service_name", newCapabilityService.getService());
                 extraVars.put("supported_connection_types", capabilityInstallAction.getConnectionTypes());
@@ -457,7 +459,8 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                                 resourceId,
                                 awxCredential,
                                 consulCredential,
-                                newCapabilityService
+                                newCapabilityService,
+                                jwtAuthenticationToken
                         )
                 );
                 return awxJobId;
@@ -516,7 +519,11 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                 configParameters
         );
 
-        this.notificationServiceClient.postNotification(jwtAuthenticationToken, Category.RESOURCES, JobTarget.DEPLOYMENT_CAPABILITY, ADD);
+        this.notificationMessageSender.sendMessage(new NotificationMessage(
+                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                NotificationCategory.RESOURCES, NotificationSubCategory.CAPABILITY, EventType.ADDED,
+                null
+        ));
 
         this.keycloakUtil.createRealmRoleAndAssignToUser(
                 jwtAuthenticationToken,
@@ -536,10 +543,14 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                     newCapabilityService,
                     new AwxCredential(jwtAuthenticationToken),
                     new ConsulCredential(jwtAuthenticationToken),
-                    jwtAuthenticationToken.getToken().getTokenValue(),
+                    jwtAuthenticationToken,
                     configParameters
             );
-            this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobId, JobTarget.DEPLOYMENT_CAPABILITY, ADD);
+            this.notificationMessageSender.sendMessage(new NotificationMessage(
+                    KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                    NotificationCategory.RESOURCES, NotificationSubCategory.CAPABILITY, EventType.ADDED,
+                    null
+            ));
         }
     }
 
@@ -570,11 +581,10 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                 newCapabilityService,
                 new AwxCredential(jwtAuthenticationToken),
                 new ConsulCredential(),
-                jwtAuthenticationToken.getToken().getTokenValue(),
+                jwtAuthenticationToken,
                 new HashMap<>()
 
         );
-        this.notificationServiceClient.postJobObserver(jwtAuthenticationToken, awxJobId, JobTarget.BASE_CONFIGURATION_CAPABILITY, ADD);
     }
 
     private void updateCapabilityServiceStatus(
@@ -596,13 +606,13 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
             CapabilityService capabilityService,
             AwxCredential awxCredential,
             ConsulCredential consulCredential,
-            String keycloakToken
-    ) throws SSLException, ConsulLoginFailedException, ResourceNotFoundException {
+            JwtAuthenticationToken jwtAuthenticationToken
+    ) throws ConsulLoginFailedException, ResourceNotFoundException {
         Capability capability = capabilityService.getCapability();
 
         var uninstallAction = (AwxAction) capability.getActions().get(ActionType.UNINSTALL);
         Map<String, Object> extraVars = new HashMap<>();
-        extraVars.put("keycloak_token", keycloakToken);
+        extraVars.put("keycloak_token", KeycloakTokenUtil.getToken(jwtAuthenticationToken));
         extraVars.put("resource_id", resourceId.toString());
         extraVars.put("service_name", capabilityService.getService());
         extraVars.put("supported_connection_types", uninstallAction.getConnectionTypes());
@@ -634,7 +644,8 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                         resourceId,
                         awxCredential,
                         consulCredential,
-                        capabilityService
+                        capabilityService,
+                        jwtAuthenticationToken
                 )
         );
 
@@ -683,16 +694,8 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                     capabilityService,
                     new AwxCredential(jwtAuthenticationToken),
                     consulCredential,
-                    jwtAuthenticationToken.getToken().getTokenValue()
+                    jwtAuthenticationToken
             );
-
-            if (awxJobId != -1)
-                this.notificationServiceClient.postJobObserver(
-                        jwtAuthenticationToken,
-                        awxJobId,
-                        JobTarget.DEPLOYMENT_CAPABILITY,
-                        DELETE
-                );
         } else {
             singleHostCapabilitiesConsulClient.removeSingleHostCapabilityFromNode(
                     consulCredential,
@@ -707,12 +710,11 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                             capabilityService
                     )
             );
-            this.notificationServiceClient.postNotification(
-                    jwtAuthenticationToken,
-                    Category.RESOURCES,
-                    JobTarget.DEPLOYMENT_CAPABILITY,
-                    DELETE
-            );
+            this.notificationMessageSender.sendMessage(new NotificationMessage(
+                    KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                    NotificationCategory.RESOURCES, NotificationSubCategory.CAPABILITY, EventType.DELETED,
+                    null
+            ));
         }
     }
 
@@ -726,10 +728,11 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
             JobFinalState finalState
     ) {
 
-        JobGoal jobGoal = awxJobObserver.jobGoal;
-        CapabilityJob jobDetails = this.awxJobObserverToJobDetails.get(awxJobObserver);
-        CapabilityService capabilityService = jobDetails.getCapabilityService();
-        Capability capability = capabilityService.getCapability();
+        var jobGoal = awxJobObserver.jobGoal;
+        var jobDetails = this.awxJobObserverToJobDetails.get(awxJobObserver);
+        var capabilityService = jobDetails.getCapabilityService();
+        var capability = capabilityService.getCapability();
+        var jwtAuthenticationToken = jobDetails.getJwtAuthenticationToken();
 
         if (finalState == JobFinalState.SUCCESSFUL)
         {
@@ -752,6 +755,11 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                                 CapabilityServiceStatus.READY
                         );
 
+                        this.notificationMessageSender.sendMessage(new NotificationMessage(
+                                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                                NotificationCategory.RESOURCES, NotificationSubCategory.CAPABILITY, EventType.INSTALLED,
+                                null
+                        ));
                         LOG.info("Successfully added capability '" + capability.getName() + "'" +
                                 "to resource '" + jobDetails.getResourceId() + "'");
                         break;
@@ -769,6 +777,12 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
                                     jobDetails.getResourceId()
                             );
                         }
+
+                        this.notificationMessageSender.sendMessage(new NotificationMessage(
+                                KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                                NotificationCategory.RESOURCES, NotificationSubCategory.CAPABILITY, EventType.UNINSTALLED,
+                                null
+                        ));
 
                         LOG.info("Successfully removed deployment capability '"  + capability.getName() +"'" +
                                 "from resource '" + jobDetails.getResourceId() + "'");
@@ -798,6 +812,12 @@ public class CapabilitiesManager implements IAwxJobObserverListener {
             }
             LOG.error("Failed to add deployment capability '"  + jobDetails.getCapabilityService().getCapability().getName() + "'" +
                     "to resource '" + jobDetails.getResourceId() + "'");
+
+            this.notificationMessageSender.sendMessage(new NotificationMessage(
+                    KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
+                    NotificationCategory.RESOURCES, NotificationSubCategory.CAPABILITY, EventType.FAILED,
+                    null
+            ));
         }
 
         this.awxJobObserverToJobDetails.remove(awxJobObserver);
