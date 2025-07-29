@@ -33,6 +33,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -51,7 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 public class CapabilitiesManagerTest {
-    public static final String keycloakDummyToken = "";
+    public static final JwtAuthenticationToken keycloakDummyToken = new JwtAuthenticationToken(
+            new Jwt("", null, null, new HashMap<>(), new HashMap<>()));
     @Autowired
     CapabilitiesManager capabilitiesManager;
     @MockBean
