@@ -3,10 +3,8 @@ package org.eclipse.slm.information_service.service.impl;
 import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelDescriptor;
 import org.eclipse.slm.common.aas.clients.*;
-import org.eclipse.slm.common.messaging.resources.ResourceCreatedMessage;
-import org.eclipse.slm.common.messaging.resources.ResourceInformationFoundMessage;
-import org.eclipse.slm.common.messaging.resources.ResourceMessageListener;
-import org.eclipse.slm.common.messaging.resources.ResourceMessageSender;
+import org.eclipse.slm.common.messaging.GenericMessageListener;
+import org.eclipse.slm.resource_management.messaging.ResourceCreatedMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,46 +21,44 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class InformationServiceResourceMessageListener extends ResourceMessageListener {
+public class InformationServiceResourceCreatedMessageListener extends GenericMessageListener<ResourceCreatedMessage> {
 
-    public final static Logger LOG = LoggerFactory.getLogger(InformationServiceResourceMessageListener.class);
+    public final static Logger LOG = LoggerFactory.getLogger(InformationServiceResourceCreatedMessageListener.class);
 
     private final AasRepositoryClient aasRepositoryClient;
     private final SubmodelRepositoryClient submodelRepositoryClient;
     private final SubmodelRegistryClient submodelRegistryClient;
-    private final ResourceMessageSender resourceMessageSender;
 
     private final AasRepositoryClient irsAasRepositoryClient;
     private final SubmodelRegistryClient irsSubmodelRegistryClient;
     private final String irsUrlInternal;
     private final String irsUrlExternal;
 
-    public InformationServiceResourceMessageListener(@Value("${irs.url.internal}") String irsUrlInternal,
-                                                     @Value("${irs.url.external}") String irsUrlExternal,
-                                                     AasRepositoryClientFactory aasRepositoryClientFactory,
-                                                     SubmodelRepositoryClientFactory submodelRepositoryClientFactory,
-                                                     SubmodelRegistryClientFactory submodelRegistryClientFactory,
-                                                     ResourceMessageSender resourceMessageSender) {
+    public InformationServiceResourceCreatedMessageListener(@Value("${irs.url.internal}") String irsUrlInternal,
+                                                            @Value("${irs.url.external}") String irsUrlExternal,
+                                                            AasRepositoryClientFactory aasRepositoryClientFactory,
+                                                            SubmodelRepositoryClientFactory submodelRepositoryClientFactory,
+                                                            SubmodelRegistryClientFactory submodelRegistryClientFactory) {
+        super(ResourceCreatedMessage.class);
         this.irsUrlInternal = irsUrlInternal;
         this.irsUrlExternal = irsUrlExternal;
         this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
         this.submodelRepositoryClient = submodelRepositoryClientFactory.getClient();
         this.submodelRegistryClient = submodelRegistryClientFactory.getClient();
-        this.resourceMessageSender = resourceMessageSender;
 
         this.irsAasRepositoryClient = new AasRepositoryClient(this.irsUrlInternal + "/api/shell_repo");
         this.irsSubmodelRegistryClient = new SubmodelRegistryClient(this.irsUrlInternal + "/api/submodel_registry");
     }
 
     @Override
-    public void onResourceCreated(ResourceCreatedMessage resourceCreatedMessage) {
+    public void onMessageReceived(ResourceCreatedMessage resourceCreatedMessage) {
         LOG.info("Received resource created message: {}", resourceCreatedMessage);
 
         try {
-            var resourceAasId = "Resource_" + resourceCreatedMessage.resourceId();
+            var resourceAasId = "Resource_" + resourceCreatedMessage.getResourceId();
             var resourceAasOptional = aasRepositoryClient.getAas(resourceAasId);
             if (resourceAasOptional.isEmpty()) {
-                LOG.info("No AAS found for resource '{}', skipping information retrieval", resourceCreatedMessage.resourceId());
+                LOG.info("No AAS found for resource '{}', skipping information retrieval", resourceCreatedMessage.getResourceId());
                 return;
             }
             var resourceAas = resourceAasOptional.get();
@@ -94,9 +90,9 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
                 }
             }
 
-            var assetId = resourceCreatedMessage.assetId();
+            var assetId = resourceCreatedMessage.getAssetId();
             if (assetId == null) {
-                LOG.info("Asset id for created resource '{}' not available, skipping information retrieval", resourceCreatedMessage.resourceId());
+                LOG.info("Asset id for created resource '{}' not available, skipping information retrieval", resourceCreatedMessage.getResourceId());
                 return;
             }
 
@@ -188,7 +184,7 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
 
             LOG.info("Successfully added {} submodels to AAS '{}'", receivedSubmodelDescriptors.size(), resourceAasId);
 
-            resourceMessageSender.sendResourceInformationMessage(resourceCreatedMessage.resourceId());
+//            resourceMessageSender.sendResourceInformationMessage(resourceCreatedMessage.getResourceId());
         }
         catch (Exception e) {
             Writer buffer = new StringWriter();
@@ -198,9 +194,9 @@ public class InformationServiceResourceMessageListener extends ResourceMessageLi
         }
     }
 
-    @Override
-    public void onResourceInformationFound(ResourceInformationFoundMessage resourceInformationFoundMessage) {
-        // Nothing to do
-    }
+//    @Override
+//    public void onResourceInformationFound(ResourceInformationFoundMessage resourceInformationFoundMessage) {
+//        // Nothing to do
+//    }
 
 }

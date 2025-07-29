@@ -1,4 +1,4 @@
-package org.eclipse.slm.common.messaging.resources;
+package org.eclipse.slm.common.messaging;
 
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

@@ -18,6 +18,7 @@
         <module>resource_management.service</module>
         <module>resource_management.persistence</module>
         <module>resource_management.model</module>
+        <module>resource_management.messaging</module>
     </modules>
 
 </project>

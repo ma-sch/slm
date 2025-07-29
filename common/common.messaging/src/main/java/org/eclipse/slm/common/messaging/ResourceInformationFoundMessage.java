@@ -1,4 +1,4 @@
-package org.eclipse.slm.common.messaging.resources;
+package org.eclipse.slm.common.messaging;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

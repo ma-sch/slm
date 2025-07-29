@@ -39,6 +39,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.slm</groupId>
+            <artifactId>resource_management.messaging</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
             <artifactId>common.parent.service_rest</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -79,6 +85,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.slm</groupId>
+            <artifactId>notification_service.messaging</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
             <artifactId>common.consul.client</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
@@ -96,7 +108,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.slm</groupId>
-            <artifactId>common.messaging.resources</artifactId>
+            <artifactId>common.messaging</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
