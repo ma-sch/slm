@@ -1,21 +1,20 @@
----
 openapi: 3.0.1
 info:
   title: Resource Management
   description: REST API of Resource Management
   contact:
     name: Fraunhofer IPA
-    url: https://www.ipa.fraunhofer.de
+    url: 'https://www.ipa.fraunhofer.de'
     email: matthias.schneider@ipa.fraunhofer.de
   version: 1.4.0-SNAPSHOT
 servers:
-  - url: https://slm.local/resource-management
+  - url: 'https://slm.local/resource-management'
     description: Generated server url
 security:
   - bearer_auth: []
   - spring_oauth: []
 paths:
-  "/resources/{resourceId}":
+  '/resources/{resourceId}':
     get:
       tags:
         - Resources
@@ -32,9 +31,9 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/BasicResource"
+                $ref: '#/components/schemas/BasicResource'
     put:
       tags:
         - Resources
@@ -51,13 +50,13 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/CreateResourceRequest"
+              $ref: '#/components/schemas/CreateResourceRequest'
         required: true
       responses:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
     delete:
@@ -76,10 +75,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/{resourceId}/remote-access":
+  '/resources/{resourceId}/remote-access':
     put:
       tags:
         - Resources
@@ -106,7 +105,7 @@ paths:
           in: query
           required: true
           schema:
-            "$ref": "#/components/schemas/ConnectionType"
+            $ref: '#/components/schemas/ConnectionType'
         - name: resourceConnectionPort
           in: query
           required: false
@@ -118,10 +117,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/{resourceId}/location":
+  '/resources/{resourceId}/location':
     put:
       tags:
         - Resources
@@ -144,10 +143,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/{resourceId}/connection-parameters":
+  '/resources/{resourceId}/connection-parameters':
     put:
       tags:
         - Resources
@@ -169,10 +168,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/{resourceId}/capabilities":
+  '/resources/{resourceId}/capabilities':
     put:
       tags:
         - Capabilities
@@ -209,7 +208,7 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
     delete:
@@ -234,10 +233,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/updates/{softwareNameplateId}/file":
+  '/resources/updates/{softwareNameplateId}/file':
     put:
       tags:
         - Updates
@@ -277,7 +276,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/locations/{locationId}":
+  '/resources/locations/{locationId}':
     put:
       tags:
         - Location
@@ -299,10 +298,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/Location"
-  "/resources":
+                $ref: '#/components/schemas/Location'
+  /resources:
     get:
       tags:
         - Resources
@@ -312,11 +311,11 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/BasicResource"
+                  $ref: '#/components/schemas/BasicResource'
     post:
       tags:
         - Resources
@@ -326,17 +325,17 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/CreateResourceRequest"
+              $ref: '#/components/schemas/CreateResourceRequest'
         required: true
       responses:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
                 format: uuid
-  "/resources/{resourceId}/updates/jobs":
+  '/resources/{resourceId}/updates/jobs':
     get:
       tags:
         - Updates
@@ -353,16 +352,16 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/FirmwareUpdateJob"
+                  $ref: '#/components/schemas/FirmwareUpdateJob'
     post:
       tags:
         - Updates
       summary: Start firmware update job for a resource
-      operationId: prepareFirmwareUpdateOnResource
+      operationId: startFirmwareUpdateOnResource
       parameters:
         - name: resourceId
           in: path
@@ -378,12 +377,12 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/{resourceId}/updates/jobs/{firmwareUpdateJobId}":
+  '/resources/{resourceId}/updates/jobs/{firmwareUpdateJobId}':
     post:
       tags:
         - Updates
-      summary: Prepare firmware update on resource
-      operationId: prepareFirmwareUpdateOnResource_1
+      summary: Change state of firmware update on resource
+      operationId: changeStateOfFirmwareUpdateOnResource
       parameters:
         - name: resourceId
           in: path
@@ -401,11 +400,11 @@ paths:
           in: query
           required: true
           schema:
-            "$ref": "#/components/schemas/FirmwareUpdateEvents"
+            $ref: '#/components/schemas/FirmwareUpdateEvents'
       responses:
         '200':
           description: OK
-  "/resources/{resourceId}/submodels":
+  '/resources/{resourceId}/submodels':
     get:
       tags:
         - Resources AAS
@@ -422,7 +421,7 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
     post:
@@ -452,10 +451,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/updates/{softwareNameplateId}/file/download":
+  '/resources/updates/{softwareNameplateId}/file/download':
     post:
       tags:
         - Updates
@@ -470,7 +469,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/types/aas/submodel-refs":
+  /resources/types/aas/submodel-refs:
     get:
       tags:
         - Resource Types
@@ -488,11 +487,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
       responses:
         '200':
           description: Requested submodel references
@@ -501,38 +501,39 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/GetReferencesResult"
+                  $ref: '#/components/schemas/GetReferencesResult'
         '400':
-          description: Bad Request, e.g. the request parameters of the format of the
+          description: >-
+            Bad Request, e.g. the request parameters of the format of the
             request body is wrong.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
     post:
       tags:
         - Resource Types
@@ -542,7 +543,7 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/Reference"
+              $ref: '#/components/schemas/Reference'
         required: true
       responses:
         '201':
@@ -550,47 +551,49 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Reference"
+                $ref: '#/components/schemas/Reference'
         '400':
-          description: Bad Request, e.g. the request parameters of the format of the
+          description: >-
+            Bad Request, e.g. the request parameters of the format of the
             request body is wrong.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '409':
-          description: Conflict, a resource which shall be created exists already.
-            Might be thrown if a Submodel or SubmodelElement with the same ShortId
-            is contained in a POST request.
+          description: >-
+            Conflict, a resource which shall be created exists already. Might be
+            thrown if a Submodel or SubmodelElement with the same ShortId is
+            contained in a POST request.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/providers/virtual-resource-provider/{virtualResourceProviderId}/vm":
+                $ref: '#/components/schemas/Result'
+  '/resources/providers/virtual-resource-provider/{virtualResourceProviderId}/vm':
     post:
       tags:
         - Capability Providers
@@ -606,7 +609,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/profiler":
+  /resources/profiler:
     get:
       tags:
         - Profiler
@@ -620,7 +623,7 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Profiler"
+                  $ref: '#/components/schemas/Profiler'
     post:
       tags:
         - Profiler
@@ -630,16 +633,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/ProfilerDTOApi"
+              $ref: '#/components/schemas/ProfilerDTOApi'
         required: true
       responses:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/Profiler"
-  "/resources/profiler/{profilerId}/execute":
+                $ref: '#/components/schemas/Profiler'
+  '/resources/profiler/{profilerId}/execute':
     post:
       tags:
         - Profiler
@@ -655,7 +658,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/profiler/execute":
+  /resources/profiler/execute:
     post:
       tags:
         - Profiler
@@ -664,7 +667,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/locations":
+  /resources/locations:
     get:
       tags:
         - Location
@@ -681,11 +684,11 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Location"
+                  $ref: '#/components/schemas/Location'
     post:
       tags:
         - Location
@@ -701,9 +704,9 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/Location"
+                $ref: '#/components/schemas/Location'
     delete:
       tags:
         - Location
@@ -719,7 +722,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/discovery/inbox/onboard":
+  /resources/discovery/inbox/onboard:
     post:
       tags:
         - Discovery
@@ -728,12 +731,12 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/OnboardingRequest"
+              $ref: '#/components/schemas/OnboardingRequest'
         required: true
       responses:
         '200':
           description: OK
-  "/resources/discovery/inbox/ignore":
+  /resources/discovery/inbox/ignore:
     post:
       tags:
         - Discovery
@@ -753,7 +756,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/discovery/drivers/{driverId}/discover":
+  '/resources/discovery/drivers/{driverId}/discover':
     post:
       tags:
         - Discovery
@@ -768,16 +771,16 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/DiscoveryRequest"
+              $ref: '#/components/schemas/DiscoveryRequest'
         required: true
       responses:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/DiscoveryJobStartedResponse"
-  "/resources/clusters":
+                $ref: '#/components/schemas/DiscoveryJobStartedResponse'
+  /resources/clusters:
     get:
       tags:
         - Clusters
@@ -787,11 +790,11 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/Cluster"
+                  $ref: '#/components/schemas/Cluster'
     post:
       tags:
         - Clusters
@@ -801,12 +804,12 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/ClusterCreateRequest"
+              $ref: '#/components/schemas/ClusterCreateRequest'
         required: true
       responses:
         '200':
           description: OK
-  "/resources/clusters/{clusterUuid}/members":
+  '/resources/clusters/{clusterUuid}/members':
     post:
       tags:
         - Clusters
@@ -849,7 +852,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/capabilities":
+  /resources/capabilities:
     get:
       tags:
         - Capabilities
@@ -860,7 +863,7 @@ paths:
           in: query
           required: false
           schema:
-            "$ref": "#/components/schemas/CapabilityFilter"
+            $ref: '#/components/schemas/CapabilityFilter'
       responses:
         '200':
           description: OK
@@ -870,9 +873,9 @@ paths:
                 type: array
                 items:
                   oneOf:
-                    - "$ref": "#/components/schemas/BaseConfigurationCapabilityDTOApi"
-                    - "$ref": "#/components/schemas/DeploymentCapabilityDTOApi"
-                    - "$ref": "#/components/schemas/VirtualizationCapabilityDTOApi"
+                    - $ref: '#/components/schemas/BaseConfigurationCapabilityDTOApi'
+                    - $ref: '#/components/schemas/DeploymentCapabilityDTOApi'
+                    - $ref: '#/components/schemas/VirtualizationCapabilityDTOApi'
     post:
       tags:
         - Capabilities
@@ -883,14 +886,14 @@ paths:
           application/json:
             schema:
               oneOf:
-                - "$ref": "#/components/schemas/BaseConfigurationCapabilityDTOApi"
-                - "$ref": "#/components/schemas/DeploymentCapabilityDTOApi"
-                - "$ref": "#/components/schemas/VirtualizationCapabilityDTOApi"
+                - $ref: '#/components/schemas/BaseConfigurationCapabilityDTOApi'
+                - $ref: '#/components/schemas/DeploymentCapabilityDTOApi'
+                - $ref: '#/components/schemas/VirtualizationCapabilityDTOApi'
         required: true
       responses:
         '200':
           description: OK
-  "/importer/file":
+  /importer/file:
     post:
       tags:
         - Importer
@@ -910,7 +913,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/{resourceId}/updates":
+  '/resources/{resourceId}/updates':
     get:
       tags:
         - Updates
@@ -927,10 +930,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/UpdateInformationResource"
-  "/resources/{resourceId}/deployment-capabilities":
+                $ref: '#/components/schemas/UpdateInformationResource'
+  '/resources/{resourceId}/deployment-capabilities':
     get:
       tags:
         - Capabilities
@@ -951,8 +954,8 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/DeploymentCapability"
-  "/resources/{resourceId}/capability-services":
+                  $ref: '#/components/schemas/DeploymentCapability'
+  '/resources/{resourceId}/capability-services':
     get:
       tags:
         - Capabilities
@@ -974,10 +977,10 @@ paths:
                 type: array
                 items:
                   oneOf:
-                    - "$ref": "#/components/schemas/CapabilityService"
-                    - "$ref": "#/components/schemas/MultiHostCapabilityService"
-                    - "$ref": "#/components/schemas/SingleHostCapabilityService"
-  "/resources/{resourceId}/aas-descriptor":
+                    - $ref: '#/components/schemas/CapabilityService'
+                    - $ref: '#/components/schemas/MultiHostCapabilityService'
+                    - $ref: '#/components/schemas/SingleHostCapabilityService'
+  '/resources/{resourceId}/aas-descriptor':
     get:
       tags:
         - Resources AAS
@@ -994,10 +997,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/AssetAdministrationShellDescriptor"
-  "/resources/{aasId}/aas/submodels":
+                $ref: '#/components/schemas/AssetAdministrationShellDescriptor'
+  '/resources/{aasId}/aas/submodels':
     get:
       tags:
         - Resources AAS
@@ -1006,7 +1009,9 @@ paths:
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1033,11 +1038,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
         - name: level
           in: query
           description: Determines the structural depth of the respective resource content
@@ -1064,14 +1070,14 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/GetSubmodelsResult"
+                $ref: '#/components/schemas/GetSubmodelsResult'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/{submodelIdentifier}":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/{submodelIdentifier}':
     get:
       tags:
         - Resources AAS
@@ -1080,7 +1086,9 @@ paths:
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1116,20 +1124,20 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Submodel"
+                $ref: '#/components/schemas/Submodel'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements':
     get:
       tags:
         - Resources AAS
@@ -1138,7 +1146,9 @@ paths:
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1159,11 +1169,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
         - name: level
           in: query
           description: Determines the structural depth of the respective resource content
@@ -1196,24 +1207,27 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}':
     get:
       tags:
         - Resources AAS
-      summary: Returns a specific submodel element from the Submodel at a specified
+      summary: >-
+        Returns a specific submodel element from the Submodel at a specified
         path
       operationId: getSubmodelElementByPathSubmodelRepo
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1255,30 +1269,33 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/SubmodelElement"
+                $ref: '#/components/schemas/SubmodelElement'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/$value":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/$value':
     get:
       tags:
         - Resources AAS
-      summary: Returns a specific submodel element from the Submodel at a specified
+      summary: >-
+        Returns a specific submodel element from the Submodel at a specified
         path in the ValueOnly representation
       operationId: getSubmodelElementByPathValueOnlySubmodelRepo
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1320,20 +1337,20 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/SubmodelElementValue"
+                $ref: '#/components/schemas/SubmodelElementValue'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/{submodelIdentifier}/$value":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/{submodelIdentifier}/$value':
     get:
       tags:
         - Resources AAS
@@ -1342,7 +1359,9 @@ paths:
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1378,20 +1397,20 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/SubmodelValueOnly"
+                $ref: '#/components/schemas/SubmodelValueOnly'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/{submodelIdentifier}/$metadata":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/{submodelIdentifier}/$metadata':
     get:
       tags:
         - Resources AAS
@@ -1400,7 +1419,9 @@ paths:
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1426,20 +1447,20 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Submodel"
+                $ref: '#/components/schemas/Submodel'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/{aasId}/aas/submodels/$value":
+                $ref: '#/components/schemas/Result'
+  '/resources/{aasId}/aas/submodels/$value':
     get:
       tags:
         - Resources AAS
@@ -1448,7 +1469,9 @@ paths:
       parameters:
         - name: aasId
           in: path
-          description: Id of the AAS the submodel repository belongs to (UTF8-BASE64-URL-encoded)
+          description: >-
+            Id of the AAS the submodel repository belongs to
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -1475,11 +1498,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
         - name: level
           in: query
           description: Determines the structural depth of the respective resource content
@@ -1506,14 +1530,14 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/GetSubmodelsValueOnlyResult"
+                $ref: '#/components/schemas/GetSubmodelsValueOnlyResult'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/updates/{softwareNameplateId}/file/{fileName}":
+                $ref: '#/components/schemas/Result'
+  '/resources/updates/{softwareNameplateId}/file/{fileName}':
     get:
       tags:
         - Updates
@@ -1538,7 +1562,7 @@ paths:
               schema:
                 type: string
                 format: byte
-  "/resources/types":
+  /resources/types:
     get:
       tags:
         - Resource Types
@@ -1548,12 +1572,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/ResourceType"
-  "/resources/types/{resourceTypeName}/updates":
+                  $ref: '#/components/schemas/ResourceType'
+  '/resources/types/{resourceTypeName}/updates':
     get:
       tags:
         - Updates
@@ -1569,10 +1593,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/UpdateInformationResourceType"
-  "/resources/types/submodels":
+                $ref: '#/components/schemas/UpdateInformationResourceType'
+  /resources/types/submodels:
     get:
       tags:
         - Resource Types
@@ -1602,11 +1626,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
         - name: level
           in: query
           description: Determines the structural depth of the respective resource content
@@ -1633,26 +1658,26 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/GetSubmodelsResult"
+                $ref: '#/components/schemas/GetSubmodelsResult'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/{submodelIdentifier}":
+                $ref: '#/components/schemas/Result'
+  '/resources/types/submodels/aas/{submodelIdentifier}':
     get:
       tags:
         - Resource Types
@@ -1691,32 +1716,32 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Submodel"
+                $ref: '#/components/schemas/Submodel'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements":
+                $ref: '#/components/schemas/Result'
+  '/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements':
     get:
       tags:
         - Resource Types
@@ -1739,11 +1764,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
         - name: level
           in: query
           description: Determines the structural depth of the respective resource content
@@ -1766,28 +1792,29 @@ paths:
               - withoutBlobValue
       responses:
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements/{idShortPath}":
+                $ref: '#/components/schemas/Result'
+  '/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements/{idShortPath}':
     get:
       tags:
         - Resource Types
-      summary: Returns a specific submodel element from the Submodel at a specified
+      summary: >-
+        Returns a specific submodel element from the Submodel at a specified
         path
       operationId: getSubmodelElementByPathSubmodelRepo_1
       parameters:
@@ -1829,36 +1856,37 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/SubmodelElement"
+                $ref: '#/components/schemas/SubmodelElement'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements/{idShortPath}/$value":
+                $ref: '#/components/schemas/Result'
+  '/resources/types/submodels/aas/{submodelIdentifier}/submodel-elements/{idShortPath}/$value':
     get:
       tags:
         - Resource Types
-      summary: Returns a specific submodel element from the Submodel at a specified
+      summary: >-
+        Returns a specific submodel element from the Submodel at a specified
         path in the ValueOnly representation
       operationId: getSubmodelElementByPathValueOnlySubmodelRepo_1
       parameters:
@@ -1900,32 +1928,32 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/SubmodelElementValue"
+                $ref: '#/components/schemas/SubmodelElementValue'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/{submodelIdentifier}/$value":
+                $ref: '#/components/schemas/Result'
+  '/resources/types/submodels/aas/{submodelIdentifier}/$value':
     get:
       tags:
         - Resource Types
@@ -1964,32 +1992,32 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/SubmodelValueOnly"
+                $ref: '#/components/schemas/SubmodelValueOnly'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/{submodelIdentifier}/$metadata":
+                $ref: '#/components/schemas/Result'
+  '/resources/types/submodels/aas/{submodelIdentifier}/$metadata':
     get:
       tags:
         - Resource Types
@@ -2018,32 +2046,32 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Submodel"
+                $ref: '#/components/schemas/Submodel'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/submodels/aas/$value":
+                $ref: '#/components/schemas/Result'
+  /resources/types/submodels/aas/$value:
     get:
       tags:
         - Resource Types
@@ -2073,11 +2101,12 @@ paths:
               - '1'
         - name: cursor
           in: query
-          description: A server-generated identifier retrieved from pagingMetadata that
+          description: >-
+            A server-generated identifier retrieved from pagingMetadata that
             specifies from which position the result listing should continue
           required: false
           schema:
-            "$ref": "#/components/schemas/Base64UrlEncodedCursor"
+            $ref: '#/components/schemas/Base64UrlEncodedCursor'
         - name: level
           in: query
           description: Determines the structural depth of the respective resource content
@@ -2104,26 +2133,26 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/GetSubmodelsValueOnlyResult"
+                $ref: '#/components/schemas/GetSubmodelsValueOnlyResult'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/aas":
+                $ref: '#/components/schemas/Result'
+  /resources/types/aas:
     get:
       tags:
         - Resource Types
@@ -2135,39 +2164,40 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/AssetAdministrationShell"
+                $ref: '#/components/schemas/AssetAdministrationShell'
         '400':
-          description: Bad Request, e.g. the request parameters of the format of the
+          description: >-
+            Bad Request, e.g. the request parameters of the format of the
             request body is wrong.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/types/aas/asset-information":
+                $ref: '#/components/schemas/Result'
+  /resources/types/aas/asset-information:
     get:
       tags:
         - Resource Types
@@ -2179,39 +2209,40 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/AssetInformation"
+                $ref: '#/components/schemas/AssetInformation'
         '400':
-          description: Bad Request, e.g. the request parameters of the format of the
+          description: >-
+            Bad Request, e.g. the request parameters of the format of the
             request body is wrong.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/providers/virtual-resource-provider":
+                $ref: '#/components/schemas/Result'
+  /resources/providers/virtual-resource-provider:
     get:
       tags:
         - Capability Providers
@@ -2221,12 +2252,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/VirtualResourceProvider"
-  "/resources/providers/service-hoster":
+                  $ref: '#/components/schemas/VirtualResourceProvider'
+  /resources/providers/service-hoster:
     get:
       tags:
         - Capability Providers
@@ -2237,17 +2268,17 @@ paths:
           in: query
           required: false
           schema:
-            "$ref": "#/components/schemas/ServiceHosterFilter"
+            $ref: '#/components/schemas/ServiceHosterFilter'
       responses:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/ServiceHoster"
-  "/resources/profiler/{profilerId}":
+                  $ref: '#/components/schemas/ServiceHoster'
+  '/resources/profiler/{profilerId}':
     get:
       tags:
         - Profiler
@@ -2264,9 +2295,9 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/Profiler"
+                $ref: '#/components/schemas/Profiler'
     delete:
       tags:
         - Profiler
@@ -2282,7 +2313,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/discovery/jobs":
+  /resources/discovery/jobs:
     get:
       tags:
         - Discovery
@@ -2291,12 +2322,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/DiscoveryJob"
-  "/resources/discovery/jobs/{discoveryJobId}":
+                  $ref: '#/components/schemas/DiscoveryJob'
+  '/resources/discovery/jobs/{discoveryJobId}':
     get:
       tags:
         - Discovery
@@ -2312,10 +2343,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/DiscoveryJob"
-  "/resources/discovery/inbox":
+                $ref: '#/components/schemas/DiscoveryJob'
+  /resources/discovery/inbox:
     get:
       tags:
         - Discovery
@@ -2349,12 +2380,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/DiscoveredResourceDTO"
-  "/resources/discovery/drivers":
+                  $ref: '#/components/schemas/DiscoveredResourceDTO'
+  /resources/discovery/drivers:
     get:
       tags:
         - Discovery
@@ -2363,12 +2394,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/DriverInfo"
-  "/resources/connection-types":
+                  $ref: '#/components/schemas/DriverInfo'
+  /resources/connection-types:
     get:
       tags:
         - Resources
@@ -2378,12 +2409,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/ConnectionTypeDTO"
-  "/resources/clusters/{clusterName}/members":
+                  $ref: '#/components/schemas/ConnectionTypeDTO'
+  '/resources/clusters/{clusterName}/members':
     get:
       tags:
         - Clusters
@@ -2399,12 +2430,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/CatalogService"
-  "/resources/clusters/types":
+                  $ref: '#/components/schemas/CatalogService'
+  /resources/clusters/types:
     get:
       tags:
         - Clusters
@@ -2414,15 +2445,15 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
                   oneOf:
-                    - "$ref": "#/components/schemas/BaseConfigurationCapabilityDTOApi"
-                    - "$ref": "#/components/schemas/DeploymentCapabilityDTOApi"
-                    - "$ref": "#/components/schemas/VirtualizationCapabilityDTOApi"
-  "/resources/aas":
+                    - $ref: '#/components/schemas/BaseConfigurationCapabilityDTOApi'
+                    - $ref: '#/components/schemas/DeploymentCapabilityDTOApi'
+                    - $ref: '#/components/schemas/VirtualizationCapabilityDTOApi'
+  /resources/aas:
     get:
       tags:
         - Resources AAS
@@ -2432,12 +2463,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/AssetAdministrationShell"
-  "/metrics/{resourceId}":
+                  $ref: '#/components/schemas/AssetAdministrationShell'
+  '/metrics/{resourceId}':
     get:
       tags:
         - Metrics
@@ -2453,12 +2484,12 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: object
                 additionalProperties:
                   type: object
-  "/jobs":
+  /jobs:
     get:
       tags:
         - Jobs
@@ -2467,10 +2498,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: object
-  "/aas/submodels/templates/{smTemplateSemanticId}/instances":
+  '/aas/submodels/templates/{smTemplateSemanticId}/instances':
     get:
       tags:
         - Submodel Templates
@@ -2479,7 +2510,9 @@ paths:
       parameters:
         - name: smTemplateSemanticId
           in: path
-          description: The semantic id to search for submodel instances (UTF8-BASE64-URL-encoded)
+          description: >-
+            The semantic id to search for submodel instances
+            (UTF8-BASE64-URL-encoded)
           required: true
           schema:
             type: string
@@ -2492,10 +2525,10 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/{resourceId}/submodels/{submodelIdBase64Encoded}":
+  '/resources/{resourceId}/submodels/{submodelIdBase64Encoded}':
     delete:
       tags:
         - Resources AAS
@@ -2517,15 +2550,16 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
-  "/resources/types/aas/submodel-refs/{submodelIdentifier}":
+  '/resources/types/aas/submodel-refs/{submodelIdentifier}':
     delete:
       tags:
         - Resource Types
-      summary: Deletes the submodel reference from the Asset Administration Shell.
-        Does not delete the submodel itself!
+      summary: >-
+        Deletes the submodel reference from the Asset Administration Shell. Does
+        not delete the submodel itself!
       operationId: deleteSubmodelReferenceByIdAas
       parameters:
         - name: submodelIdentifier
@@ -2538,37 +2572,38 @@ paths:
         '204':
           description: Submodel reference deleted successfully
         '400':
-          description: Bad Request, e.g. the request parameters of the format of the
+          description: >-
+            Bad Request, e.g. the request parameters of the format of the
             request body is wrong.
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '401':
-          description: Unauthorized, e.g. the server refused the authorization attempt.
+          description: 'Unauthorized, e.g. the server refused the authorization attempt.'
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
+                $ref: '#/components/schemas/Result'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Result"
-  "/resources/clusters/{clusterUuid}":
+                $ref: '#/components/schemas/Result'
+  '/resources/clusters/{clusterUuid}':
     delete:
       tags:
         - Clusters
@@ -2584,7 +2619,7 @@ paths:
       responses:
         '200':
           description: OK
-  "/resources/capabilities/{capabilityId}":
+  '/resources/capabilities/{capabilityId}':
     delete:
       tags:
         - Capabilities
@@ -2601,7 +2636,7 @@ paths:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: object
 components:
@@ -2614,7 +2649,7 @@ components:
         resourceIp:
           type: string
         digitalNameplateV3:
-          "$ref": "#/components/schemas/DigitalNameplateV3"
+          $ref: '#/components/schemas/DigitalNameplateV3'
     DigitalNameplateV3:
       required:
         - addressInformation
@@ -2691,10 +2726,10 @@ components:
     Key:
       type: object
       properties:
+        type:
+          $ref: '#/components/schemas/KeyTypes'
         value:
           type: string
-        type:
-          "$ref": "#/components/schemas/KeyTypes"
     KeyTypes:
       type: string
       enum:
@@ -2726,13 +2761,13 @@ components:
       type: object
       properties:
         type:
-          "$ref": "#/components/schemas/ReferenceTypes"
+          $ref: '#/components/schemas/ReferenceTypes'
         keys:
           type: array
           items:
-            "$ref": "#/components/schemas/Key"
+            $ref: '#/components/schemas/Key'
         referredSemanticId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
     ReferenceTypes:
       type: string
       enum:
@@ -2741,12 +2776,12 @@ components:
     Message:
       type: object
       properties:
+        messageType:
+          $ref: '#/components/schemas/MessageTypeEnum'
         text:
           type: string
         timestamp:
           type: string
-        messageType:
-          "$ref": "#/components/schemas/MessageTypeEnum"
         correlationId:
           type: string
         code:
@@ -2764,7 +2799,7 @@ components:
         messages:
           type: array
           items:
-            "$ref": "#/components/schemas/Message"
+            $ref: '#/components/schemas/Message'
     Action:
       required:
         - actionClass
@@ -2776,18 +2811,18 @@ components:
         actionClass:
           type: string
         actionType:
-          "$ref": "#/components/schemas/ActionType"
+          $ref: '#/components/schemas/ActionType'
         skipable:
           type: boolean
         configParameters:
           type: array
           items:
-            "$ref": "#/components/schemas/ActionConfigParameter"
+            $ref: '#/components/schemas/ActionConfigParameter'
         connectionTypes:
           uniqueItems: true
           type: array
           items:
-            "$ref": "#/components/schemas/ConnectionType"
+            $ref: '#/components/schemas/ConnectionType'
       discriminator:
         propertyName: actionClass
     ActionConfigParameter:
@@ -2807,11 +2842,11 @@ components:
         description:
           type: string
         valueType:
-          "$ref": "#/components/schemas/ActionConfigParameterValueType"
+          $ref: '#/components/schemas/ActionConfigParameterValueType'
         defaultValue:
           type: string
         requiredType:
-          "$ref": "#/components/schemas/ActionConfigParameterRequiredType"
+          $ref: '#/components/schemas/ActionConfigParameterRequiredType'
         secret:
           type: boolean
     ActionConfigParameterRequiredType:
@@ -2850,7 +2885,7 @@ components:
         - skipable
       type: object
       allOf:
-        - "$ref": "#/components/schemas/Action"
+        - $ref: '#/components/schemas/Action'
         - type: object
           properties:
             awxRepo:
@@ -2862,7 +2897,7 @@ components:
             parameter:
               type: array
               items:
-                "$ref": "#/components/schemas/SurveyItem"
+                $ref: '#/components/schemas/SurveyItem'
     ProfilerDTOApi:
       required:
         - id
@@ -2876,7 +2911,7 @@ components:
           type: string
         action:
           oneOf:
-            - "$ref": "#/components/schemas/AwxAction"
+            - $ref: '#/components/schemas/AwxAction'
     SurveyItem:
       required:
         - choices
@@ -2889,7 +2924,7 @@ components:
       type: object
       properties:
         type:
-          "$ref": "#/components/schemas/SurveyItemType"
+          $ref: '#/components/schemas/SurveyItemType'
         question_name:
           type: string
         question_description:
@@ -2932,7 +2967,7 @@ components:
           type: string
         action:
           oneOf:
-            - "$ref": "#/components/schemas/AwxAction"
+            - $ref: '#/components/schemas/AwxAction'
     OnboardingRequest:
       type: object
       properties:
@@ -2989,7 +3024,7 @@ components:
         - type
       type: object
       allOf:
-        - "$ref": "#/components/schemas/CapabilityDTOApi"
+        - $ref: '#/components/schemas/CapabilityDTOApi'
     CapabilityDTOApi:
       required:
         - actions
@@ -3013,22 +3048,22 @@ components:
         type:
           type: array
           items:
-            "$ref": "#/components/schemas/CapabilityType"
+            $ref: '#/components/schemas/CapabilityType'
         actions:
           type: object
           additionalProperties:
             oneOf:
-              - "$ref": "#/components/schemas/AwxAction"
+              - $ref: '#/components/schemas/AwxAction'
         healthCheck:
-          "$ref": "#/components/schemas/CapabilityHealthCheck"
+          $ref: '#/components/schemas/CapabilityHealthCheck'
         clusterMemberTypes:
           type: array
           items:
-            "$ref": "#/components/schemas/ClusterMemberType"
+            $ref: '#/components/schemas/ClusterMemberType'
         connection:
-          "$ref": "#/components/schemas/ConnectionType"
+          $ref: '#/components/schemas/ConnectionType'
         executionEnvironment:
-          "$ref": "#/components/schemas/ExecutionEnvironment"
+          $ref: '#/components/schemas/ExecutionEnvironment'
       discriminator:
         propertyName: capabilityClass
     CapabilityHealthCheck:
@@ -3040,7 +3075,7 @@ components:
       type: object
       properties:
         type:
-          "$ref": "#/components/schemas/CapabilityHealthCheckType"
+          $ref: '#/components/schemas/CapabilityHealthCheckType'
         port:
           type: integer
           format: int32
@@ -3089,13 +3124,13 @@ components:
         - type
       type: object
       allOf:
-        - "$ref": "#/components/schemas/CapabilityDTOApi"
+        - $ref: '#/components/schemas/CapabilityDTOApi'
         - type: object
           properties:
             supportedDeploymentTypes:
               type: array
               items:
-                "$ref": "#/components/schemas/DeploymentType"
+                $ref: '#/components/schemas/DeploymentType'
     DeploymentType:
       type: string
       enum:
@@ -3113,11 +3148,11 @@ components:
         image:
           type: string
         pull:
-          "$ref": "#/components/schemas/ExecutionEnvironmentPull"
+          $ref: '#/components/schemas/ExecutionEnvironmentPull'
         description:
           type: string
         registryCredential:
-          "$ref": "#/components/schemas/RegistryCredentials"
+          $ref: '#/components/schemas/RegistryCredentials'
     ExecutionEnvironmentPull:
       type: string
       enum:
@@ -3157,7 +3192,7 @@ components:
         - type
       type: object
       allOf:
-        - "$ref": "#/components/schemas/CapabilityDTOApi"
+        - $ref: '#/components/schemas/CapabilityDTOApi'
     BaseConfigurationCapability:
       required:
         - actions
@@ -3171,7 +3206,7 @@ components:
         - type
       type: object
       allOf:
-        - "$ref": "#/components/schemas/Capability"
+        - $ref: '#/components/schemas/Capability'
     BasicResource:
       required:
         - clusterMember
@@ -3184,7 +3219,7 @@ components:
         assetId:
           type: string
         location:
-          "$ref": "#/components/schemas/Location"
+          $ref: '#/components/schemas/Location'
         ip:
           type: string
         hostname:
@@ -3199,11 +3234,11 @@ components:
           type: array
           items:
             oneOf:
-              - "$ref": "#/components/schemas/CapabilityService"
-              - "$ref": "#/components/schemas/MultiHostCapabilityService"
-              - "$ref": "#/components/schemas/SingleHostCapabilityService"
+              - $ref: '#/components/schemas/CapabilityService'
+              - $ref: '#/components/schemas/MultiHostCapabilityService'
+              - $ref: '#/components/schemas/SingleHostCapabilityService'
         remoteAccessService:
-          "$ref": "#/components/schemas/RemoteAccessService"
+          $ref: '#/components/schemas/RemoteAccessService'
         driverId:
           type: string
     Capability:
@@ -3231,29 +3266,29 @@ components:
         type:
           type: array
           items:
-            "$ref": "#/components/schemas/CapabilityType"
+            $ref: '#/components/schemas/CapabilityType'
         actions:
           type: object
           additionalProperties:
             oneOf:
-              - "$ref": "#/components/schemas/AwxAction"
+              - $ref: '#/components/schemas/AwxAction'
         healthCheck:
-          "$ref": "#/components/schemas/CapabilityHealthCheck"
+          $ref: '#/components/schemas/CapabilityHealthCheck'
         clusterMemberTypes:
           type: array
           items:
-            "$ref": "#/components/schemas/ClusterMemberType"
+            $ref: '#/components/schemas/ClusterMemberType'
         connection:
-          "$ref": "#/components/schemas/ConnectionType"
+          $ref: '#/components/schemas/ConnectionType'
         executionEnvironment:
-          "$ref": "#/components/schemas/ExecutionEnvironment"
-        isCluster:
-          type: boolean
+          $ref: '#/components/schemas/ExecutionEnvironment'
         connectionTypes:
           uniqueItems: true
           type: array
           items:
-            "$ref": "#/components/schemas/ConnectionType"
+            $ref: '#/components/schemas/ConnectionType'
+        isCluster:
+          type: boolean
       discriminator:
         propertyName: capabilityClass
     CapabilityService:
@@ -3280,11 +3315,11 @@ components:
             type: string
         capability:
           oneOf:
-            - "$ref": "#/components/schemas/BaseConfigurationCapability"
-            - "$ref": "#/components/schemas/DeploymentCapability"
-            - "$ref": "#/components/schemas/VirtualizationCapability"
+            - $ref: '#/components/schemas/BaseConfigurationCapability'
+            - $ref: '#/components/schemas/DeploymentCapability'
+            - $ref: '#/components/schemas/VirtualizationCapability'
         status:
-          "$ref": "#/components/schemas/CapabilityServiceStatus"
+          $ref: '#/components/schemas/CapabilityServiceStatus'
         serviceClass:
           type: string
         customMeta:
@@ -3328,7 +3363,7 @@ components:
         - username
       type: object
       allOf:
-        - "$ref": "#/components/schemas/Credential"
+        - $ref: '#/components/schemas/Credential'
         - type: object
           properties:
             password:
@@ -3349,13 +3384,13 @@ components:
         - type
       type: object
       allOf:
-        - "$ref": "#/components/schemas/Capability"
+        - $ref: '#/components/schemas/Capability'
         - type: object
           properties:
             supportedDeploymentTypes:
               type: array
               items:
-                "$ref": "#/components/schemas/DeploymentType"
+                $ref: '#/components/schemas/DeploymentType'
     MultiHostCapabilityService:
       required:
         - ID
@@ -3368,7 +3403,7 @@ components:
         - tags
       type: object
       allOf:
-        - "$ref": "#/components/schemas/CapabilityService"
+        - $ref: '#/components/schemas/CapabilityService'
         - type: object
           properties:
             memberMapping:
@@ -3378,7 +3413,7 @@ components:
             mapOfNodeIdsAndCatalogServices:
               type: object
               additionalProperties:
-                "$ref": "#/components/schemas/Service"
+                $ref: '#/components/schemas/Service'
     RemoteAccessService:
       required:
         - ID
@@ -3398,9 +3433,9 @@ components:
             type: string
         credential:
           oneOf:
-            - "$ref": "#/components/schemas/CredentialUsernamePassword"
+            - $ref: '#/components/schemas/CredentialUsernamePassword'
         connectionType:
-          "$ref": "#/components/schemas/ConnectionType"
+          $ref: '#/components/schemas/ConnectionType'
         ID:
           type: string
           format: uuid
@@ -3445,7 +3480,7 @@ components:
         - tags
       type: object
       allOf:
-        - "$ref": "#/components/schemas/CapabilityService"
+        - $ref: '#/components/schemas/CapabilityService'
         - type: object
           properties:
             consulNodeId:
@@ -3464,7 +3499,7 @@ components:
         - type
       type: object
       allOf:
-        - "$ref": "#/components/schemas/Capability"
+        - $ref: '#/components/schemas/Capability'
     FirmwareUpdateFile:
       required:
         - downloadUrl
@@ -3503,23 +3538,25 @@ components:
         softwareNameplateSubmodelId:
           type: string
         firmwareUpdateFile:
-          "$ref": "#/components/schemas/FirmwareUpdateFile"
+          $ref: '#/components/schemas/FirmwareUpdateFile'
     UpdateInformationResource:
       type: object
       properties:
         availableFirmwareVersions:
           type: array
           items:
-            "$ref": "#/components/schemas/FirmwareVersionDetails"
+            $ref: '#/components/schemas/FirmwareVersionDetails'
         currentFirmwareVersion:
-          "$ref": "#/components/schemas/FirmwareVersionDetails"
+          $ref: '#/components/schemas/FirmwareVersionDetails'
         latestFirmwareVersion:
-          "$ref": "#/components/schemas/FirmwareVersionDetails"
+          $ref: '#/components/schemas/FirmwareVersionDetails'
         firmwareUpdateStatus:
-          "$ref": "#/components/schemas/FirmwareUpdateStatus"
+          $ref: '#/components/schemas/FirmwareUpdateStatus'
     FirmwareUpdateJob:
       required:
+        - createdAt
         - id
+        - stateTransitions
       type: object
       properties:
         id:
@@ -3531,7 +3568,30 @@ components:
         softwareNameplateId:
           type: string
         firmwareUpdateState:
-          "$ref": "#/components/schemas/FirmwareUpdateStates"
+          $ref: '#/components/schemas/FirmwareUpdateStates'
+        createdAt:
+          type: string
+          format: date-time
+        stateTransitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FirmwareUpdateJobStateTransition'
+    FirmwareUpdateJobStateTransition:
+      required:
+        - id
+        - timestamp
+      type: object
+      properties:
+        fromState:
+          type: string
+        toState:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        id:
+          type: integer
+          format: int64
     FirmwareUpdateStates:
       type: string
       enum:
@@ -3547,55 +3607,55 @@ components:
       properties:
         version:
           type: string
-        templateId:
-          type: string
         revision:
           type: string
+        templateId:
+          type: string
         creator:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         embeddedDataSpecifications:
           type: array
           items:
-            "$ref": "#/components/schemas/EmbeddedDataSpecification"
+            $ref: '#/components/schemas/EmbeddedDataSpecification'
     AssetAdministrationShellDescriptor:
       type: object
       properties:
         id:
           type: string
-        idShort:
+        assetType:
           type: string
         endpoints:
           type: array
           items:
-            "$ref": "#/components/schemas/Endpoint"
-        administration:
-          "$ref": "#/components/schemas/AdministrativeInformation"
+            $ref: '#/components/schemas/Endpoint'
         globalAssetId:
           type: string
-        assetType:
-          type: string
         assetKind:
-          "$ref": "#/components/schemas/AssetKind"
-        specificAssetIds:
-          type: array
-          items:
-            "$ref": "#/components/schemas/SpecificAssetId"
+          $ref: '#/components/schemas/AssetKind'
+        administration:
+          $ref: '#/components/schemas/AdministrativeInformation'
         submodelDescriptors:
           type: array
           items:
-            "$ref": "#/components/schemas/SubmodelDescriptor"
+            $ref: '#/components/schemas/SubmodelDescriptor'
+        specificAssetIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecificAssetId'
+        idShort:
+          type: string
         displayName:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringNameType"
+            $ref: '#/components/schemas/LangStringNameType'
         extensions:
           type: array
           items:
-            "$ref": "#/components/schemas/Extension"
+            $ref: '#/components/schemas/Extension'
         description:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringTextType"
+            $ref: '#/components/schemas/LangStringTextType'
     AssetKind:
       type: string
       enum:
@@ -3640,15 +3700,15 @@ components:
     EmbeddedDataSpecification:
       type: object
       properties:
-        dataSpecification:
-          "$ref": "#/components/schemas/Reference"
         dataSpecificationContent:
-          "$ref": "#/components/schemas/DataSpecificationContent"
+          $ref: '#/components/schemas/DataSpecificationContent'
+        dataSpecification:
+          $ref: '#/components/schemas/Reference'
     Endpoint:
       type: object
       properties:
         protocolInformation:
-          "$ref": "#/components/schemas/ProtocolInformation"
+          $ref: '#/components/schemas/ProtocolInformation'
         get_interface:
           type: string
     Extension:
@@ -3659,17 +3719,17 @@ components:
         value:
           type: string
         valueType:
-          "$ref": "#/components/schemas/DataTypeDefXsd"
+          $ref: '#/components/schemas/DataTypeDefXsd'
         refersTo:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
         semanticId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         supplementalSemanticIds:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
     LangStringNameType:
       type: object
       properties:
@@ -3687,33 +3747,33 @@ components:
     ProtocolInformation:
       type: object
       properties:
+        subprotocolBody:
+          type: string
+        subprotocol:
+          type: string
         href:
           type: string
         endpointProtocolVersion:
           type: array
           items:
             type: string
+        endpointProtocol:
+          type: string
         securityAttributes:
           type: array
           items:
-            "$ref": "#/components/schemas/SecurityAttributeObject"
+            $ref: '#/components/schemas/SecurityAttributeObject'
         subprotocolBodyEncoding:
-          type: string
-        endpointProtocol:
-          type: string
-        subprotocol:
-          type: string
-        subprotocolBody:
           type: string
     SecurityAttributeObject:
       type: object
       properties:
+        type:
+          $ref: '#/components/schemas/SecurityTypeEnum'
         value:
           type: string
         key:
           type: string
-        type:
-          "$ref": "#/components/schemas/SecurityTypeEnum"
     SecurityTypeEnum:
       type: string
       enum:
@@ -3728,44 +3788,44 @@ components:
         value:
           type: string
         externalSubjectId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         semanticId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         supplementalSemanticIds:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
     SubmodelDescriptor:
       type: object
       properties:
         id:
           type: string
-        idShort:
-          type: string
         endpoints:
           type: array
           items:
-            "$ref": "#/components/schemas/Endpoint"
-        semanticId:
-          "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Endpoint'
         administration:
-          "$ref": "#/components/schemas/AdministrativeInformation"
+          $ref: '#/components/schemas/AdministrativeInformation'
+        semanticId:
+          $ref: '#/components/schemas/Reference'
         supplementalSemanticId:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
+        idShort:
+          type: string
         displayName:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringNameType"
+            $ref: '#/components/schemas/LangStringNameType'
         extensions:
           type: array
           items:
-            "$ref": "#/components/schemas/Extension"
+            $ref: '#/components/schemas/Extension'
         description:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringTextType"
+            $ref: '#/components/schemas/LangStringTextType'
     Base64UrlEncodedCursor:
       type: object
       properties:
@@ -3777,11 +3837,11 @@ components:
       type: object
       properties:
         paging_metadata:
-          "$ref": "#/components/schemas/PagedResultPagingMetadata"
+          $ref: '#/components/schemas/PagedResultPagingMetadata'
         result:
           type: array
           items:
-            "$ref": "#/components/schemas/Submodel"
+            $ref: '#/components/schemas/Submodel'
     ModellingKind:
       type: string
       enum:
@@ -3792,26 +3852,26 @@ components:
       properties:
         cursor:
           type: string
-          example: wJlCDLIl6KTWypN7T6vc6nWEmEYe99Hjf1XY1xmqV-M=#
+          example: 'wJlCDLIl6KTWypN7T6vc6nWEmEYe99Hjf1XY1xmqV-M=#'
     Qualifier:
       type: object
       properties:
-        value:
-          type: string
         type:
           type: string
+        value:
+          type: string
         kind:
-          "$ref": "#/components/schemas/QualifierKind"
+          $ref: '#/components/schemas/QualifierKind'
         valueType:
-          "$ref": "#/components/schemas/DataTypeDefXsd"
+          $ref: '#/components/schemas/DataTypeDefXsd'
         valueId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         semanticId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         supplementalSemanticIds:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
     QualifierKind:
       type: string
       enum:
@@ -3824,19 +3884,19 @@ components:
         submodelElements:
           type: array
           items:
-            "$ref": "#/components/schemas/SubmodelElement"
+            $ref: '#/components/schemas/SubmodelElement'
         id:
           type: string
         administration:
-          "$ref": "#/components/schemas/AdministrativeInformation"
+          $ref: '#/components/schemas/AdministrativeInformation'
         displayName:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringNameType"
+            $ref: '#/components/schemas/LangStringNameType'
         description:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringTextType"
+            $ref: '#/components/schemas/LangStringTextType'
         idShort:
           type: string
         category:
@@ -3844,38 +3904,38 @@ components:
         extensions:
           type: array
           items:
-            "$ref": "#/components/schemas/Extension"
+            $ref: '#/components/schemas/Extension'
         embeddedDataSpecifications:
           type: array
           items:
-            "$ref": "#/components/schemas/EmbeddedDataSpecification"
+            $ref: '#/components/schemas/EmbeddedDataSpecification'
         semanticId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         supplementalSemanticIds:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
         qualifiers:
           type: array
           items:
-            "$ref": "#/components/schemas/Qualifier"
+            $ref: '#/components/schemas/Qualifier'
         kind:
-          "$ref": "#/components/schemas/ModellingKind"
+          $ref: '#/components/schemas/ModellingKind'
     SubmodelElement:
       type: object
       properties:
         embeddedDataSpecifications:
           type: array
           items:
-            "$ref": "#/components/schemas/EmbeddedDataSpecification"
+            $ref: '#/components/schemas/EmbeddedDataSpecification'
         displayName:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringNameType"
+            $ref: '#/components/schemas/LangStringNameType'
         description:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringTextType"
+            $ref: '#/components/schemas/LangStringTextType'
         idShort:
           type: string
         category:
@@ -3883,17 +3943,17 @@ components:
         extensions:
           type: array
           items:
-            "$ref": "#/components/schemas/Extension"
+            $ref: '#/components/schemas/Extension'
         semanticId:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/Reference'
         supplementalSemanticIds:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
         qualifiers:
           type: array
           items:
-            "$ref": "#/components/schemas/Qualifier"
+            $ref: '#/components/schemas/Qualifier'
     SubmodelElementValue:
       type: object
     SubmodelValueOnly:
@@ -3904,7 +3964,7 @@ components:
         valuesOnlyMap:
           type: object
           additionalProperties:
-            "$ref": "#/components/schemas/SubmodelElementValue"
+            $ref: '#/components/schemas/SubmodelElementValue'
     GetSubmodelsValueOnlyResult:
       type: object
       properties:
@@ -3939,30 +3999,30 @@ components:
         availableFirmwareVersions:
           type: array
           items:
-            "$ref": "#/components/schemas/FirmwareVersionDetails"
+            $ref: '#/components/schemas/FirmwareVersionDetails'
     AssetAdministrationShell:
       type: object
       properties:
+        derivedFrom:
+          $ref: '#/components/schemas/Reference'
         submodels:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
         assetInformation:
-          "$ref": "#/components/schemas/AssetInformation"
-        derivedFrom:
-          "$ref": "#/components/schemas/Reference"
+          $ref: '#/components/schemas/AssetInformation'
         id:
           type: string
         administration:
-          "$ref": "#/components/schemas/AdministrativeInformation"
+          $ref: '#/components/schemas/AdministrativeInformation'
         displayName:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringNameType"
+            $ref: '#/components/schemas/LangStringNameType'
         description:
           type: array
           items:
-            "$ref": "#/components/schemas/LangStringTextType"
+            $ref: '#/components/schemas/LangStringTextType'
         idShort:
           type: string
         category:
@@ -3970,42 +4030,42 @@ components:
         extensions:
           type: array
           items:
-            "$ref": "#/components/schemas/Extension"
+            $ref: '#/components/schemas/Extension'
         embeddedDataSpecifications:
           type: array
           items:
-            "$ref": "#/components/schemas/EmbeddedDataSpecification"
+            $ref: '#/components/schemas/EmbeddedDataSpecification'
     AssetInformation:
       type: object
       properties:
-        globalAssetId:
-          type: string
         assetType:
           type: string
+        globalAssetId:
+          type: string
         assetKind:
-          "$ref": "#/components/schemas/AssetKind"
+          $ref: '#/components/schemas/AssetKind'
         specificAssetIds:
           type: array
           items:
-            "$ref": "#/components/schemas/SpecificAssetId"
+            $ref: '#/components/schemas/SpecificAssetId'
         defaultThumbnail:
-          "$ref": "#/components/schemas/Resource"
+          $ref: '#/components/schemas/Resource'
     Resource:
       type: object
       properties:
-        path:
-          type: string
         contentType:
+          type: string
+        path:
           type: string
     GetReferencesResult:
       type: object
       properties:
         paging_metadata:
-          "$ref": "#/components/schemas/PagedResultPagingMetadata"
+          $ref: '#/components/schemas/PagedResultPagingMetadata'
         result:
           type: array
           items:
-            "$ref": "#/components/schemas/Reference"
+            $ref: '#/components/schemas/Reference'
     VirtualResourceProvider:
       required:
         - capabilityClass
@@ -4013,9 +4073,9 @@ components:
       properties:
         capabilityService:
           oneOf:
-            - "$ref": "#/components/schemas/CapabilityService"
-            - "$ref": "#/components/schemas/MultiHostCapabilityService"
-            - "$ref": "#/components/schemas/SingleHostCapabilityService"
+            - $ref: '#/components/schemas/CapabilityService'
+            - $ref: '#/components/schemas/MultiHostCapabilityService'
+            - $ref: '#/components/schemas/SingleHostCapabilityService'
         capabilityClass:
           type: string
     CapabilityHostType:
@@ -4030,9 +4090,9 @@ components:
           type: string
           format: uuid
         supportedDeploymentType:
-          "$ref": "#/components/schemas/DeploymentType"
+          $ref: '#/components/schemas/DeploymentType'
         capabilityHostType:
-          "$ref": "#/components/schemas/CapabilityHostType"
+          $ref: '#/components/schemas/CapabilityHostType'
     ServiceHoster:
       required:
         - capabilityClass
@@ -4040,9 +4100,9 @@ components:
       properties:
         capabilityService:
           oneOf:
-            - "$ref": "#/components/schemas/CapabilityService"
-            - "$ref": "#/components/schemas/MultiHostCapabilityService"
-            - "$ref": "#/components/schemas/SingleHostCapabilityService"
+            - $ref: '#/components/schemas/CapabilityService'
+            - $ref: '#/components/schemas/MultiHostCapabilityService'
+            - $ref: '#/components/schemas/SingleHostCapabilityService'
         capabilityClass:
           type: string
     DiscoveredResource:
@@ -4086,11 +4146,11 @@ components:
           type: string
           format: date-time
         state:
-          "$ref": "#/components/schemas/DiscoveryJobState"
+          $ref: '#/components/schemas/DiscoveryJobState'
         discoveryResult:
           type: array
           items:
-            "$ref": "#/components/schemas/DiscoveredResource"
+            $ref: '#/components/schemas/DiscoveredResource'
     DiscoveryJobState:
       type: string
       enum:
@@ -4172,11 +4232,11 @@ components:
         discoveryRequestFilters:
           type: array
           items:
-            "$ref": "#/components/schemas/DiscoveryRequestFilter"
+            $ref: '#/components/schemas/DiscoveryRequestFilter'
         discoveryRequestOptions:
           type: array
           items:
-            "$ref": "#/components/schemas/DiscoveryRequestOption"
+            $ref: '#/components/schemas/DiscoveryRequestOption'
     ConnectionTypeDTO:
       required:
         - isRemote
@@ -4185,7 +4245,7 @@ components:
       type: object
       properties:
         connectionType:
-          "$ref": "#/components/schemas/ConnectionType"
+          $ref: '#/components/schemas/ConnectionType'
         name:
           type: string
         prettyName:
@@ -4215,11 +4275,11 @@ components:
         clusterMemberTypes:
           type: array
           items:
-            "$ref": "#/components/schemas/ClusterMemberType"
+            $ref: '#/components/schemas/ClusterMemberType'
         nodes:
           type: array
           items:
-            "$ref": "#/components/schemas/Node"
+            $ref: '#/components/schemas/Node'
         memberMapping:
           type: object
           additionalProperties:
@@ -4229,7 +4289,7 @@ components:
           additionalProperties:
             type: string
         capabilityService:
-          "$ref": "#/components/schemas/MultiHostCapabilityService"
+          $ref: '#/components/schemas/MultiHostCapabilityService'
         managed:
           type: boolean
     Node:
@@ -4245,7 +4305,7 @@ components:
         Datacenter:
           type: string
         TaggedAddresses:
-          "$ref": "#/components/schemas/TaggedAddresses"
+          $ref: '#/components/schemas/TaggedAddresses'
         Meta:
           type: object
           additionalProperties:
@@ -4276,7 +4336,7 @@ components:
         Datacenter:
           type: string
         TaggedAddresses:
-          "$ref": "#/components/schemas/TaggedAddresses"
+          $ref: '#/components/schemas/TaggedAddresses'
         NodeMeta:
           type: object
           additionalProperties:
@@ -4313,16 +4373,16 @@ components:
           type: string
           format: uuid
         capabilityHostType:
-          "$ref": "#/components/schemas/CapabilityHostType"
+          $ref: '#/components/schemas/CapabilityHostType'
   securitySchemes:
     spring_oauth:
       type: oauth2
       description: Oauth2 flow
       flows:
         authorizationCode:
-          authorizationUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/auth
-          tokenUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/token
-          refreshUrl: https://slm.local/auth/realms/fabos/protocol/openid-connect/token
+          authorizationUrl: 'https://slm.local/auth/realms/fabos/protocol/openid-connect/auth'
+          tokenUrl: 'https://slm.local/auth/realms/fabos/protocol/openid-connect/token'
+          refreshUrl: 'https://slm.local/auth/realms/fabos/protocol/openid-connect/token'
           scopes: {}
     bearer_auth:
       type: http

@@ -25,7 +25,7 @@ class FirmwareUpdateJob(id: UUID? = null,
     var softwareNameplateId: String? = softwareNameplateId
 
     @Column(name = "state", nullable = false)
-    var firmwareUpdateState: FirmwareUpdateStates? = FirmwareUpdateStates.PREPARING
+    var firmwareUpdateState: FirmwareUpdateStates? = FirmwareUpdateStates.CREATED
 
     @Column(name = "created_at", nullable = false)
     var createdAt: Date = Date()

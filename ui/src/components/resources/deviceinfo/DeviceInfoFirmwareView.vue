@@ -91,7 +91,23 @@ function downloadItem (item) {
 const selectedFirmwareVersion = ref(undefined);
 const showConfirmFirmwareUpdateInstallation = ref(false);
 function installFirmwareUpdate() {
+  let softwareNameplateSubmodelIdBase64Encoded = btoa(selectedFirmwareVersion.value.softwareNameplateSubmodelId);
+  ResourceManagementClient.resourcesUpdatesApi.startFirmwareUpdateOnResource(
+      props.resourceId,
+      softwareNameplateSubmodelIdBase64Encoded
+  ).then(() => {
+    // Reload jobs
+    ResourceManagementClient.resourcesUpdatesApi.getFirmwareUpdateJobsOfResource(props.resourceId)
+        .then(response => {
+          firmwareUpdateJobs.value = response.data;
+        }).catch(e => logRequestError(e));
+  }).catch(e => {
+    logRequestError(e);
+  });
+
+
   $toast.success("Firmware update started");
+
   console.log(selectedFirmwareVersion);
   selectedFirmwareVersion.value = undefined;
 }

@@ -141,7 +141,7 @@ public class UpdatesRestController {
     @RequestMapping(value = "/{resourceId}/updates/jobs",
             method = RequestMethod.POST)
     @Operation(summary="Start firmware update job for a resource")
-    public void prepareFirmwareUpdateOnResource(
+    public void startFirmwareUpdateOnResource(
             @PathVariable(name = "resourceId")  UUID resourceId,
             @RequestParam(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded
     ) throws Exception {
@@ -153,7 +153,7 @@ public class UpdatesRestController {
     @RequestMapping(value = "/{resourceId}/updates/jobs/{firmwareUpdateJobId}",
             method = RequestMethod.POST)
     @Operation(summary="Change state of firmware update on resource")
-    public void prepareFirmwareUpdateOnResource(
+    public void changeStateOfFirmwareUpdateOnResource(
             @PathVariable(name = "resourceId")  UUID resourceId,
             @PathVariable(name = "firmwareUpdateJobId")  UUID firmwareUpdateJobId,
             @RequestParam(name = "event") FirmwareUpdateEvents event

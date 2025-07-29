@@ -1,6 +1,7 @@
 package org.eclipse.slm.resource_management.model.update;
 
 public enum FirmwareUpdateEvents {
+    PREPARATION_TRIGGERED,
     PREPARATION_COMPLETED,
     PREPARATION_FAILED,
     ACTIVATION_TRIGGERED,
