@@ -29,6 +29,7 @@ import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNot
 import org.eclipse.slm.resource_management.persistence.api.CapabilityJpaRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.keycloak.representations.AccessToken;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.net.ssl.SSLException;
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -54,7 +56,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 public class CapabilitiesManagerTest {
     public static final JwtAuthenticationToken keycloakDummyToken = new JwtAuthenticationToken(
-            new Jwt("", null, null, new HashMap<>(), new HashMap<>()));
+            new Jwt(new AccessToken().toString(),
+                    Instant.now(),
+                    Instant.now().plusSeconds(3600),
+                    Map.of("dummy-header", "dummy-header-value"),
+                    Map.of("dummy-claim", "dummy-claim-value")),
+            new ArrayList<>(),
+            "testUser");
     @Autowired
     CapabilitiesManager capabilitiesManager;
     @MockBean
