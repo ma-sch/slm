@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.OneToMany
 import org.eclipse.slm.common.model.AbstractBaseEntityUuid
 import java.util.*
@@ -15,6 +16,7 @@ import java.util.*
 class FirmwareUpdateJob(id: UUID? = null,
                         resourceId: UUID?,
                         softwareNameplateId: String?,
+                        userId: String?
 )
     : AbstractBaseEntityUuid(id) {
 
@@ -24,15 +26,18 @@ class FirmwareUpdateJob(id: UUID? = null,
     @Column(name = "software_nameplate_id", nullable = false)
     var softwareNameplateId: String? = softwareNameplateId
 
+    @Column(name = "user_id", nullable = false)
+    var userId: String? = userId
+
     @Column(name = "state", nullable = false)
     var firmwareUpdateState: FirmwareUpdateStates? = FirmwareUpdateStates.CREATED
 
     @Column(name = "created_at", nullable = false)
     var createdAt: Date = Date()
 
-    @OneToMany(mappedBy = "firmwareUpdateJob", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "firmwareUpdateJob", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     var stateTransitions: MutableList<FirmwareUpdateJobStateTransition> = mutableListOf()
 
     protected constructor()
-    : this(null, null, null)
+    : this(null, null, null, null)
 }

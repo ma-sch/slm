@@ -63,9 +63,15 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
             try {
                 if (!localSubmodelIds.contains(submodelId)) {
                     this.submodelRegistryClient.findSubmodelDescriptor(submodelId).ifPresent(submodelDescriptor -> {
-                        var scopedSubmodelRepositoryClient = SubmodelRepositoryClientFactory.FromSubmodelDescriptor(submodelDescriptor, null);
-                        var submodel = scopedSubmodelRepositoryClient.getSubmodel(submodelDescriptor.getId());
-                        remoteSubmodels.add(submodel);
+                        var submodelEndpoint = submodelDescriptor.getEndpoints().get(0).getProtocolInformation().getHref();
+                        if (submodelEndpoint.contains("/submodels/")) {
+                            var scopedSubmodelRepositoryClient = SubmodelRepositoryClientFactory.FromSubmodelDescriptor(submodelDescriptor, null);
+                            var submodel = scopedSubmodelRepositoryClient.getSubmodel(submodelDescriptor.getId());
+                            remoteSubmodels.add(submodel);
+                        }
+                        if (submodelEndpoint.endsWith("/submodel")) {
+                            LOG.debug("Value only representation for submodel '{}' is currently not supported by the submodel service", submodelId);
+                        }
                     });
                 }
             } catch (ElementDoesNotExistException | IllegalArgumentException e) {
@@ -119,7 +125,7 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
                         }
 
                         if (submodelEndpoint.endsWith("/submodel")) {
-                            LOG.info("Value only representation for submodel '{}' is currently not supported by the submodel service", submodelId);
+                            LOG.debug("Value only representation for submodel '{}' is currently not supported by the submodel service", submodelId);
                         }
                     });
                 }

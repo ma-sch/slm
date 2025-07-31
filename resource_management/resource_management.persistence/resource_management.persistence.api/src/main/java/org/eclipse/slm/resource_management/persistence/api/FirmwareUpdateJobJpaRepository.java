@@ -10,6 +10,6 @@ import java.util.UUID;
 @Repository
 public interface FirmwareUpdateJobJpaRepository extends JpaRepository<FirmwareUpdateJob, UUID> {
 
-        List<FirmwareUpdateJob> findByResourceId(UUID resourceId);
+        List<FirmwareUpdateJob> findByResourceIdOrderByCreatedAtDesc(UUID resourceId);
 
 }

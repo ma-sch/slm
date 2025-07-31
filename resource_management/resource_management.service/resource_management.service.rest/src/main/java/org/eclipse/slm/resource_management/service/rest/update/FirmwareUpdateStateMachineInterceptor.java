@@ -1,5 +1,10 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
+import org.eclipse.slm.notification_service.messaging.NotificationMessage;
+import org.eclipse.slm.notification_service.messaging.NotificationMessageSender;
+import org.eclipse.slm.notification_service.model.EventType;
+import org.eclipse.slm.notification_service.model.NotificationCategory;
+import org.eclipse.slm.notification_service.model.NotificationSubCategory;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvents;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJob;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJobStateTransition;
@@ -29,10 +34,14 @@ public class FirmwareUpdateStateMachineInterceptor implements StateMachineInterc
 
     private final FirmwareUpdateJobStateTransitionJpaRepository firmwareUpdateJobStateTransitionJpaRepository;
 
+    private final NotificationMessageSender notificationMessageSender;
+
     public FirmwareUpdateStateMachineInterceptor(FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository,
-                                                 FirmwareUpdateJobStateTransitionJpaRepository firmwareUpdateJobStateTransitionJpaRepository) {
+                                                 FirmwareUpdateJobStateTransitionJpaRepository firmwareUpdateJobStateTransitionJpaRepository,
+                                                 NotificationMessageSender notificationMessageSender) {
         this.firmwareUpdateJobJpaRepository = firmwareUpdateJobJpaRepository;
         this.firmwareUpdateJobStateTransitionJpaRepository = firmwareUpdateJobStateTransitionJpaRepository;
+        this.notificationMessageSender = notificationMessageSender;
     }
 
     @Override
@@ -75,6 +84,13 @@ public class FirmwareUpdateStateMachineInterceptor implements StateMachineInterc
                                     transition.getSource().getId(),
                                     transition.getTarget().getId(),
                                     firmwareUpdateJob.get());
+
+                            var notificationMessage = new NotificationMessage(
+                                    persistedFirmwareUpdateJob.getUserId(),
+                                    NotificationCategory.RESOURCES, NotificationSubCategory.FIRMWARE_UPDATE, EventType.MODIFIED,
+                                    persistedFirmwareUpdateJob
+                            );
+                            notificationMessageSender.sendMessage(notificationMessage);
                         } catch (Exception e) {
                             LOG.error("Error while updating firmware update process state: {}", e.getMessage(), e);
                         }

@@ -54,7 +54,7 @@ public class FirmwareUpdateJobStateMachineFactory {
                     LOG.info("State: PREPARING | Firmware update preparation started");
                     CompletableFuture.runAsync(() -> {
                         try {
-                            Thread.sleep(5000);
+                            Thread.sleep(10000);
                             transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.PREPARATION_COMPLETED);
                         } catch (InterruptedException e) {
                             transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.PREPARATION_FAILED);
@@ -66,7 +66,7 @@ public class FirmwareUpdateJobStateMachineFactory {
                     LOG.info("State: Prepared | Firmware update preparation completed");
                     CompletableFuture.runAsync(() -> {
                         try {
-                            Thread.sleep(5000);
+                            Thread.sleep(10000);
                             transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.ACTIVATION_TRIGGERED);
                         } catch (InterruptedException e) {
                             transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.CANCEL_TRIGGERED);
@@ -78,7 +78,7 @@ public class FirmwareUpdateJobStateMachineFactory {
                     LOG.info("State: ACTIVATING | Firmware update activation started");
                     CompletableFuture.runAsync(() -> {
                         try {
-                            Thread.sleep(5000);
+                            Thread.sleep(10000);
                             transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.ACTIVATION_COMPLETED);
                         } catch (InterruptedException e) {
                             transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.ACTIVATION_FAILED);

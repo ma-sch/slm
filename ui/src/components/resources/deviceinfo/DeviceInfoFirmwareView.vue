@@ -2,7 +2,7 @@
 
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import logRequestError from "@/api/restApiHelper";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, Ref, ref} from "vue";
 import {FirmwareUpdateJob, UpdateInformation} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
@@ -11,6 +11,8 @@ import formatDate, {formatDateTime} from "@/utils/dateUtils";
 import axios from 'axios'
 import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 import {useToast} from "vue-toast-notification";
+import {storeToRefs} from "pinia";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 
 const $toast = useToast();
 
@@ -21,31 +23,21 @@ const props = defineProps({
   },
 });
 
+const resourceDevicesStore = useResourceDevicesStore();
+
 const loading = ref(false);
-const updateInformation = ref<UpdateInformation>({});
-const firmwareUpdateJobs = ref<FirmwareUpdateJob[]>([]);
+const {firmwareUpdateInformationOfResource, firmwareUpdateJobsOfResource} = storeToRefs(resourceDevicesStore)
+
 onMounted(() => {
   loading.value = true;
-  ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResource(props.resourceId)
-      .then(
-          response => {
-            updateInformation.value = response.data;
-            loading.value = false;
-          }
-      ).catch(e => {
-        logRequestError(e)
+  resourceDevicesStore.getFirmwareUpdateInformationOfResource(props.resourceId).then(
+      response => {
         loading.value = false;
       }
-  )
-  ResourceManagementClient.resourcesUpdatesApi.getFirmwareUpdateJobsOfResource(props.resourceId)
-      .then(
-          response => {
-            firmwareUpdateJobs.value = response.data;
-          }
-      ).catch(e => {
-        logRequestError(e)
-      }
-  )
+  ).catch(e => {
+    loading.value = false;
+  });
+  resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);
 });
 
 const filesTableHeaders = [
@@ -63,11 +55,11 @@ const jobTableHeaders = [
 ];
 
 const installedVersionText = computed(() => {
-  const version = updateInformation.value.currentFirmwareVersion?.version;
+  const version = firmwareUpdateInformationOfResource.value(props.resourceId).currentFirmwareVersion?.version;
   if (!version) {
     return "N/A"
   }
-  const date = updateInformation.value.currentFirmwareVersion?.date;
+  const date = firmwareUpdateInformationOfResource.value(props.resourceId).currentFirmwareVersion?.date;
   return date ? `${version} (${formatDate(date)})` : version;
 });
 
@@ -97,14 +89,8 @@ function installFirmwareUpdate() {
       softwareNameplateSubmodelIdBase64Encoded
   ).then(() => {
     // Reload jobs
-    ResourceManagementClient.resourcesUpdatesApi.getFirmwareUpdateJobsOfResource(props.resourceId)
-        .then(response => {
-          firmwareUpdateJobs.value = response.data;
-        }).catch(e => logRequestError(e));
-  }).catch(e => {
-    logRequestError(e);
+    resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);
   });
-
 
   $toast.success("Firmware update started");
 
@@ -113,7 +99,7 @@ function installFirmwareUpdate() {
 }
 
 function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
-  const version = updateInformation.value.availableFirmwareVersions?.find(
+  const version = firmwareUpdateInformationOfResource.value(props.resourceId).availableFirmwareVersions?.find(
       firmwareVersion =>
           firmwareVersion.softwareNameplateSubmodelId?.trim() === softwareNameplateSubmodelId?.trim()
   )?.version;
@@ -138,8 +124,26 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
         label="Update status"
       >
         <template #content>
+          <div v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress">
+            <progress-circular
+              size="20"
+              width="2"
+            />
+            <v-chip
+              v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
+              color="primary"
+              variant="elevated"
+              class="mx-8"
+              label
+              size="small"
+            >
+              {{ firmwareUpdateJobsOfResource(props.resourceId)[0].firmwareUpdateState }}
+            </v-chip>
+          </div>
+
           <FirmwareUpdateStatusIcon
-            :firmware-update-status="updateInformation.firmwareUpdateStatus"
+            v-else
+            :firmware-update-status="firmwareUpdateInformationOfResource(props.resourceId).firmwareUpdateStatus"
             :clickable="false"
           />
         </template>
@@ -150,16 +154,18 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
         :divider="true"
       >
         <template #content>
-          <div v-if="updateInformation.availableFirmwareVersions?.length == 0">No updates available</div>
+          <div v-if="firmwareUpdateInformationOfResource(props.resourceId).availableFirmwareVersions?.length == 0">
+            No updates available
+          </div>
           <v-expansion-panels
-              v-else
-              variant="accordion"
-              flat
+            v-else
+            variant="accordion"
+            flat
           >
             <v-expansion-panel
-                v-for="firmwareVersion in updateInformation.availableFirmwareVersions"
-                :key="firmwareVersion.version"
-                expand
+              v-for="firmwareVersion in firmwareUpdateInformationOfResource(props.resourceId).availableFirmwareVersions"
+              :key="firmwareVersion.version"
+              expand
             >
               <template #title>
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
@@ -169,26 +175,27 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
                     </v-col>
                     <v-col cols="1">
                       <v-btn
-                          v-if="firmwareVersion.version === updateInformation?.currentFirmwareVersion?.version"
-                          color="secondary"
-                          size="small"
+                        v-if="firmwareVersion.version === firmwareUpdateInformationOfResource(props.resourceId)?.currentFirmwareVersion?.version"
+                        color="secondary"
+                        size="small"
                       >
                         Installed
                       </v-btn>
                       <div v-else>
                         <v-btn
-                            v-if="firmwareVersion.firmwareUpdateFile"
-                            color="primary"
-                            size="small"
-                            @click.stop="selectedFirmwareVersion = firmwareVersion; showConfirmFirmwareUpdateInstallation = true;"
+                          v-if="firmwareVersion.firmwareUpdateFile"
+                          color="primary"
+                          size="small"
+                          :disabled="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
+                          @click.stop="selectedFirmwareVersion = firmwareVersion; showConfirmFirmwareUpdateInstallation = true;"
                         >
                           Install
                           <ConfirmDialog
-                              :show="showConfirmFirmwareUpdateInstallation"
-                              :title="`Install firmware update`"
-                              :text="`Do you want to update the firmware of the device to version '${selectedFirmwareVersion?.version}'?`"
-                              @confirmed="showConfirmFirmwareUpdateInstallation = false; installFirmwareUpdate()"
-                              @canceled="showConfirmFirmwareUpdateInstallation = false"
+                            :show="showConfirmFirmwareUpdateInstallation"
+                            :title="`Install firmware update`"
+                            :text="`Do you want to update the firmware of the device to version '${selectedFirmwareVersion?.version}'?`"
+                            @confirmed="showConfirmFirmwareUpdateInstallation = false; installFirmwareUpdate()"
+                            @canceled="showConfirmFirmwareUpdateInstallation = false"
                           />
                         </v-btn>
                       </div>
@@ -198,36 +205,36 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
               </template>
               <template #text>
                 <RowWithLabel
-                    label="Version"
-                    :text="firmwareVersion.version"
+                  label="Version"
+                  :text="firmwareVersion.version"
                 />
                 <RowWithLabel
-                    label="Date"
-                    :text="firmwareVersion.date"
+                  label="Date"
+                  :text="firmwareVersion.date"
                 />
                 <RowWithLabel
-                    label="Installation URI"
+                  label="Installation URI"
                 >
                   <template #content>
                     <a
-                        :href="firmwareVersion.installationUri"
-                        target="_blank"
+                      :href="firmwareVersion.installationUri"
+                      target="_blank"
                     >{{ firmwareVersion.installationUri }}</a>
                   </template>
                 </RowWithLabel>
                 <RowWithLabel
-                    label="Checksum"
-                    :text="firmwareVersion.installationChecksum"
+                  label="Checksum"
+                  :text="firmwareVersion.installationChecksum"
                 />
                 <RowWithLabel
-                    label="File"
+                  label="File"
                 >
                   <template #content>
                     <v-data-table
-                        v-if="firmwareVersion.firmwareUpdateFile"
-                        :headers="filesTableHeaders"
-                        :items="[ firmwareVersion.firmwareUpdateFile ]"
-                        hide-default-footer
+                      v-if="firmwareVersion.firmwareUpdateFile"
+                      :headers="filesTableHeaders"
+                      :items="[ firmwareVersion.firmwareUpdateFile ]"
+                      hide-default-footer
                     >
                       <template #item.fileSize="{ item }">
                         {{ humanFileSize(item.fileSizeBytes) }}
@@ -237,9 +244,9 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
                       </template>
                       <template #item.fileActions="{ item }">
                         <v-icon
-                            class="ml-4"
-                            color="secondary"
-                            @click.prevent="downloadItem(item)"
+                          class="ml-4"
+                          color="secondary"
+                          @click.prevent="downloadItem(item)"
                         >
                           mdi-download
                         </v-icon>
@@ -261,18 +268,17 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
         :divider="true"
       >
         <template #content>
-          <div v-if="firmwareUpdateJobs?.length === 0">
+          <div v-if="firmwareUpdateJobsOfResource(props.resourceId)?.length === 0">
             No jobs available
-
           </div>
           <v-data-table
-              v-else
-              :headers="jobTableHeaders"
-              :items="firmwareUpdateJobs"
-              item-key="id"
-              show-expand
-              hide-default-footer
-              class="elevation-0"
+            v-else
+            :headers="jobTableHeaders"
+            :items="firmwareUpdateJobsOfResource(props.resourceId)"
+            item-key="id"
+            :sort-by="[{ key: 'createdAt', order: 'desc' }]"
+            show-expand
+            class="elevation-0"
           >
             <template #item.state="{ item }">
               <span>{{ item.firmwareUpdateState }}</span>
@@ -284,13 +290,19 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
               <span>{{ formatDateTime(item.createdAt) }}</span>
             </template>
             <template #expanded-row="{ item }">
-              <td class="ma-4" :colspan="jobTableHeaders.length+1">
-                <div v-if="item.stateTransitions?.length > 0" class="mx-4">
+              <td
+                class="ma-4"
+                :colspan="jobTableHeaders.length+1"
+              >
+                <div
+                  v-if="item.stateTransitions?.length > 0"
+                  class="mx-4"
+                >
                   <v-timeline direction="horizontal">
                     <v-timeline-item
-                        v-for="transition in item.stateTransitions"
-                        :key="transition.id"
-                        dot-color="primary"
+                      v-for="transition in item.stateTransitions"
+                      :key="transition.id"
+                      dot-color="primary"
                     >
                       <div>
                         <strong>{{ transition.toState }}</strong>
@@ -314,5 +326,10 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
 <style scoped>
 .v-divider {
   border-color: #000000;
+}
+
+.non-clickable {
+  pointer-events: none;
+  opacity: 0.5;
 }
 </style>

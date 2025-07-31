@@ -135,7 +135,7 @@ components:
         - UPDATED
         - UPGRADED
         - MOVED
-        - MODIFYED
+        - MODIFIED
         - ADDED
         - INSTALLED
         - UNINSTALLED
@@ -176,6 +176,7 @@ components:
         - JOB
         - CAPABILITY
         - DISCOVERY
+        - FIRMWARE_UPDATE
   securitySchemes:
     spring_oauth:
       type: oauth2

@@ -103,7 +103,7 @@ public abstract class AbstractSubmodelRepository implements SubmodelRepository {
 
                         submodelsValueOnly.put(submodel.getIdShort(), submodelValueOnly);
                     } catch (SubmodelNotFoundException e) {
-                        LOG.warn("Submodel with ID {} not found in repository for AAS {}", submodel.getId(), this.aasId);
+                        LOG.debug("Submodel with ID {} not found in repository for AAS {}", submodel.getId(), this.aasId);
                     }
                 }
             }

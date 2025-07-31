@@ -12,6 +12,7 @@ import org.eclipse.slm.common.utils.files.FileDownloader;
 import org.eclipse.slm.resource_management.model.resource.ResourceAas;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceTypeNotFoundException;
 import org.eclipse.slm.resource_management.model.update.*;
+import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobJpaRepository;
 import org.eclipse.slm.resource_management.service.rest.resource_types.ResourceTypesManager;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ public class UpdateManager {
 
     private final ResourceTypesManager resourceTypesManager;
 
+    private final FirmwareUpdateJobJpaRepository firmwareUpdateJobRepository;
+
     private final AasRepositoryClient aasRepositoryClient;
 
     private final SubmodelRegistryClient submodelRegistryClient;
@@ -47,13 +50,14 @@ public class UpdateManager {
 
 
     public UpdateManager(@Value("${deployment.url}")String resourceManagementDeploymentUrl,
-                         ResourcesManager resourcesManager, ResourceTypesManager resourceTypesManager,
+                         ResourcesManager resourcesManager, ResourceTypesManager resourceTypesManager, FirmwareUpdateJobJpaRepository firmwareUpdateJobRepository,
                          AasRepositoryClientFactory aasRepositoryClientFactory,
                          SubmodelRegistryClientFactory submodelRegistryClientFactroy,
                          MinioClient minioClient) {
         this.resourceManagementDeploymentUrl = resourceManagementDeploymentUrl;
         this.resourcesManager = resourcesManager;
         this.resourceTypesManager = resourceTypesManager;
+        this.firmwareUpdateJobRepository = firmwareUpdateJobRepository;
         this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
         this.submodelRegistryClient = submodelRegistryClientFactroy.getClient();
         this.minioClient = minioClient;
@@ -94,6 +98,9 @@ public class UpdateManager {
         if (!availableFirmwareVersions.isEmpty()) {
             updateInformation.setLatestFirmwareVersion(availableFirmwareVersions.get(0));
         }
+
+        var firmwareUpdateJobs = firmwareUpdateJobRepository.findByResourceIdOrderByCreatedAtDesc(resourceId);
+        updateInformation.setFirmwareUpdateJobs(firmwareUpdateJobs);
 
         return updateInformation;
     }

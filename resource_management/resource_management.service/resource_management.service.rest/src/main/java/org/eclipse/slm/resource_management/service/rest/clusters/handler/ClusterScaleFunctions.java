@@ -217,7 +217,7 @@ public class ClusterScaleFunctions extends AbstractClusterFunctions implements I
 
             this.notificationMessageSender.sendMessage(new NotificationMessage(
                     KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),
-                    NotificationCategory.RESOURCES, NotificationSubCategory.CLUSTER, EventType.MODIFYED,
+                    NotificationCategory.RESOURCES, NotificationSubCategory.CLUSTER, EventType.MODIFIED,
                     null
             ));
             this.clusterJobMap.remove(sender.jobId);

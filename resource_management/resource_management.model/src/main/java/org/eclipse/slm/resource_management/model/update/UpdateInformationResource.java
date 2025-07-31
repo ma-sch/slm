@@ -1,5 +1,8 @@
 package org.eclipse.slm.resource_management.model.update;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class UpdateInformationResource {
@@ -11,6 +14,8 @@ public class UpdateInformationResource {
     private FirmwareVersionDetails latestFirmwareVersion;
 
     private FirmwareUpdateStatus firmwareUpdateStatus;
+
+    private List<FirmwareUpdateJob> firmwareUpdateJobs = new ArrayList<>();
 
     public List<FirmwareVersionDetails> getAvailableFirmwareVersions() {
         return availableFirmwareVersions;
@@ -42,5 +47,24 @@ public class UpdateInformationResource {
 
     public void setFirmwareUpdateStatus(FirmwareUpdateStatus firmwareUpdateStatus) {
         this.firmwareUpdateStatus = firmwareUpdateStatus;
+    }
+
+    public List<FirmwareUpdateJob> getFirmwareUpdateJobs() {
+        return firmwareUpdateJobs;
+    }
+
+    public void setFirmwareUpdateJobs(List<FirmwareUpdateJob> firmwareUpdateJobs) {
+        this.firmwareUpdateJobs = firmwareUpdateJobs;
+    }
+
+    @JsonProperty("isUpdateInProgress")
+    public boolean isUpdateInProgress() {
+        if (firmwareUpdateJobs.isEmpty()) {
+            return false;
+        } else {
+            firmwareUpdateJobs.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+            FirmwareUpdateJob latestJob = firmwareUpdateJobs.get(0);
+            return !FirmwareUpdateStates.getEndStates().contains(latestJob.getFirmwareUpdateState());
+        }
     }
 }

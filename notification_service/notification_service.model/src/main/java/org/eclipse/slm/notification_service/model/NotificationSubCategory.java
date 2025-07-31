@@ -6,5 +6,6 @@ public enum NotificationSubCategory {
     SERVICE,
     JOB,
     CAPABILITY,
-    DISCOVERY
+    DISCOVERY,
+    FIRMWARE_UPDATE,
 }

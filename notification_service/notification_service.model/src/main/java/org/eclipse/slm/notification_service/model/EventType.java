@@ -8,11 +8,20 @@ public enum EventType {
     UPGRADED,
 
     MOVED,
-    MODIFYED,
+    MODIFIED,
     ADDED,
 
     INSTALLED,
     UNINSTALLED,
 
     FAILED,
+
+
+//    CREATED,
+//    UPDATED,
+//    DELETED,
+//    STARTED,
+//    COMPLETED,
+//    FAILED,
+//    CANCELLED
 }

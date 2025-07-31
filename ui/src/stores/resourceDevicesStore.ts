@@ -20,6 +20,7 @@ interface ResourceDevicesStoreState{
     availableCapabilities: any[],
 
     firmwareUpdateInformationOfResources: {}
+    firmwareUpdateJobsOfResources: {}
 }
 
 export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
@@ -38,6 +39,7 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
         availableCapabilities: [],
 
         firmwareUpdateInformationOfResources: {},
+        firmwareUpdateJobsOfResources: {}
     }),
     getters: {
         resourceById: (state) => (id) => {
@@ -66,6 +68,22 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
                 return state.resources.filter(prop => {
                     return !prop.clusterMember
                 })
+            }
+        },
+
+        firmwareUpdateInformationOfResource: (state) => (resourceId) => {
+            if (state.firmwareUpdateInformationOfResources[resourceId]) {
+                return state.firmwareUpdateInformationOfResources[resourceId]
+            } else {
+                return {}
+            }
+        },
+
+        firmwareUpdateJobsOfResource: (state) => (resourceId) => {
+            if (state.firmwareUpdateJobsOfResources[resourceId]) {
+                return state.firmwareUpdateJobsOfResources[resourceId]
+            } else {
+                return []
             }
         },
     },
@@ -155,8 +173,22 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
             }));
         },
 
-        getFirmwareUpdateInformationOfResource (resourceId) {
-            return this.firmwareUpdateInformationOfResources[resourceId]
+        async getFirmwareUpdateInformationOfResource(resourceId: string) {
+            return await ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResource(resourceId).then(
+                    response => {
+                        console.log(response)
+                        this.firmwareUpdateInformationOfResources[resourceId] = response.data;
+                    }
+                ).catch(logRequestError)
+        },
+
+        async getFirmwareUpdateJobsOfResource(resourceId: string) {
+            return await ResourceManagementClient.resourcesUpdatesApi.getFirmwareUpdateJobsOfResource(resourceId).then(
+                response => {
+                    this.firmwareUpdateJobsOfResources[resourceId] = response.data;
+                    return response.data;
+                }
+            ).catch(logRequestError)
         },
 
         async getResourceAasDescriptors () {

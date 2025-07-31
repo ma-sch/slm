@@ -50,6 +50,8 @@ export const useNotificationStore = defineStore('notificationStore', {
       const $toast = useToast();
       this.addNotification(notification)
 
+      console.log(notification)
+
       $toast.info(NotificationTextGenerator.generateLocalizedText(notification, i18n.global))
 
       const resourceDevicesStore = useResourceDevicesStore();
@@ -136,6 +138,11 @@ function handleResourcesCategoryNotification(notification: Notification) {
     }
     case NotificationSubCategory.Discovery: {
       discoveryStore.updateDiscoveryStore();
+      break;
+    }
+    case NotificationSubCategory.FirmwareUpdate: {
+      resourceDevicesStore.getFirmwareUpdateInformationOfResource(notification.payload.resourceId, true);
+      resourceDevicesStore.getFirmwareUpdateJobsOfResource(notification.payload.resourceId)
       break;
     }
     default: {
