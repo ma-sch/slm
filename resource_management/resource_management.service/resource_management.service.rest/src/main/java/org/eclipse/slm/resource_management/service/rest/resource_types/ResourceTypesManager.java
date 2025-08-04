@@ -61,7 +61,9 @@ public class ResourceTypesManager {
         for (var nameplateSubmodelDescriptor : nameplateSubmodelDescriptors) {
             var submodelRepositoryClient = SubmodelRepositoryClientFactory.FromSubmodelDescriptor(nameplateSubmodelDescriptor);
             var nameplateSubmodel = submodelRepositoryClient.getSubmodel(nameplateSubmodelDescriptor.getId());
-            nameplateSubmodels.add(nameplateSubmodel);
+            if (nameplateSubmodel != null) {
+                nameplateSubmodels.add(nameplateSubmodel);
+            }
         }
 
         var resourceTypes = new HashMap<String, ResourceType>();
