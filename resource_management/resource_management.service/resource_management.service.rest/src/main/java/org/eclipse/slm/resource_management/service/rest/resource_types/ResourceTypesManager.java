@@ -68,54 +68,56 @@ public class ResourceTypesManager {
 
         var resourceTypes = new HashMap<String, ResourceType>();
         for (var nameplateSubmodel : nameplateSubmodels) {
+            try {
+                var manufacturerName = SubmodelUtils.findSubmodelElement(nameplateSubmodel.getSubmodelElements(), "ManufacturerName");
+                var manufacturerProductType = SubmodelUtils.findSubmodelElement(nameplateSubmodel.getSubmodelElements(), "ManufacturerProductType");
 
-            var manufacturerName = SubmodelUtils.findSubmodelElement(nameplateSubmodel.getSubmodelElements(), "ManufacturerName");
-            var manufacturerProductType = SubmodelUtils.findSubmodelElement(nameplateSubmodel.getSubmodelElements(), "ManufacturerProductType");
+                if (manufacturerName.isPresent() && manufacturerProductType.isPresent()) {
+                    var manufacturerProductTypeProp = (MultiLanguageProperty) manufacturerProductType.get();
+                    var manufacturerNameProp = (MultiLanguageProperty) manufacturerName.get();
 
-            if (manufacturerName.isPresent() && manufacturerProductType.isPresent()) {
-                var manufacturerProductTypeProp = (MultiLanguageProperty) manufacturerProductType.get();
-                var manufacturerNameProp = (MultiLanguageProperty) manufacturerName.get();
+                    var manufacturerProductTypeValue = manufacturerProductTypeProp.getValue().get(0).getText();
+                    var manufacturerNameValue = manufacturerNameProp.getValue().get(0).getText();
 
-                var manufacturerProductTypeValue = manufacturerProductTypeProp.getValue().get(0).getText();
-                var manufacturerNameValue = manufacturerNameProp.getValue().get(0).getText();
+                    ResourceType resourceType;
+                    if (resourceTypes.containsKey(manufacturerProductTypeValue)) {
+                        resourceType = resourceTypes.get(manufacturerProductTypeValue);
+                    } else {
+                        resourceType = new ResourceType(manufacturerProductTypeValue, manufacturerNameValue);
+                        resourceTypes.put(resourceType.getTypeName(), resourceType);
+                    }
 
-                ResourceType resourceType;
-                if (resourceTypes.containsKey(manufacturerProductTypeValue)) {
-                    resourceType = resourceTypes.get(manufacturerProductTypeValue);
-                }
-                else {
-                    resourceType = new ResourceType(manufacturerProductTypeValue, manufacturerNameValue);
-                    resourceTypes.put(resourceType.getTypeName(), resourceType);
-                }
+                    if (submodelIdToShellId.containsKey(nameplateSubmodel.getId())) {
+                        var shellId = submodelIdToShellId.get(nameplateSubmodel.getId());
+                        if (shellId.contains(ResourceAas.AAS_ID_PREFIX)) {
+                            var resourceId = UUID.fromString(shellId.replace(ResourceAas.AAS_ID_PREFIX, ""));
+                            resourceType.addResourceInstanceId(resourceId);
 
-                if (submodelIdToShellId.containsKey(nameplateSubmodel.getId())) {
-                    var shellId = submodelIdToShellId.get(nameplateSubmodel.getId());
-                    if (shellId.contains(ResourceAas.AAS_ID_PREFIX)) {
-                        var resourceId = UUID.fromString(shellId.replace(ResourceAas.AAS_ID_PREFIX, ""));
-                        resourceType.addResourceInstanceId(resourceId);
-
-                        var submodelIds = shellIdToSubmodelIds.get(shellId);
-                        var softwareNameplateIds = new ArrayList<String>();
-                        for (var submodelId : submodelIds) {
-                            var optionalSubmodelDescriptor = this.submodelRegistryClient.findSubmodelDescriptor(submodelId);
-                            if (optionalSubmodelDescriptor.isPresent()) {
-                                var semanticId = optionalSubmodelDescriptor.get().getSemanticId();
-                                if (semanticId != null) {
-                                    if (semanticId.getKeys() != null && !semanticId.getKeys().isEmpty()) {
-                                        var semanticIdValue = semanticId.getKeys().get(0).getValue();
-                                        if (semanticIdValue.equals(IDTASubmodelTemplates.SOFTWARE_NAMEPLATE_SUBMODEL_SEMANTIC_ID)) {
-                                            softwareNameplateIds.add(submodelId);
+                            var submodelIds = shellIdToSubmodelIds.get(shellId);
+                            var softwareNameplateIds = new ArrayList<String>();
+                            for (var submodelId : submodelIds) {
+                                var optionalSubmodelDescriptor = this.submodelRegistryClient.findSubmodelDescriptor(submodelId);
+                                if (optionalSubmodelDescriptor.isPresent()) {
+                                    var semanticId = optionalSubmodelDescriptor.get().getSemanticId();
+                                    if (semanticId != null) {
+                                        if (semanticId.getKeys() != null && !semanticId.getKeys().isEmpty()) {
+                                            var semanticIdValue = semanticId.getKeys().get(0).getValue();
+                                            if (semanticIdValue.equals(IDTASubmodelTemplates.SOFTWARE_NAMEPLATE_SUBMODEL_SEMANTIC_ID)) {
+                                                softwareNameplateIds.add(submodelId);
+                                            }
                                         }
                                     }
                                 }
                             }
+                            resourceType.setSoftwareNameplateIds(softwareNameplateIds);
                         }
-                        resourceType.setSoftwareNameplateIds(softwareNameplateIds);
                     }
-                }
 
-            } else {
-                LOG.warn("Skipping submodel with id '" + nameplateSubmodel.getId() + "', because of missing ManufacturerName or ManufacturerProductType");
+                } else {
+                    LOG.warn("Skipping submodel with id '" + nameplateSubmodel.getId() + "', because of missing ManufacturerName or ManufacturerProductType");
+                }
+            } catch (Exception e) {
+                LOG.debug("Error processing nameplate submodel: " + e.getMessage(), e);
             }
         }
 
