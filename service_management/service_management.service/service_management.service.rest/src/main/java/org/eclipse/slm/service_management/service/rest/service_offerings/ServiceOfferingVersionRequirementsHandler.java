@@ -50,9 +50,7 @@ public class ServiceOfferingVersionRequirementsHandler {
                 if (submodel != null) {
                     resourceSubmodels.add(submodel);
                 }
-            }
-
-            if (submodelEndpoint.contains("/submodel")) {
+            } else if (submodelEndpoint.endsWith("/submodel")) {
                 var submodelServiceClient = SubmodelServiceClient.FromSubmodelDescriptor(submodelDescriptor.get(), jwtAuthenticationToken);
                 var submodelOptional = submodelServiceClient.getSubmodel();
                 submodelOptional.ifPresent(resourceSubmodels::add);

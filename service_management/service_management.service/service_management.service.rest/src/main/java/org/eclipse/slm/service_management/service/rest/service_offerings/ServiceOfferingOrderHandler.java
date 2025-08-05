@@ -167,13 +167,18 @@ public class ServiceOfferingOrderHandler {
         serviceHosters = serviceHosters.stream()
                 .filter(sh -> {
                     if (sh.getCapabilityService() instanceof SingleHostCapabilityService) {
-                        var singleHostCapabilityService = (SingleHostCapabilityService)sh.getCapabilityService();
-                        var resourceId = singleHostCapabilityService.getConsulNodeId();
+                        try {
+                            var singleHostCapabilityService = (SingleHostCapabilityService) sh.getCapabilityService();
+                            var resourceId = singleHostCapabilityService.getConsulNodeId();
 
-                        return serviceOfferingVersion.getServiceRequirements()
-                                .stream()
-                                .allMatch(requirementDTO -> serviceOfferingVersionRequirementsHandler
-                                        .isRequirementFulfilledByResource(requirementDTO, resourceId, jwtAuthenticationToken));
+                            return serviceOfferingVersion.getServiceRequirements()
+                                    .stream()
+                                    .allMatch(requirementDTO -> serviceOfferingVersionRequirementsHandler
+                                            .isRequirementFulfilledByResource(requirementDTO, resourceId, jwtAuthenticationToken));
+                        } catch (Exception e) {
+                            LOG.error("Error while checking service requirements for resource '" + ((SingleHostCapabilityService) sh.getCapabilityService()).getConsulNodeId() + "'", e);
+                            return false;
+                        }
                     }
                     else {
                         return true;
