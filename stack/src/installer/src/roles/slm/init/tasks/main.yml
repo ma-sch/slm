@@ -46,6 +46,17 @@
       port: "{{ ENV.SLM_CATALOG_SERVICE.PORT.INTERNAL | int }}"
       consul_app_token: "{{ ENV.CONSUL.MASTER_TOKEN }}"
 
+- name: "SLM | Create RabbitMQ exchanges"
+  include_role:
+    name: rabbitmq/client
+    tasks_from: add_exchange
+  vars:
+      _exchange_name: "{{ item }}"
+  loop:
+      - "resources"
+      - "services"
+      - "notifications"
+
 - name: "Create Minio access"
   include_tasks: "create_and_store_minio_config.yml"
   vars:
