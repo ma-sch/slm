@@ -1,17 +1,20 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
+import org.apache.logging.log4j.util.Base64Util;
 import org.eclipse.digitaltwin.aas4j.v3.model.Property;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElementCollection;
 import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.eclipse.slm.common.aas.repositories.exceptions.SubmodelNotFoundException;
+import org.eclipse.slm.common.keycloak.client.KeycloakServiceClient;
 import org.eclipse.slm.common.minio.client.MinioClient;
 import org.eclipse.slm.common.minio.model.exceptions.*;
 import org.eclipse.slm.common.utils.files.FileDownloader;
 import org.eclipse.slm.resource_management.model.resource.ResourceAas;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceTypeNotFoundException;
 import org.eclipse.slm.resource_management.model.update.*;
+import org.eclipse.slm.resource_management.model.update.exceptions.FirmwareUpdateFileNotFoundException;
 import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobJpaRepository;
 import org.eclipse.slm.resource_management.service.rest.resource_types.ResourceTypesManager;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
@@ -22,15 +25,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
-public class UpdateManager {
+public class FirmwareUpdateManager {
 
-    private final static Logger LOG = LoggerFactory.getLogger(UpdateManager.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdateManager.class);
 
     private final static String FIRMWARE_UPDATE_BUCKET_NAME = "firmware-updates";
 
@@ -48,12 +52,14 @@ public class UpdateManager {
 
     private final MinioClient minioClient;
 
+    private final KeycloakServiceClient keycloakServiceClient;
 
-    public UpdateManager(@Value("${deployment.url}")String resourceManagementDeploymentUrl,
-                         ResourcesManager resourcesManager, ResourceTypesManager resourceTypesManager, FirmwareUpdateJobJpaRepository firmwareUpdateJobRepository,
-                         AasRepositoryClientFactory aasRepositoryClientFactory,
-                         SubmodelRegistryClientFactory submodelRegistryClientFactroy,
-                         MinioClient minioClient) {
+    public FirmwareUpdateManager(@Value("${deployment.url}")String resourceManagementDeploymentUrl,
+                                 ResourcesManager resourcesManager, ResourceTypesManager resourceTypesManager, FirmwareUpdateJobJpaRepository firmwareUpdateJobRepository,
+                                 AasRepositoryClientFactory aasRepositoryClientFactory,
+                                 SubmodelRegistryClientFactory submodelRegistryClientFactroy,
+                                 MinioClient minioClient,
+                                 KeycloakServiceClient keycloakServiceClient) {
         this.resourceManagementDeploymentUrl = resourceManagementDeploymentUrl;
         this.resourcesManager = resourcesManager;
         this.resourceTypesManager = resourceTypesManager;
@@ -61,6 +67,18 @@ public class UpdateManager {
         this.aasRepositoryClient = aasRepositoryClientFactory.getClient();
         this.submodelRegistryClient = submodelRegistryClientFactroy.getClient();
         this.minioClient = minioClient;
+        this.keycloakServiceClient = keycloakServiceClient;
+    }
+
+    public UpdateInformationResource getUpdateInformationOfResource(UUID resourceId) {
+        JwtAuthenticationToken jwtAuthenticationToken = null;
+        try {
+            jwtAuthenticationToken = this.keycloakServiceClient.getJwtAuthentication();
+        } catch (SSLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return this.getUpdateInformationOfResource(resourceId, jwtAuthenticationToken);
     }
 
     public UpdateInformationResource getUpdateInformationOfResource(UUID resourceId, JwtAuthenticationToken jwtAuthenticationToken) {
@@ -144,16 +162,16 @@ public class UpdateManager {
         fileName = fileName.replaceAll("[\\x00-\\x1F\\\\?*<>|\"\\r\\n\\t\\[\\]\\(\\)\\s]", "_");
         var objectName = path + fileName;
 
-        if (minioClient.objectExist(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName)){
-            minioClient.removeObject(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
+        if (minioClient.objectExist(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName)){
+            minioClient.removeObject(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
             LOG.debug("Removed existing firmware update file '" + firmwareUpdateFile.getName() + "'for software nameplate id (Base64): " + softwareNameplateIdBase64Encoded);
         }
 
         try {
-            minioClient.putObject(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName, firmwareUpdateFile.getInputStream(), firmwareUpdateFile.getSize(), firmwareUpdateFile.getContentType());
+            minioClient.putObject(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName, firmwareUpdateFile.getInputStream(), firmwareUpdateFile.getSize(), firmwareUpdateFile.getContentType());
             LOG.debug("Added firmware update file '" + firmwareUpdateFile.getName() + "' for software nameplate id (Base64): " + softwareNameplateIdBase64Encoded);
         } catch (IOException e) {
-            throw new MinioUploadException(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
+            throw new MinioUploadException(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
         }
     }
 
@@ -312,7 +330,7 @@ public class UpdateManager {
         var softwareNameplateIdBase64Encoded = Base64.getEncoder().encodeToString(softwareNameplateId.getBytes());
 
         var path = softwareNameplateIdBase64Encoded + "/";
-        var objectItems = this.minioClient.getObjectsOfPath(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, path);
+        var objectItems = this.minioClient.getObjectsOfPath(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, path);
 
         if (objectItems.isEmpty()) {
             return Optional.empty();
@@ -340,10 +358,12 @@ public class UpdateManager {
         return Optional.empty();
     }
 
-    public InputStream getUpdateFileOfSoftwareNameplate(String softwareNameplateIdBase64Encoded, String fileName, JwtAuthenticationToken jwtAuthenticationToken) {
+    public InputStream getUpdateFileOfSoftwareNameplateByFileName(String softwareNameplateId, String fileName, JwtAuthenticationToken jwtAuthenticationToken) {
+        var softwareNameplateIdBase64Encoded = Base64Util.encode(softwareNameplateId);
+
         var objectName = softwareNameplateIdBase64Encoded + "/" + fileName;
         try {
-            var fileInputStream = this.minioClient.getObject(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
+            var fileInputStream = this.minioClient.getObject(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
             return fileInputStream;
         } catch (MinioObjectPathNameException | MinioBucketNameException e) {
             LOG.error("Error retrieving firmware update file: {}", e.getMessage());
@@ -353,12 +373,24 @@ public class UpdateManager {
         }
     }
 
+    public InputStream getFirstUpdateFileOfSoftwareNameplate(String softwareNameplateId, JwtAuthenticationToken jwtAuthenticationToken) {
+
+        var fileInputStream = this.getFirmwareUpdateFile(softwareNameplateId)
+                .map(firmwareUpdateFile -> {
+                    var fileName = firmwareUpdateFile.getFileName();
+                    return this.getUpdateFileOfSoftwareNameplateByFileName(softwareNameplateId, fileName, jwtAuthenticationToken);
+                })
+                .orElseThrow(() -> new FirmwareUpdateFileNotFoundException(softwareNameplateId));
+
+        return fileInputStream;
+    }
+
     public void deleteFirmwareUpdateFile(String softwareNameplateIdBase64Encoded)
             throws MinioObjectPathNameException, MinioBucketNameException, MinioRemoveObjectException {
         var softwareNameplateId = new String(Base64.getDecoder().decode(softwareNameplateIdBase64Encoded));
 
         var path = softwareNameplateIdBase64Encoded + "/";
-        var objectItems = this.minioClient.getObjectsOfPath(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, path);
+        var objectItems = this.minioClient.getObjectsOfPath(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, path);
 
         if (objectItems.isEmpty()) {
             LOG.debug("No firmware updates files found for software nameplate '" + softwareNameplateId + "', nothing to delete");
@@ -372,7 +404,7 @@ public class UpdateManager {
         for (var objectItem : objectItems) {
             var objectName = objectItem.objectName();
             if (objectName.startsWith(path)) {
-                this.minioClient.removeObject(UpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
+                this.minioClient.removeObject(FirmwareUpdateManager.FIRMWARE_UPDATE_BUCKET_NAME, objectName);
                 LOG.debug("Removed firmware update file '" + objectItem.objectName() + "' for software nameplate id (Base64): " + softwareNameplateIdBase64Encoded);
             }
         }

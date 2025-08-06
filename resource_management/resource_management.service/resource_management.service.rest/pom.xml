@@ -118,6 +118,18 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
+            <artifactId>common.utils.general</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
+            <artifactId>common.keycloak.client</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- Testing !-->
         <dependency>
             <groupId>com.c4-soft.springaddons</groupId>

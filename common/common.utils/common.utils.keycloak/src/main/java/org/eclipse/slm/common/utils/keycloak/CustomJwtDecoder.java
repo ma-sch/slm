@@ -1,4 +1,4 @@
-package org.eclipse.slm.common.parent.service_rest.config;
+package org.eclipse.slm.common.utils.keycloak;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;

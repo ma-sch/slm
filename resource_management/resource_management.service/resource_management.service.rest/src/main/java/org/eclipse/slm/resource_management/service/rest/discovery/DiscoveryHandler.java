@@ -11,8 +11,8 @@ import org.eclipse.slm.resource_management.model.capabilities.CapabilityNotFound
 import org.eclipse.slm.resource_management.model.discovery.*;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNotFoundException;
 import org.eclipse.slm.resource_management.persistence.api.DiscoveryJobRepository;
-import org.eclipse.slm.resource_management.service.discovery.driver.DiscoveryJobListener;
-import org.eclipse.slm.resource_management.service.discovery.driver.DriverClientFactory;
+import org.eclipse.slm.resource_management.service.discovery.driver.discovery.DiscoveryJobListener;
+import org.eclipse.slm.resource_management.service.discovery.driver.discovery.DiscoveryDriverClientFactory;
 import org.eclipse.slm.resource_management.service.discovery.driver.DriverRegistryClient;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DriverNotFoundException;
 import org.eclipse.slm.resource_management.service.rest.resources.aas.submodels.digitalnameplate.DigitalNameplateV3;
@@ -35,23 +35,23 @@ public class DiscoveryHandler implements DiscoveryJobListener {
 
     private final DriverRegistryClient driverRegistryClient;
 
-    private final DriverClientFactory driverClientFactory;
+    private final DiscoveryDriverClientFactory discoveryDriverClientFactory;
 
     private final NotificationMessageSender notificationMessageSender;
 
     private final Map<UUID, JwtAuthenticationToken> jobIdToTokenMap = new HashMap<>();
 
-    private final Map<UUID, DriverInfo> jobIdToDriverInfoMap = new HashMap<>();
+    private final Map<UUID, String> jobIdToDriverId = new HashMap<>();
 
     private final ResourcesManager resourcesManager;
 
     public DiscoveryHandler(DiscoveryJobRepository discoveryJobRepository,
                             DriverRegistryClient driverRegistryClient,
-                            DriverClientFactory driverClientFactory,
+                            DiscoveryDriverClientFactory discoveryDriverClientFactory,
                             NotificationMessageSender notificationMessageSender, ResourcesManager resourcesManager) {
         this.discoveryJobRepository = discoveryJobRepository;
         this.driverRegistryClient = driverRegistryClient;
-        this.driverClientFactory = driverClientFactory;
+        this.discoveryDriverClientFactory = discoveryDriverClientFactory;
         this.notificationMessageSender = notificationMessageSender;
         this.resourcesManager = resourcesManager;
     }
@@ -59,12 +59,11 @@ public class DiscoveryHandler implements DiscoveryJobListener {
     public UUID discover(JwtAuthenticationToken jwtAuthenticationToken, String driverId, DiscoveryRequest discoveryRequest)
             throws DriverNotFoundException {
         var driverInfo = this.driverRegistryClient.getRegisteredDriver(driverId);
-
-        var driverClient = this.driverClientFactory.createDriverClient(driverInfo);
+        var driverClient = this.discoveryDriverClientFactory.createDriverClient(driverInfo);
         var discoveryJob = driverClient.discover(this, discoveryRequest);
 
         jobIdToTokenMap.put(discoveryJob.getId(), jwtAuthenticationToken);
-        jobIdToDriverInfoMap.put(discoveryJob.getId(), driverInfo);
+        jobIdToDriverId.put(discoveryJob.getId(), driverId);
 
         return discoveryJob.getId();
     }
@@ -152,8 +151,8 @@ public class DiscoveryHandler implements DiscoveryJobListener {
     public void onDiscoveryCompleted(DiscoveryJob completedDiscoveryJob) {
         var jwtAuthenticationToken = jobIdToTokenMap.get(completedDiscoveryJob.getId());
         jobIdToTokenMap.remove(completedDiscoveryJob.getId());
-        var driverInfo = jobIdToDriverInfoMap.get(completedDiscoveryJob.getId());
-        jobIdToDriverInfoMap.remove(completedDiscoveryJob.getId());
+        var driverInfo = jobIdToDriverId.get(completedDiscoveryJob.getId());
+        jobIdToDriverId.remove(completedDiscoveryJob.getId());
 
         this.notificationMessageSender.sendMessage(new NotificationMessage(
                 KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken),

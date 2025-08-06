@@ -1,9 +1,8 @@
 <script setup lang="ts">
 
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
-import logRequestError from "@/api/restApiHelper";
 import {computed, onMounted, Ref, ref} from "vue";
-import {FirmwareUpdateJob, UpdateInformation} from "@/api/resource-management/client";
+import {FirmwareUpdateJob, FirmwareUpdateState, UpdateInformation} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import FirmwareUpdateStatusIcon from "@/components/updates/FirmwareUpdateStatusIcon.vue";
@@ -13,6 +12,7 @@ import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 import {useToast} from "vue-toast-notification";
 import {storeToRefs} from "pinia";
 import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
+import VCodeBlock from '@wdns/vue-code-block';
 
 const $toast = useToast();
 
@@ -88,14 +88,26 @@ function installFirmwareUpdate() {
       props.resourceId,
       softwareNameplateSubmodelIdBase64Encoded
   ).then(() => {
-    // Reload jobs
-    resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);
+    resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);     // Reload jobs
+    $toast.success("Firmware update preparation started");
+  }).catch(e => {;
+    console.error("Error starting firmware update preparation:", e);
+    $toast.error("Failed to start firmware update preparation");
   });
 
-  $toast.success("Firmware update started");
-
-  console.log(selectedFirmwareVersion);
   selectedFirmwareVersion.value = undefined;
+}
+
+function activateFirmwareUpdate(firmwareUpdateJobId) {
+  ResourceManagementClient.resourcesUpdatesApi.activateFirmwareUpdateOnResource(
+      props.resourceId,
+      firmwareUpdateJobId
+  ).then(() => {
+    $toast.success("Firmware update activation started");
+  }).catch(e => {
+    console.error("Error starting firmware update activation:", e);
+    $toast.error("Failed to start firmware update activation");
+  });
 }
 
 function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
@@ -106,6 +118,18 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
   return version ?? "N/A";
 }
 
+const logCollapsedStates = ref<Record<string, boolean>>({});
+function toggleLogCollapse(firmwareUpdateJobId: string) {
+  logCollapsedStates.value[firmwareUpdateJobId] = !logCollapsedStates.value[firmwareUpdateJobId];
+}
+const firmwareUpdateJobLogMessages = computed(() => (firmwareUpdateJobId: string) => {
+  const jobs = firmwareUpdateJobsOfResource.value(props.resourceId);
+  const job = jobs?.find(j => j.id === firmwareUpdateJobId);
+  if (job?.logMessages?.length) {
+    return job.logMessages.join('\n');
+  }
+  return "No messages available";
+});
 </script>
 
 <template>
@@ -124,28 +148,51 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
         label="Update status"
       >
         <template #content>
-          <div v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress">
-            <progress-circular
-              size="20"
-              width="2"
-            />
-            <v-chip
-              v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
-              color="primary"
-              variant="elevated"
-              class="mx-8"
-              label
-              size="small"
-            >
-              {{ firmwareUpdateJobsOfResource(props.resourceId)[0].firmwareUpdateState }}
-            </v-chip>
-          </div>
+          <v-row
+            v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
+            class="ma-1"
+          >
+            <div v-if="firmwareUpdateJobsOfResource(props.resourceId)[0].firmwareUpdateState != FirmwareUpdateState.Prepared">
+              <progress-circular
+                size="20"
+                width="2"
+              />
+              <v-chip
+                color="primary"
+                variant="elevated"
+                class="mx-8"
+                label
+                size="small"
+              >
+                {{ firmwareUpdateJobsOfResource(props.resourceId)[0].firmwareUpdateState }}
+              </v-chip>
+            </div>
+            <div v-else>
+              Firmware update to version {{ getVersionTextOfSoftwareNameplate(firmwareUpdateJobsOfResource(props.resourceId)[0].softwareNameplateId) }} prepared
 
-          <FirmwareUpdateStatusIcon
+              <v-icon class="mx-2">
+                mdi-arrow-right
+              </v-icon>
+              <v-btn
+                class="mx-2"
+                color="primary"
+                size="small"
+                @click="activateFirmwareUpdate(firmwareUpdateJobsOfResource(props.resourceId)[0].id)"
+              >
+                Activate
+              </v-btn>
+            </div>
+          </v-row>
+
+          <v-row
             v-else
-            :firmware-update-status="firmwareUpdateInformationOfResource(props.resourceId).firmwareUpdateStatus"
-            :clickable="false"
-          />
+            class="ma-1"
+          >
+            <FirmwareUpdateStatusIcon
+              :firmware-update-status="firmwareUpdateInformationOfResource(props.resourceId).firmwareUpdateStatus"
+              :clickable="false"
+            />
+          </v-row>
         </template>
       </RowWithLabel>
 
@@ -310,6 +357,27 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
                       </div>
                     </v-timeline-item>
                   </v-timeline>
+
+                  <v-row class="align-center mb-2">
+                    <span class="mr-2">Log</span>
+                    <v-icon
+                        style="cursor: pointer;"
+                        @click="toggleLogCollapse(item.id)"
+                        size="small"
+                    >
+                      {{ !logCollapsedStates[item.id] ? 'mdi-chevron-down' : 'mdi-chevron-up' }}
+                    </v-icon>
+                  </v-row>
+                  <v-expand-transition>
+                    <div v-show="logCollapsedStates[item.id]">
+                  <VCodeBlock
+                    :code="firmwareUpdateJobLogMessages(item.id)"
+                    prismjs
+                    lang="html"
+                    theme="coy"
+                  />
+                    </div>
+                  </v-expand-transition>
                 </div>
                 <div v-else>
                   No state transitions
@@ -326,10 +394,5 @@ function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
 <style scoped>
 .v-divider {
   border-color: #000000;
-}
-
-.non-clickable {
-  pointer-events: none;
-  opacity: 0.5;
 }
 </style>

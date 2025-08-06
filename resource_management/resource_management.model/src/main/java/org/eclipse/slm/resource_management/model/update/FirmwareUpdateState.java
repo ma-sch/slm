@@ -2,7 +2,7 @@ package org.eclipse.slm.resource_management.model.update;
 
 import java.util.EnumSet;
 
-public enum FirmwareUpdateStates {
+public enum FirmwareUpdateState {
     CREATED,
     PREPARING,
     PREPARED,
@@ -12,7 +12,7 @@ public enum FirmwareUpdateStates {
     CANCELED,
     FAILED;
 
-    public static EnumSet<FirmwareUpdateStates> getEndStates() {
+    public static EnumSet<FirmwareUpdateState> getEndStates() {
         return EnumSet.of(ACTIVATED, CANCELED, FAILED);
     }
 }

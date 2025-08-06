@@ -1,4 +1,4 @@
-package org.eclipse.slm.resource_management.service.discovery.driver;
+package org.eclipse.slm.resource_management.service.discovery.driver.discovery;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

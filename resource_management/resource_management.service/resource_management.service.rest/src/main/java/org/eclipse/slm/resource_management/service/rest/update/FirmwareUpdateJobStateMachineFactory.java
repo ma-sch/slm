@@ -1,8 +1,8 @@
 package org.eclipse.slm.resource_management.service.rest.update;
 
-import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvents;
-import org.eclipse.slm.resource_management.model.update.FirmwareUpdateStates;
-import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobJpaRepository;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvent;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJob;
+import org.eclipse.slm.resource_management.model.update.FirmwareUpdateState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -15,148 +15,115 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import static org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvent.PREPARATION_TRIGGERED;
 
 @Service
 public class FirmwareUpdateJobStateMachineFactory {
 
     public final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdateJobStateMachineFactory.class);
 
-    private final FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository;
+    private final List<FirmwareUpdateState> endStates = List.of(FirmwareUpdateState.CANCELED, FirmwareUpdateState.ACTIVATED, FirmwareUpdateState.FAILED);
 
-    private final FirmwareUpdateStateMachineInterceptor firmwareUpdateStateMachineInterceptor;
+    private final FirmwareUpdateJobStateMachineInterceptor firmwareUpdateJobStateMachineInterceptor;
 
-    private final ExecutorService executor = Executors.newCachedThreadPool();
-
-    private final List<FirmwareUpdateStates> endStates = List.of(FirmwareUpdateStates.CANCELED, FirmwareUpdateStates.ACTIVATED, FirmwareUpdateStates.FAILED);
-
-    public FirmwareUpdateJobStateMachineFactory(FirmwareUpdateJobJpaRepository firmwareUpdateJobJpaRepository,
-                                                FirmwareUpdateStateMachineInterceptor firmwareUpdateStateMachineInterceptor) {
-        this.firmwareUpdateJobJpaRepository = firmwareUpdateJobJpaRepository;
-        this.firmwareUpdateStateMachineInterceptor = firmwareUpdateStateMachineInterceptor;
+    public FirmwareUpdateJobStateMachineFactory(FirmwareUpdateJobStateMachineInterceptor firmwareUpdateJobStateMachineInterceptor) {
+        this.firmwareUpdateJobStateMachineInterceptor = firmwareUpdateJobStateMachineInterceptor;
     }
 
-    public StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> create(UUID firmwareUpdateJobId) throws Exception {
-
-        var firmwareUpdateJob = firmwareUpdateJobJpaRepository.findById(firmwareUpdateJobId)
-                .orElseThrow(() -> new IllegalArgumentException("Firmware update process not found with ID: " + firmwareUpdateJobId));
-
-        var stateMachineBuilder = new StateMachineBuilder.Builder<FirmwareUpdateStates, FirmwareUpdateEvents>();
+    public StateMachine<FirmwareUpdateState, FirmwareUpdateEvent> create(FirmwareUpdateJob firmwareUpdateJob,
+                                                                         FirmwareUpdateJobStateMachineListener firmwareUpdateJobStateMachineListener) throws Exception {
+        var stateMachineBuilder = new StateMachineBuilder.Builder<FirmwareUpdateState, FirmwareUpdateEvent>();
         stateMachineBuilder.configureStates().withStates()
-                .initial(FirmwareUpdateStates.CREATED, context -> {
-                    LOG.info("State Machine for Firmware Update Job {} created with initial state: CREATED", firmwareUpdateJobId);
-                })
-                .state(FirmwareUpdateStates.PREPARING)
-                .stateEntry(FirmwareUpdateStates.PREPARING, context -> {
-                    LOG.info("State: PREPARING | Firmware update preparation started");
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            Thread.sleep(10000);
-                            transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.PREPARATION_COMPLETED);
-                        } catch (InterruptedException e) {
-                            transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.PREPARATION_FAILED);
-                        }
-                    }, executor);
-                })
-                .state(FirmwareUpdateStates.PREPARED)
-                .stateEntry(FirmwareUpdateStates.PREPARED, context -> {
-                    LOG.info("State: Prepared | Firmware update preparation completed");
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            Thread.sleep(10000);
-                            transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.ACTIVATION_TRIGGERED);
-                        } catch (InterruptedException e) {
-                            transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.CANCEL_TRIGGERED);
-                        }
-                    }, executor);
-                })
-                .state(FirmwareUpdateStates.ACTIVATING)
-                .stateEntry(FirmwareUpdateStates.ACTIVATING, context -> {
-                    LOG.info("State: ACTIVATING | Firmware update activation started");
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            Thread.sleep(10000);
-                            transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.ACTIVATION_COMPLETED);
-                        } catch (InterruptedException e) {
-                            transitionStateMachineToState(context.getStateMachine(), firmwareUpdateJobId, FirmwareUpdateEvents.ACTIVATION_FAILED);
-                        }
-                    }, executor);
-                })
-                .state(FirmwareUpdateStates.ACTIVATED)
-                .stateEntry(FirmwareUpdateStates.ACTIVATED, context -> {
-                    LOG.info("State: ACTIVATED | Firmware update activation completed");
+                .initial(FirmwareUpdateState.CREATED, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.CREATED);
                 })
 
-                .state(FirmwareUpdateStates.CANCELING)
-                .stateEntry(FirmwareUpdateStates.CANCELING, context -> {
-                    LOG.info("State: CANCELING | Firmware update cancellation started");
+                .state(FirmwareUpdateState.PREPARING)
+                .stateEntry(FirmwareUpdateState.PREPARING, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.PREPARING);
                 })
-                .state(FirmwareUpdateStates.CANCELED)
-                .stateEntry(FirmwareUpdateStates.CANCELED, context -> {
-                    LOG.info("State: CANCELED | Firmware update canceled");
+                .state(FirmwareUpdateState.PREPARED)
+                .stateEntry(FirmwareUpdateState.PREPARED, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.PREPARED);
                 })
 
-                .state(FirmwareUpdateStates.FAILED)
-                .stateEntry(FirmwareUpdateStates.FAILED, context -> {
-                    LOG.error("State: FAILED | Firmware update process failed");
+                .state(FirmwareUpdateState.ACTIVATING)
+                .stateEntry(FirmwareUpdateState.ACTIVATING, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.ACTIVATING);
+                })
+                .state(FirmwareUpdateState.ACTIVATED)
+                .stateEntry(FirmwareUpdateState.ACTIVATED, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.ACTIVATED);
+                })
+
+                .state(FirmwareUpdateState.CANCELING)
+                .stateEntry(FirmwareUpdateState.CANCELING, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.CANCELING);
+                })
+                .state(FirmwareUpdateState.CANCELED)
+                .stateEntry(FirmwareUpdateState.CANCELED, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.CANCELED);
+                })
+
+                .state(FirmwareUpdateState.FAILED)
+                .stateEntry(FirmwareUpdateState.FAILED, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, FirmwareUpdateState.FAILED);
                 });
 
-                for (var endState : endStates) {
-                    stateMachineBuilder.configureStates().withStates()
-                        .end(endState)
-                        .stateEntry(endState, context -> {
-                            LOG.info("State Machine for Firmware Update Job {} reached end state: {}", firmwareUpdateJobId, endState);
-                        });
-                }
+        for (var endState : endStates) {
+            stateMachineBuilder.configureStates().withStates()
+                .end(endState)
+                .stateEntry(endState, context -> {
+                    firmwareUpdateJobStateMachineListener.onStateEntry(firmwareUpdateJob, endState);
+                });
+        }
 
         stateMachineBuilder.configureTransitions()
                 .withExternal()
-                .source(FirmwareUpdateStates.CREATED).target(FirmwareUpdateStates.PREPARING).event(FirmwareUpdateEvents.PREPARATION_TRIGGERED)
+                .source(FirmwareUpdateState.CREATED).target(FirmwareUpdateState.PREPARING).event(PREPARATION_TRIGGERED)
 
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.PREPARING).target(FirmwareUpdateStates.PREPARED).event(FirmwareUpdateEvents.PREPARATION_COMPLETED)
+                .source(FirmwareUpdateState.PREPARING).target(FirmwareUpdateState.PREPARED).event(FirmwareUpdateEvent.PREPARATION_COMPLETED)
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.PREPARING).target(FirmwareUpdateStates.FAILED).event(FirmwareUpdateEvents.PREPARATION_FAILED)
+                .source(FirmwareUpdateState.PREPARING).target(FirmwareUpdateState.FAILED).event(FirmwareUpdateEvent.PREPARATION_FAILED)
 
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.PREPARED).target(FirmwareUpdateStates.ACTIVATING).event(FirmwareUpdateEvents.ACTIVATION_TRIGGERED)
+                .source(FirmwareUpdateState.PREPARED).target(FirmwareUpdateState.ACTIVATING).event(FirmwareUpdateEvent.ACTIVATION_TRIGGERED)
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.PREPARED).target(FirmwareUpdateStates.CANCELING).event(FirmwareUpdateEvents.CANCEL_TRIGGERED)
+                .source(FirmwareUpdateState.PREPARED).target(FirmwareUpdateState.CANCELING).event(FirmwareUpdateEvent.CANCEL_TRIGGERED)
 
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.CANCELING).target(FirmwareUpdateStates.CANCELED).event(FirmwareUpdateEvents.CANCEL_COMPLETED)
+                .source(FirmwareUpdateState.CANCELING).target(FirmwareUpdateState.CANCELED).event(FirmwareUpdateEvent.CANCEL_COMPLETED)
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.CANCELING).target(FirmwareUpdateStates.FAILED).event(FirmwareUpdateEvents.CANCEL_FAILED)
+                .source(FirmwareUpdateState.CANCELING).target(FirmwareUpdateState.FAILED).event(FirmwareUpdateEvent.CANCEL_FAILED)
 
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.ACTIVATING).target(FirmwareUpdateStates.ACTIVATED).event(FirmwareUpdateEvents.ACTIVATION_COMPLETED)
+                .source(FirmwareUpdateState.ACTIVATING).target(FirmwareUpdateState.ACTIVATED).event(FirmwareUpdateEvent.ACTIVATION_COMPLETED)
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.ACTIVATING).target(FirmwareUpdateStates.FAILED).event(FirmwareUpdateEvents.ACTIVATION_FAILED)
+                .source(FirmwareUpdateState.ACTIVATING).target(FirmwareUpdateState.FAILED).event(FirmwareUpdateEvent.ACTIVATION_FAILED)
             .and()
                 .withExternal()
-                .source(FirmwareUpdateStates.ACTIVATING).target(FirmwareUpdateStates.CANCELING).event(FirmwareUpdateEvents.CANCEL_TRIGGERED);
+                .source(FirmwareUpdateState.ACTIVATING).target(FirmwareUpdateState.CANCELING).event(FirmwareUpdateEvent.CANCEL_TRIGGERED);
 
     stateMachineBuilder.configureConfiguration().withConfiguration()
         .autoStartup(false)
         .listener(new StateMachineListenerAdapter<>() {
             @Override
-            public void eventNotAccepted(Message<FirmwareUpdateEvents> event) {
+            public void eventNotAccepted(Message<FirmwareUpdateEvent> event) {
                 LOG.warn("Event not accepted: " + event);
             }
 
             @Override
-            public void stateMachineError(StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> stateMachine, Exception exception) {
+            public void stateMachineError(StateMachine<FirmwareUpdateState, FirmwareUpdateEvent> stateMachine, Exception exception) {
                 LOG.error("Error in firmware update state machine: " + exception.getMessage(), exception);
             }
 
@@ -164,27 +131,12 @@ public class FirmwareUpdateJobStateMachineFactory {
 
         var stateMachine = stateMachineBuilder.build();
         stateMachine.getStateMachineAccessor().doWithAllRegions( sma -> {
-            sma.addStateMachineInterceptor(this.firmwareUpdateStateMachineInterceptor);
+            sma.addStateMachineInterceptor(this.firmwareUpdateJobStateMachineInterceptor);
             sma.resetStateMachineReactively(new DefaultStateMachineContext<>(firmwareUpdateJob.getFirmwareUpdateState(), null, null, null)).block();
         });
         stateMachine.startReactively().block();
 
-        // Trigger transition to PREPARING state if the state machine is in the initial state because stateEntry
-        // actions are not executed when the state machine is started from the initial state.
-        if (stateMachine.getState().getId().equals(FirmwareUpdateStates.CREATED)) {
-            this.transitionStateMachineToState(stateMachine, firmwareUpdateJobId, FirmwareUpdateEvents.PREPARATION_TRIGGERED);
-        }
-
         return stateMachine;
-    }
-
-    private void transitionStateMachineToState(StateMachine<FirmwareUpdateStates, FirmwareUpdateEvents> stateMachine,
-                             UUID firmwareUpdateJobId, FirmwareUpdateEvents targetState) {
-        Message<FirmwareUpdateEvents> message = MessageBuilder.withPayload(targetState)
-                .setHeader("firmwareUpdateJobId", firmwareUpdateJobId)
-                .build();
-
-        var result = stateMachine.sendEvent(Mono.just(message)).blockFirst();
     }
 
 }

@@ -15,9 +15,9 @@ import java.util.*
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 class FirmwareUpdateJobStateTransition(
 
-    fromState: FirmwareUpdateStates?,
+    fromState: FirmwareUpdateState?,
 
-    toState: FirmwareUpdateStates?,
+    toState: FirmwareUpdateState?,
 
     timestamp: Date = Date(),
 

@@ -362,6 +362,9 @@ public class ResourcesConsulClient {
         if (node.getMeta().containsKey(META_KEY_FIRMWARE_VERSION)) {
             basicResource.setFirmwareVersion(node.getMeta().get(META_KEY_FIRMWARE_VERSION));
         }
+        if (node.getMeta().containsKey(META_KEY_DRIVER_ID)) {
+            basicResource.setDriverId(node.getMeta().get(META_KEY_DRIVER_ID));
+        }
 
 
         return basicResource;

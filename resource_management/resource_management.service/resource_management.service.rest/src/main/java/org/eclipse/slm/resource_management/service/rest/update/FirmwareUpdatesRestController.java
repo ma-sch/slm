@@ -3,28 +3,22 @@ package org.eclipse.slm.resource_management.service.rest.update;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.slm.common.utils.general.Base64Util;
 import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.slm.common.minio.model.exceptions.*;
-import org.eclipse.slm.common.model.exceptions.EventNotAcceptedException;
 import org.eclipse.slm.common.utils.keycloak.KeycloakTokenUtil;
 import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceTypeNotFoundException;
-import org.eclipse.slm.resource_management.model.update.FirmwareUpdateEvents;
 import org.eclipse.slm.resource_management.model.update.FirmwareUpdateJob;
 import org.eclipse.slm.resource_management.model.update.UpdateInformationResource;
 import org.eclipse.slm.resource_management.model.update.UpdateInformationResourceType;
-import org.eclipse.slm.resource_management.persistence.api.FirmwareUpdateJobJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.statemachine.StateMachineEventResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,17 +26,17 @@ import java.util.*;
 @RestController
 @RequestMapping("/resources")
 @Tag(name = "Updates")
-public class UpdatesRestController {
+public class FirmwareUpdatesRestController {
 
-    private final static Logger LOG = LoggerFactory.getLogger(UpdatesRestController.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdatesRestController.class);
 
-    private final UpdateManager updateManager;
+    private final FirmwareUpdateManager firmwareUpdateManager;
 
-    private final UpdateJobManager updateJobManager;
+    private final FirmwareUpdateJobService firmwareUpdateJobService;
 
-    public UpdatesRestController(UpdateManager updateManager, UpdateJobManager updateJobManager) {
-        this.updateManager = updateManager;
-        this.updateJobManager = updateJobManager;
+    public FirmwareUpdatesRestController(FirmwareUpdateManager firmwareUpdateManager, FirmwareUpdateJobService firmwareUpdateJobService) {
+        this.firmwareUpdateManager = firmwareUpdateManager;
+        this.firmwareUpdateJobService = firmwareUpdateJobService;
     }
 
     @RequestMapping(value = "/{resourceId}/updates", method = RequestMethod.GET)
@@ -52,7 +46,7 @@ public class UpdatesRestController {
     ) {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        var updateInformation = this.updateManager.getUpdateInformationOfResource(resourceId, jwtAuthenticationToken);
+        var updateInformation = this.firmwareUpdateManager.getUpdateInformationOfResource(resourceId, jwtAuthenticationToken);
 
         return ResponseEntity.ok(updateInformation);
     }
@@ -64,7 +58,7 @@ public class UpdatesRestController {
     ) throws ResourceTypeNotFoundException {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        var updateInformation = this.updateManager.getUpdateInformationOfResourceType(resourceTypeName, jwtAuthenticationToken);
+        var updateInformation = this.firmwareUpdateManager.getUpdateInformationOfResourceType(resourceTypeName, jwtAuthenticationToken);
 
         return ResponseEntity.ok(updateInformation);
     }
@@ -78,8 +72,9 @@ public class UpdatesRestController {
     ) throws IOException {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        var fileInputStream = this.updateManager.getUpdateFileOfSoftwareNameplate(
-                softwareNameplateIdBase64Encoded,
+        var softwareNameplateId = Base64Util.decodeFromBase64(softwareNameplateIdBase64Encoded);
+        var fileInputStream = this.firmwareUpdateManager.getUpdateFileOfSoftwareNameplateByFileName(
+                softwareNameplateId,
                 fileName,
                 jwtAuthenticationToken
         );
@@ -96,7 +91,7 @@ public class UpdatesRestController {
             @PathVariable(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded,
             @RequestPart("file") MultipartFile firmwareUpdateFile
     ) throws MinioUploadException, MinioObjectPathNameException, MinioBucketNameException, MinioBucketCreateException, MinioRemoveObjectException {
-        updateManager.addOrUpdateFirmwareUpdateFile(softwareNameplateIdBase64Encoded, firmwareUpdateFile);
+        firmwareUpdateManager.addOrUpdateFirmwareUpdateFile(softwareNameplateIdBase64Encoded, firmwareUpdateFile);
     }
 
     @RequestMapping(value = "/updates/{softwareNameplateId}/file", method = RequestMethod.DELETE)
@@ -104,7 +99,7 @@ public class UpdatesRestController {
     public void deleteFirmwareUpdateFile(
             @PathVariable(name = "softwareNameplateId")  String softwareNameplateIdBase64Encoded
     ) throws MinioObjectPathNameException, MinioBucketNameException, MinioRemoveObjectException {
-        updateManager.deleteFirmwareUpdateFile(softwareNameplateIdBase64Encoded);
+        firmwareUpdateManager.deleteFirmwareUpdateFile(softwareNameplateIdBase64Encoded);
     }
 
     @RequestMapping(value = "/updates/{softwareNameplateId}/file/download",
@@ -116,7 +111,7 @@ public class UpdatesRestController {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         var softwareNameplateId = Base64UrlEncodedIdentifier.fromEncodedValue(softwareNameplateIdBase64Encoded).getIdentifier();
 
-        updateManager.downloadFirmwareUpdateFileFromVendor(softwareNameplateId, jwtAuthenticationToken);
+        firmwareUpdateManager.downloadFirmwareUpdateFileFromVendor(softwareNameplateId, jwtAuthenticationToken);
     }
 
     @RequestMapping(value = "/{resourceId}/updates/jobs",
@@ -125,7 +120,7 @@ public class UpdatesRestController {
     public ResponseEntity<List<FirmwareUpdateJob>> getFirmwareUpdateJobsOfResource(
             @PathVariable(name = "resourceId")  UUID resourceId
     ) {
-        var firmwareUpdateJobs = this.updateJobManager.getFirmwareUpdateJobsOfResource(resourceId);
+        var firmwareUpdateJobs = this.firmwareUpdateJobService.getFirmwareUpdateJobsOfResource(resourceId);
 
         return ResponseEntity.ok(firmwareUpdateJobs);
     }
@@ -141,19 +136,33 @@ public class UpdatesRestController {
         var userId = KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken);
         var softwareNameplateId = Base64UrlEncodedIdentifier.fromEncodedValue(softwareNameplateIdBase64Encoded).getIdentifier();
 
-        this.updateJobManager.startFirmwareUpdateOnResource(resourceId, softwareNameplateId, userId);
+        this.firmwareUpdateJobService.initFirmwareUpdate(resourceId, softwareNameplateId, userId);
     }
 
-    @RequestMapping(value = "/{resourceId}/updates/jobs/{firmwareUpdateJobId}",
+    @RequestMapping(value = "/{resourceId}/updates/jobs/{firmwareUpdateJobId}/activate",
             method = RequestMethod.POST)
-    @Operation(summary="Change state of firmware update on resource")
-    public void changeStateOfFirmwareUpdateOnResource(
+    @Operation(summary="Activate firmware update on resource")
+    public void activateFirmwareUpdateOnResource(
             @PathVariable(name = "resourceId")  UUID resourceId,
-            @PathVariable(name = "firmwareUpdateJobId")  UUID firmwareUpdateJobId,
-            @RequestParam(name = "event") FirmwareUpdateEvents event
+            @PathVariable(name = "firmwareUpdateJobId")  UUID firmwareUpdateJobId
             ) throws Exception {
-        this.updateJobManager.changeStateOfFirmwareUpdateOnResource(resourceId, firmwareUpdateJobId, event);
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        var userId = KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken);
+
+        this.firmwareUpdateJobService.activateFirmwareUpdate(firmwareUpdateJobId);
     }
 
+    @RequestMapping(value = "/{resourceId}/updates/jobs/{firmwareUpdateJobId}/cancel",
+            method = RequestMethod.POST)
+    @Operation(summary="Activate firmware update on resource")
+    public void cancelFirmwareUpdateOnResource(
+            @PathVariable(name = "resourceId")  UUID resourceId,
+            @PathVariable(name = "firmwareUpdateJobId")  UUID firmwareUpdateJobId
+    ) throws Exception {
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        var userId = KeycloakTokenUtil.getUserUuid(jwtAuthenticationToken);
+
+        this.firmwareUpdateJobService.activateFirmwareUpdate(firmwareUpdateJobId);
+    }
 
 }

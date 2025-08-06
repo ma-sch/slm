@@ -3,6 +3,7 @@ package org.eclipse.slm.resource_management.service.discovery.driver;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.eclipse.slm.resource_management.model.discovery.DriverInfo;
+import org.eclipse.slm.resource_management.service.discovery.driver.discovery.DiscoveryDriverClientFactory;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DriverNotFoundException;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DriverNotReachableException;
 import org.slf4j.Logger;
@@ -24,14 +25,14 @@ public class DriverRegistryClient {
 
     private final int driverRegistryPort;
 
-    private final DriverClientFactory driverClientFactory;
+    private final DiscoveryDriverClientFactory discoveryDriverClientFactory;
 
     public DriverRegistryClient(@Value("${discovery.driver-registry.address}") String driverRegistryAddress,
                                 @Value("${discovery.driver-registry.port}") int driverRegistryPort,
-                                DriverClientFactory driverClientFactory) {
+                                DiscoveryDriverClientFactory discoveryDriverClientFactory) {
         this.driverRegistryAddress = driverRegistryAddress;
         this.driverRegistryPort = driverRegistryPort;
-        this.driverClientFactory = driverClientFactory;
+        this.discoveryDriverClientFactory = discoveryDriverClientFactory;
     }
 
     public List<DriverInfo> getRegisteredDrivers() {
@@ -57,7 +58,7 @@ public class DriverRegistryClient {
                 driverInfo.setPortNumber(serviceInfo.getGrpcIpPortNumber());
 
                 try {
-                    var driverClient = this.driverClientFactory.createDriverClient(driverInfo);
+                    var driverClient = this.discoveryDriverClientFactory.createDriverClient(driverInfo);
                     LOG.debug("Getting version info for driver: Id: {} | IP: {} | DomainName: {} | Port: {} |",
                             driverInfo.getInstanceId(),
                             driverInfo.getIpv4Address(),

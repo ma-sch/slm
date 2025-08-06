@@ -99,6 +99,15 @@ public class ResourcesVaultClient {
         );
     }
 
+    public Map<String, String> getSecretsForResource(VaultCredential vaultCredential, UUID resourceId, String path) {
+        var kvPathSegment = resourceId + "/" + path;
+        KvPath resourceVaultPath = new KvPath("resources", kvPathSegment);
+
+        var content = this.vaultClient.getKvContent(vaultCredential, resourceVaultPath);
+
+        return content;
+    }
+
     public void addSecretsForResource(VaultCredential vaultCredential, UUID resourceId, String path, Map<String, String> secretsOfResource) {
         // Add secrets for resource
         var kvPathSegment = resourceId + "/" + path;

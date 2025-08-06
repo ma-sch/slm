@@ -8,6 +8,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.OneToMany
 import org.eclipse.slm.common.model.AbstractBaseEntityUuid
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
 
 @Entity
@@ -15,6 +17,7 @@ import java.util.*
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 class FirmwareUpdateJob(id: UUID? = null,
                         resourceId: UUID?,
+                        driverId: String?,
                         softwareNameplateId: String?,
                         userId: String?
 )
@@ -23,6 +26,9 @@ class FirmwareUpdateJob(id: UUID? = null,
     @Column(name = "resource_id", nullable = false)
     var resourceId: UUID? = resourceId
 
+    @Column(name = "driver_id", nullable = false)
+    var driverId: String? = driverId
+
     @Column(name = "software_nameplate_id", nullable = false)
     var softwareNameplateId: String? = softwareNameplateId
 
@@ -30,7 +36,7 @@ class FirmwareUpdateJob(id: UUID? = null,
     var userId: String? = userId
 
     @Column(name = "state", nullable = false)
-    var firmwareUpdateState: FirmwareUpdateStates? = FirmwareUpdateStates.CREATED
+    var firmwareUpdateState: FirmwareUpdateState? = FirmwareUpdateState.CREATED
 
     @Column(name = "created_at", nullable = false)
     var createdAt: Date = Date()
@@ -38,6 +44,15 @@ class FirmwareUpdateJob(id: UUID? = null,
     @OneToMany(mappedBy = "firmwareUpdateJob", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     var stateTransitions: MutableList<FirmwareUpdateJobStateTransition> = mutableListOf()
 
+    @Column(name = "log_messages", columnDefinition = "LONGTEXT")
+    @JdbcTypeCode(SqlTypes.JSON)
+    var logMessages: MutableList<String> = mutableListOf()
+
     protected constructor()
-    : this(null, null, null, null)
-}
+    : this(null, null, null, null, null)
+
+    fun addLogMessage(message: String) {
+            logMessages.add(message);
+    }
+
+ }

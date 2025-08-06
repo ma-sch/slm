@@ -9,7 +9,7 @@ import org.eclipse.slm.resource_management.model.resource.exceptions.ResourceNot
 import org.eclipse.slm.resource_management.persistence.api.DiscoveryJobRepository;
 import org.eclipse.slm.resource_management.service.discovery.api.DiscoveryJobStartedResponse;
 import org.eclipse.slm.resource_management.service.discovery.api.OnboardingRequest;
-import org.eclipse.slm.resource_management.service.discovery.driver.DriverClientFactory;
+import org.eclipse.slm.resource_management.service.discovery.driver.discovery.DiscoveryDriverClientFactory;
 import org.eclipse.slm.resource_management.service.discovery.driver.DriverRegistryClient;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DiscoveryJobNotFoundException;
 import org.eclipse.slm.resource_management.service.discovery.exceptions.DriverNotFoundException;
@@ -32,16 +32,16 @@ public class DiscoveryRestController {
 
     private final DiscoveryJobRepository discoveryJobRepository;
 
-    private final DriverClientFactory driverClientFactory;
+    private final DiscoveryDriverClientFactory discoveryDriverClientFactory;
 
     private final DiscoveryHandler discoveryHandler;
 
     public DiscoveryRestController(DriverRegistryClient driverRegistryClient,
                                    DiscoveryJobRepository discoveryJobRepository,
-                                   DriverClientFactory driverClientFactory, DiscoveryHandler discoveryHandler) {
+                                   DiscoveryDriverClientFactory discoveryDriverClientFactory, DiscoveryHandler discoveryHandler) {
         this.driverRegistryClient = driverRegistryClient;
         this.discoveryJobRepository = discoveryJobRepository;
-        this.driverClientFactory = driverClientFactory;
+        this.discoveryDriverClientFactory = discoveryDriverClientFactory;
         this.discoveryHandler = discoveryHandler;
     }
 

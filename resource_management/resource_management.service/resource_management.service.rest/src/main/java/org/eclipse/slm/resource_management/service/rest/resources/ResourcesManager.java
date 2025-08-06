@@ -367,7 +367,34 @@ public class ResourcesManager {
         this.resourcesConsulClient.setResourceLocation(resourceId, optionalLocation.get());
     }
 
-    public void setConnectionParametersOfResource(UUID resourceId, String ConnectionParameters) {
-        this.resourcesVaultClient.addSecretsForResource(new VaultCredential(), resourceId, "ConnectionParameters", Map.of("ConnectionParameters", ConnectionParameters));
+    public String getConnectionParametersOfResource(UUID resourceId) {
+        var kvContent = this.resourcesVaultClient.getSecretsForResource(new VaultCredential(), resourceId, "ConnectionParameters");
+
+        var connectionParametersContent = kvContent.get("ConnectionParameters");
+
+        return connectionParametersContent;
+    }
+
+    public void setConnectionParametersOfResource(UUID resourceId, String connectionParameters) {
+        this.resourcesVaultClient.addSecretsForResource(new VaultCredential(), resourceId, "ConnectionParameters", Map.of("ConnectionParameters", connectionParameters));
+    }
+
+    public void setFirmwareVersionOfResource(UUID resourceId, String firmwareVersion) {
+        try {
+            this.resourcesConsulClient.getResourceById(new ConsulCredential(), resourceId).ifPresentOrElse(
+                (resource) -> {
+                    resource.setFirmwareVersion(firmwareVersion);
+                    try {
+                        this.resourcesConsulClient.addResource(resource);
+                    } catch (ConsulLoginFailedException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                () -> {
+                    LOG.error("Resource with id: " + resourceId + " not found. Cannot set firmware version.");
+                });
+        } catch (ConsulLoginFailedException e) {
+            LOG.error("Failed to set firmware version for resource with id: " + resourceId, e);
+        }
     }
 }

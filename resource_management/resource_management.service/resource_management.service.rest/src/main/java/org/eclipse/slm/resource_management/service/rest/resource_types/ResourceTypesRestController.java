@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.resource_management.model.resource.ResourceType;
 import org.eclipse.slm.resource_management.service.rest.resources.ResourcesManager;
-import org.eclipse.slm.resource_management.service.rest.update.UpdateManager;
+import org.eclipse.slm.resource_management.service.rest.update.FirmwareUpdateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +21,14 @@ public class ResourceTypesRestController {
 
     private final ResourceTypesManager resourceTypesManager;
 
-    private final UpdateManager updateManager;
+    private final FirmwareUpdateManager firmwareUpdateManager;
 
     @Autowired
     public ResourceTypesRestController(
-            ResourcesManager resourcesManager, ResourceTypesManager resourceTypesManager, UpdateManager updateManager
+            ResourcesManager resourcesManager, ResourceTypesManager resourceTypesManager, FirmwareUpdateManager firmwareUpdateManager
     ) {
         this.resourceTypesManager = resourceTypesManager;
-        this.updateManager = updateManager;
+        this.firmwareUpdateManager = firmwareUpdateManager;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET)

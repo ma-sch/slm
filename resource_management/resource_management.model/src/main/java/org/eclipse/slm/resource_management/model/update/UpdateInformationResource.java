@@ -64,7 +64,7 @@ public class UpdateInformationResource {
         } else {
             firmwareUpdateJobs.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
             FirmwareUpdateJob latestJob = firmwareUpdateJobs.get(0);
-            return !FirmwareUpdateStates.getEndStates().contains(latestJob.getFirmwareUpdateState());
+            return !FirmwareUpdateState.getEndStates().contains(latestJob.getFirmwareUpdateState());
         }
     }
 }

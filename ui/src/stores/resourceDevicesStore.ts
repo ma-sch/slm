@@ -176,7 +176,6 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
         async getFirmwareUpdateInformationOfResource(resourceId: string) {
             return await ResourceManagementClient.resourcesUpdatesApi.getUpdateInformationOfResource(resourceId).then(
                     response => {
-                        console.log(response)
                         this.firmwareUpdateInformationOfResources[resourceId] = response.data;
                     }
                 ).catch(logRequestError)
