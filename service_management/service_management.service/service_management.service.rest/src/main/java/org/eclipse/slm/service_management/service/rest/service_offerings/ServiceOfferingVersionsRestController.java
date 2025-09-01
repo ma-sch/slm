@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.minio.model.exceptions.*;
 import org.eclipse.slm.common.utils.objectmapper.ObjectMapperUtils;
-import org.eclipse.slm.resource_management.model.resource.MatchingResourceDTO;
+import org.eclipse.slm.resource_management.common.model.MatchingResourceDTO;
 import org.eclipse.slm.resource_management.service.client.handler.ApiException;
 import org.eclipse.slm.service_management.model.exceptions.ServiceOptionNotFoundException;
 import org.eclipse.slm.service_management.service.rest.service_categories.ServiceCategoryNotFoundException;

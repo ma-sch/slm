@@ -135,17 +135,18 @@
 
       <template #item.capabilityServices="{ item }">
         <v-tooltip
-          v-for="capabilityService in getDeploymentCapabilityServices(item.capabilityServices)"
-          :key="capabilityService.capability.name"
+          v-for="capabilityServiceId in item.capabilityServiceIds"
+          :key="capabilityServiceId"
           location="top"
         >
           <template #activator="{ props }">
             <CapabilityIcon
-              v-bind="props"
-              :capability-service="capabilityService"
+                v-if="capabilityServiceById(capabilityServiceId)"
+                v-bind="props"
+                :capability-service="capabilityServiceById(capabilityServiceId)"
             />
           </template>
-          <span>Status: {{ capabilityService.status }}</span>
+          <span>Status: {{ capabilityServiceById(capabilityServiceId)?.status }}</span>
         </v-tooltip>
       </template>
 
@@ -164,7 +165,7 @@
           v-if="!item.markedForDelete"
           class="ma-2"
         >
-          <CapabilitiesButton :resource="item" />
+          <CapabilitiesButton :resourceId="item.id" />
           <v-btn
             :disabled="item.clusterMember"
             color="error"
@@ -200,12 +201,15 @@ import {storeToRefs} from "pinia";
 import FirmwareUpdateVersion from "@/components/updates/FirmwareUpdateVersion.vue";
 import ApiState from "@/api/apiState";
 import DeviceUtils from '@/utils/deviceUtils';
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
 
 
 const emit = defineEmits(['resource-selected']);
 
 const resourceDevicesStore = useResourceDevicesStore();
 const {resources} = storeToRefs(resourceDevicesStore);
+const capabilitiesStore = useCapabilitiesStore();
+const { capabilityServiceById } = storeToRefs(capabilitiesStore);
 
 const tableHeaders = [
   { title: "Product", key: "product", width: "20%" },
@@ -245,10 +249,6 @@ const profiler = computed(() => resourceDevicesStore.profiler);
 onMounted(() => {
   resourceDevicesStore.getResourceAasValues();
 });
-
-const getDeploymentCapabilityServices = (capabilityServices) => {
-  return capabilityServices?.filter(cs => cs.capability.capabilityClass !== "BaseConfigurationCapability");
-};
 
 const deleteResource = (resource) => {
   const resourceId = resource.id;

@@ -1,8 +1,6 @@
 package org.eclipse.slm.notification_service.service.rest.endpoints;
 
-import org.eclipse.slm.common.awx.client.observer.AwxJobObserver;
-import org.eclipse.slm.common.awx.client.observer.AwxJobObserverInitializer;
-import org.eclipse.slm.common.awx.client.observer.IAwxJobObserverListener;
+import org.eclipse.slm.common.awx.client.observer.*;
 import org.eclipse.slm.notification_service.communication.websocket.NotificationWsService;
 import org.eclipse.slm.notification_service.model.*;
 import org.eclipse.slm.notification_service.persistence.api.NotificationRepository;
@@ -117,7 +115,7 @@ public class ObserverRestController implements IAwxJobObserverListener {
 
     private void sendJobChangedNotification(JobStateChange jobStateChange, String userId) {
 
-        var notification = new Notification(userId, NotificationCategory.JOBS, NotificationSubCategory.JOB, EventType.UPDATED, jobStateChange);
+        var notification = new Notification(userId, NotificationCategory.JOBS, NotificationSubCategory.JOB, NotificationEventType.UPDATED, jobStateChange);
 
         notificationRepository.save(notification);
         notificationWsService.notifyFrontend(notification);

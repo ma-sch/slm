@@ -1,54 +1,81 @@
-import {Notification, EventType, NotificationCategory, NotificationSubCategory} from "@/api/notification-service/client";
+import {
+    EventNotification,
+    EVENTCLASS,
+    ResourceEventNotification,
+    ResourceEventType,
+    FirmwareUpdateJobEventNotification,
+    DiscoveryEventNotification,
+    CapabilityJobEventNotification,
+    ServiceInstanceEventNotification, ServiceInstanceEventType
+} from "@/api/notification-service/client";
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
+import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 
 class NotificationTextGenerator {
 
-    static generateLocalizedText(notification: Notification, t) {
-        switch (notification.category) {
-            case NotificationCategory.Jobs: {
-                return `Job ${notification.payload} turned into state '${notification.eventType}'`
-            }
-            case NotificationCategory.Resources: {
-                switch (notification.subCategory) {
-                    case NotificationSubCategory.Resource: {
-                        switch (notification.eventType) {
-                            case EventType.Created: {
-                                return `Resource '${notification.payload.hostname}' created`
-                            }
-                            case EventType.Deleted: {
-                                return `Resource '${notification.payload.hostname}' deleted`
-                            }
-                            case EventType.Updated: {
-                                return `Resource '${notification.payload.hostname}' updated`
-                            }
-                        }
+    static generateLocalizedText(eventNotification: EventNotification, t) {
+        switch (eventNotification.type) {
+
+            case EVENTCLASS.ResourceEvent: {
+                const resourceEvent = eventNotification as unknown as ResourceEventNotification
+
+                switch (resourceEvent.eventType) {
+                    case ResourceEventType.Created: {
+                        return `Resource '${resourceEvent.resource.hostname}' created`
                     }
-                    case NotificationSubCategory.Capability: {
-                        switch (notification.eventType) {
-                            case EventType.Added: {
-                                return `Capability added`
-                            }
-                            case EventType.Installed: {
-                                return `Capability installed`
-                            }
-                            case EventType.Uninstalled:
-                            case EventType.Deleted: {
-                                return `Capability  uninstalled`
-                            }
-                        }
+                    case ResourceEventType.Deleted: {
+                        return `Resource '${resourceEvent.resource.hostname}' deleted`
                     }
-                    break;
+                    case ResourceEventType.Updated: {
+                        return `Resource '${resourceEvent.resource.hostname}' updated`
+                    }
                 }
+            }
+
+            case EVENTCLASS.CapabilityJobEvent: {
+                const capabilityJobEventNotification = eventNotification  as unknown as CapabilityJobEventNotification;
+
+                const capabilitiesStore = useCapabilitiesStore();
+                const capability = capabilitiesStore.capabilityById(capabilityJobEventNotification.capabilityJob.capabilityId);
+
+                const resourceDevicesStore = useResourceDevicesStore();
+                const resource = resourceDevicesStore.resourceById(capabilityJobEventNotification.capabilityJob.resourceId);
+
+                return `Capability '${capability.name}' ${capabilityJobEventNotification.capabilityJob.state?.toLowerCase()} on device '${resource.hostname}'`
+            }
+
+            case EVENTCLASS.DiscoveryEvent: {
+                const discoveryEventNotification = eventNotification  as unknown as DiscoveryEventNotification;
                 break;
             }
-            case NotificationCategory.Services: {
-                return "Service"
+
+            case EVENTCLASS.FirmwareUpdateJobEvent: {
+                const firmwareUpdateJobEventNotification = eventNotification  as unknown as FirmwareUpdateJobEventNotification;
+                const resourceDevicesStore = useResourceDevicesStore();
+                const resource = resourceDevicesStore.resourceById(firmwareUpdateJobEventNotification.firmwareUpdateJob.resourceId);
+                return `Firmware update job on device '${resource.hostname}' turned into state '${firmwareUpdateJobEventNotification.firmwareUpdateJob.state}'`
+            }
+
+            case EVENTCLASS.ServiceInstanceEvent: {
+                const serviceInstanceEventNotification = eventNotification  as unknown as ServiceInstanceEventNotification;
+                switch (serviceInstanceEventNotification.eventType) {
+                    case ServiceInstanceEventType.Created: {
+                        return `Service '${serviceInstanceEventNotification.serviceInstance.id}' created`
+                    }
+                    case ServiceInstanceEventType.Deleted: {
+                        return `Service '${serviceInstanceEventNotification.serviceInstance.id}' deleted`
+                    }
+                    case ServiceInstanceEventType.Updated: {
+                        return `Service '${serviceInstanceEventNotification.serviceInstance.id}' updated`
+                    }
+                }
             }
 
             default:
                 return "Message not defined"
         }
 
-        return `${notification.subCategory} ${notification.eventType}`
+        return `Unhandled notification event of type '${eventNotification.type}`
     }
 }
 

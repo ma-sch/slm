@@ -1,11 +1,11 @@
-import { useResourceDevicesStore } from "@/stores/resourceDevicesStore";
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
 
 export function useCapabilityUtils() {
-  const resourceDevicesStore = useResourceDevicesStore();
+  const capabilitiesStore = useCapabilitiesStore();
 
   const getCapability = (capabilityId) => {
     try {
-      return resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.find(
+      return capabilitiesStore.availableSingleHostCapabilitiesNoDefault.find(
           cap => cap.id === capabilityId
       );
     } catch (e) {
@@ -27,19 +27,12 @@ export function useCapabilityUtils() {
   };
 
   const getCapabilitiesByCapabilityClass = (capabilityClass) => {
-    return resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.filter(shc => shc.capabilityClass === capabilityClass)
-  };
-
-  const isCapabilityInstalledOnResource = (resource, capability) => {
-    if(resource.capabilityServices !== null)
-      return resource.capabilityServices.filter(capService => capService.capability.name === capability.name).length > 0
-    else
-      return false;
+    return capabilitiesStore.availableSingleHostCapabilitiesNoDefault.filter(shc => shc.capabilityClass === capabilityClass)
   };
 
   const getUniqueCapabilityClasses = () => {
     return [...new Set(
-        resourceDevicesStore.availableSingleHostCapabilitiesNoDefault.map(shc => shc.capabilityClass)
+        capabilitiesStore.availableSingleHostCapabilitiesNoDefault.map(shc => shc.capabilityClass)
     )].sort();
   };
 
@@ -75,7 +68,6 @@ export function useCapabilityUtils() {
     getParamsOfInstallAction,
     getCapabilitiesByCapabilityClass,
     getUniqueCapabilityClasses,
-    isCapabilityInstalledOnResource,
     isDefineCapabilityDialogRequired,
     isCapabilitySkipable
   };

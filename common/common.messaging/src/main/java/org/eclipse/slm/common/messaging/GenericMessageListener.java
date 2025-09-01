@@ -9,41 +9,36 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public abstract class GenericMessageListener<T extends AbstractMessage> implements MessageListener {
+public abstract class GenericMessageListener<T extends AbstractEventMessage> implements MessageListener {
 
     public final static Logger LOG = LoggerFactory.getLogger(GenericMessageListener.class);
 
-    private final Class<T> type;
-
-    @Autowired
     private ConnectionFactory connectionFactory;
 
-    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Value("${spring.application.name}")
     private String nameOfReceivingService;
 
-    protected GenericMessageListener(Class<T> type){
-        this.type = type;
-    }
+    private final String exchangeName;
 
-    protected GenericMessageListener(Class<T> type, ConnectionFactory connectionFactory, RabbitTemplate rabbitTemplate){
-        this.type = type;
+    private final String routingKeyAllEvents;
+
+    protected GenericMessageListener(String exchangeName, String routingKeyAllEvents,
+                                     ConnectionFactory connectionFactory, RabbitTemplate rabbitTemplate){
         this.connectionFactory = connectionFactory;
         this.rabbitTemplate = rabbitTemplate;
+        this.exchangeName = exchangeName;
+        this.routingKeyAllEvents = routingKeyAllEvents;
     }
 
     @PostConstruct
     public void init()  throws Exception  {
-        var tmpMessage = this.type.getDeclaredConstructor().newInstance();
-
-        var queueName = tmpMessage.getRoutingKey() + "@" +this.nameOfReceivingService;
+        var queueName = this.exchangeName + "." + this.routingKeyAllEvents + "@" +this.nameOfReceivingService;
         var queue = new Queue(queueName, false);;
 
         var amqpAdmin = new RabbitAdmin(rabbitTemplate.getConnectionFactory());
@@ -55,8 +50,8 @@ public abstract class GenericMessageListener<T extends AbstractMessage> implemen
         messageListenerContainer.setMessageListener(this);
         messageListenerContainer.start();
 
-        var resourcesExchange = new TopicExchange(tmpMessage.getExchangeName());
-        var binding = BindingBuilder.bind(queue).to(resourcesExchange).with(tmpMessage.getRoutingKey());
+        var resourcesExchange = new TopicExchange(this.exchangeName);
+        var binding = BindingBuilder.bind(queue).to(resourcesExchange).with(this.routingKeyAllEvents);
         amqpAdmin.declareBinding(binding);
     }
 

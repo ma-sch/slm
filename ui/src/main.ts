@@ -41,6 +41,7 @@ import yupValidateIPv4 from "@/utils/yup.custom";
 import {VueKeycloakInstance} from "@dsb-norge/vue-keycloak-js/dist/types";
 import {useEnvStore} from "@/stores/environmentStore";
 import updateToken from "@/utils/updateToken";
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
 
 console.log("App Mode: " + import.meta.env.MODE)
 
@@ -99,6 +100,8 @@ app.use(VueKeycloakJs, {
         resourceDevicesStore.updateStore();
         const resourceClustersStore = useResourceClustersStore();
         resourceClustersStore.updateStore();
+        const capabilitiesStore = useCapabilitiesStore();
+        capabilitiesStore.updateStore();
         const discoveryStore = useDiscoveryStore();
         discoveryStore.updateStore();
         const notificationStore = useNotificationStore();

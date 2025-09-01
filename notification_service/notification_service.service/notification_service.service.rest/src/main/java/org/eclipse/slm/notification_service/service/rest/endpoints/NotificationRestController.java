@@ -7,6 +7,7 @@ import org.eclipse.slm.notification_service.persistence.api.NotificationReposito
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -69,5 +70,11 @@ public class NotificationRestController {
         }
 
         notificationRepository.saveAll(notifications);
+    }
+
+    @RequestMapping(value = "/notifications/event-notification-model", method = RequestMethod.GET)
+    @Operation(summary = "Get event notification model")
+    public ResponseEntity<EventNotificationModel> getEventNotificationModel() {
+        return ResponseEntity.ok(null);
     }
 }

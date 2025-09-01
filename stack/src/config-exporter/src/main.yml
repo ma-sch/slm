@@ -100,7 +100,7 @@
           app_config: "{{ notification_service_config }}"
         - application_yml_file: /project/information_service/information_service.service/information_service.service.impl/src/main/resources/application.yml
           app_config: "{{ information_service_config }}"
-        - application_yml_file: /project/resource_management/resource_management.service/resource_management.service.rest/src/main/resources/application.yml
+        - application_yml_file: /project/resource_management/resource_management.service/resource_management.service.app/src/main/resources/application.yml
           app_config: "{{ resource_management_config }}"
         - application_yml_file: /project/resource_management/resource_management.service/resource_management.service.initializer/src/main/resources/application.yml
           app_config: "{{ service_management_config }}"

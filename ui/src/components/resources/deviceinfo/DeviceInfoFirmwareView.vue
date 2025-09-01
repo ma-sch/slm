@@ -2,7 +2,6 @@
 
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
 import {computed, onMounted, Ref, ref} from "vue";
-import {FirmwareUpdateJob, FirmwareUpdateState, UpdateInformation} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import FirmwareUpdateStatusIcon from "@/components/updates/FirmwareUpdateStatusIcon.vue";
@@ -13,6 +12,7 @@ import {useToast} from "vue-toast-notification";
 import {storeToRefs} from "pinia";
 import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import VCodeBlock from '@wdns/vue-code-block';
+import {FirmwareUpdateJobState} from "@/api/resource-management/client";
 
 const $toast = useToast();
 
@@ -152,7 +152,7 @@ const firmwareUpdateJobLogMessages = computed(() => (firmwareUpdateJobId: string
             v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
             class="ma-1"
           >
-            <div v-if="firmwareUpdateJobsOfResource(props.resourceId)[0].firmwareUpdateState != FirmwareUpdateState.Prepared">
+            <div v-if="firmwareUpdateJobsOfResource(props.resourceId)[0].state !== FirmwareUpdateJobState.Prepared">
               <progress-circular
                 size="20"
                 width="2"
@@ -164,7 +164,7 @@ const firmwareUpdateJobLogMessages = computed(() => (firmwareUpdateJobId: string
                 label
                 size="small"
               >
-                {{ firmwareUpdateJobsOfResource(props.resourceId)[0].firmwareUpdateState }}
+                {{ firmwareUpdateJobsOfResource(props.resourceId)[0].state }}
               </v-chip>
             </div>
             <div v-else>

@@ -3,7 +3,7 @@ import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import { useClipboard } from '@vueuse/core'
 import {onMounted, ref} from "vue";
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
-import {BasicResource} from "@/api/resource-management/client";
+import {BasicResource, RemoteAccessDTO} from "@/api/resource-management/client";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
 import {useToast} from 'vue-toast-notification';
@@ -20,6 +20,7 @@ const resourceDevicesStore = useResourceDevicesStore();
 const $toast = useToast();
 
 const resource = ref<BasicResource|undefined>(undefined)
+const remoteAccess = ref<RemoteAccessDTO[]>([])
 
 const showPassword = ref(false);
 
@@ -28,10 +29,19 @@ const loadData = () => {
   // Get aas descriptor
   ResourceManagementClient.resourcesApi.getResource(props.resourceId).then(response => {
     resource.value = response.data
+
+    const promises = (resource.value?.remoteAccessIds ?? []).map(remoteAccessId =>
+        ResourceManagementClient.resourcesApi.getRemoteAccessOfResourceById(resource.value!.id, remoteAccessId)
+    );
+
+    Promise.all(promises).then(responses => {
+      remoteAccess.value = responses.map(r => r.data);
+    }).finally(() => {
+      loading.value = false
+    });
+
   }).catch((e) => {
     resource.value = undefined;
-
-  }).finally(() => {
     loading.value = false
   })
 }
@@ -87,7 +97,7 @@ onMounted(() => {
         label="Remote Access"
       >
         <template #content>
-          <div v-if="resource.remoteAccessService === undefined">
+          <div v-if="!resource.remoteAccessAvailable">
             Not available
           </div>
           <div v-else>
@@ -97,17 +107,19 @@ onMounted(() => {
               :model-value="0"
             >
               <v-expansion-panel
-                :title="resource.remoteAccessService.connectionType"
-                expand
+                  v-for="(item, idx) in remoteAccess"
+                  :key="item.id || idx"
+                  :title="item.connectionType"
+                  expand
               >
                 <template #text>
                   <RowWithLabel
                     label="Port"
-                    :text="resource.remoteAccessService.Port"
+                    :text="item.connectionPort"
                   />
                   <RowWithLabel
                     label="Username"
-                    :text="resource.remoteAccessService.credential.username"
+                    :text="item.credential.username"
                   />
                   <RowWithLabel
                     label="Password"
@@ -116,7 +128,7 @@ onMounted(() => {
                       <v-row>
                         <v-col cols="8">
                           <div v-if="showPassword">
-                            {{ resource.remoteAccessService.credential.password }}
+                            {{ item.credential.password }}
                           </div>
                           <div v-else>
                             ••••••••

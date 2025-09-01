@@ -9,13 +9,17 @@ import {useDiscoveryStore} from "@/stores/discoveryStore";
 import ApiState from "@/api/apiState";
 import {useToast} from "vue-toast-notification";
 import {
-  EventType,
+  CapabilityJobEventNotification,
+  EventNotification,
+  EventType, FirmwareUpdateJobEventNotification,
   Notification,
   NotificationCategory,
-  NotificationSubCategory
+  NotificationSubCategory, EVENTCLASS, ResourceEventNotification, ResourceEventType
 } from "@/api/notification-service/client";
 import NotificationTextGenerator from "@/utils/notificationTextGenerator";
 import i18n from '@/utils/i18n';
+import {Resource} from "@/api/resource-management/client";
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
 
 export interface NotificationStoreState {
   apiState: number,
@@ -46,39 +50,76 @@ export const useNotificationStore = defineStore('notificationStore', {
       this.notifications.push(notification)
     },
 
-    processIncomingNotification (notification: Notification) {
+    processIncomingNotification (eventNotification: EventNotification) {
+      console.log(eventNotification)
+
       const $toast = useToast();
-      this.addNotification(notification)
+      // this.addNotification(notification)
 
-      $toast.info(NotificationTextGenerator.generateLocalizedText(notification, i18n.global))
+      switch (eventNotification.type) {
+        case EVENTCLASS.ResourceEvent: {
+          const resourceDevicesStore = useResourceDevicesStore();
+          const resourceEventNotification = eventNotification  as unknown as ResourceEventNotification;
+          switch (resourceEventNotification.eventType) {
+            case ResourceEventType.Created: {
+              resourceDevicesStore.addOrUpdateResource(resourceEventNotification.resource);
+              break;
+            }
+            case ResourceEventType.Deleted: {
+              resourceDevicesStore.deleteResource(resourceEventNotification.resource.id)
+              break;
+            }
+            default: {
+              resourceDevicesStore.updateStore();
+              break;
+            }
+          }
+          $toast.info(NotificationTextGenerator.generateLocalizedText(eventNotification, i18n.global))
+          break;
+        }
 
-      const resourceDevicesStore = useResourceDevicesStore();
-      const resourceClustersStore = useResourceClustersStore();
-      const serviceInstancesStore = useServiceInstancesStore();
+        case EVENTCLASS.CapabilityJobEvent: {
+          const capabilityJobEventNotification = eventNotification  as unknown as CapabilityJobEventNotification;
 
-      switch (notification.category) {
-        case NotificationCategory.Jobs: {
-          const jobsStore = useJobsStore();
+          const capabilitiesStore = useCapabilitiesStore();
+          const resourceDevicesStore = useResourceDevicesStore();
+          capabilitiesStore.updateStore().then(() => {
+            resourceDevicesStore.getResourceById(capabilityJobEventNotification.capabilityJob.resourceId).then(() => {
+              $toast.info(NotificationTextGenerator.generateLocalizedText(eventNotification, i18n.global))
+            })
+          })
+          break;
+        }
 
-          jobsStore.updateStore();
-          resourceDevicesStore.updateStore();
-          resourceClustersStore.updateStore();
+        case EVENTCLASS.DiscoveryEvent: {
+          const discoveryStore = useDiscoveryStore();
+          discoveryStore.updateDiscoveryStore();
+          $toast.info(NotificationTextGenerator.generateLocalizedText(eventNotification, i18n.global))
+          break;
+        }
+
+        case EVENTCLASS.FirmwareUpdateJobEvent: {
+          const resourceDevicesStore = useResourceDevicesStore();
+          const firmwareUpdateJobEventNotification = eventNotification  as unknown as FirmwareUpdateJobEventNotification;
+          resourceDevicesStore.getFirmwareUpdateInformationOfResource(firmwareUpdateJobEventNotification.firmwareUpdateJob.resourceId);
+          resourceDevicesStore.getFirmwareUpdateJobsOfResource(firmwareUpdateJobEventNotification.firmwareUpdateJob.resourceId)
+          $toast.info(NotificationTextGenerator.generateLocalizedText(eventNotification, i18n.global))
+          break;
+        }
+
+        case EVENTCLASS.ServiceInstanceEvent: {
+          const serviceInstancesStore = useServiceInstancesStore();
           serviceInstancesStore.updateStore();
+          $toast.info(NotificationTextGenerator.generateLocalizedText(eventNotification, i18n.global))
+        }
+
+        default: {
+          console.debug("Unknown event notification type: ", eventNotification.type);
           break;
         }
-        case NotificationCategory.Resources: {
-          handleResourcesCategoryNotification(notification);
-          break;
-        }
-        case NotificationCategory.Services: {
-          serviceInstancesStore.updateStore();
-          break;
-        }
-        default:
-          console.debug(`Update ${notification.category} store`)
-          break
       }
     },
+
     markAllAsRead () {
       const unreadNotificationIds = this.notifications_unread.map((note) => note.id);
       NotificationServiceClient.api.setReadOfNotifications(true, unreadNotificationIds)
@@ -106,47 +147,3 @@ export const useNotificationStore = defineStore('notificationStore', {
     },
   },
 });
-
-function handleResourcesCategoryNotification(notification: Notification) {
-  const resourceDevicesStore = useResourceDevicesStore();
-  const resourceClustersStore = useResourceClustersStore();
-  const discoveryStore = useDiscoveryStore();
-
-  switch (notification.subCategory) {
-    case NotificationSubCategory.Resource: {
-      switch (notification.eventType) {
-        case EventType.Created: {
-          resourceDevicesStore.addResource(notification.payload)
-          break;
-        }
-        case EventType.Deleted: {
-          resourceDevicesStore.deleteResource(notification.payload.id)
-          break;
-        }
-        default: {
-          resourceDevicesStore.updateStore();
-          break;
-        }
-      }
-      break;
-    }
-    case NotificationSubCategory.Cluster: {
-      resourceClustersStore.updateStore();
-      break;
-    }
-    case NotificationSubCategory.Discovery: {
-      discoveryStore.updateDiscoveryStore();
-      break;
-    }
-    case NotificationSubCategory.FirmwareUpdate: {
-      resourceDevicesStore.getFirmwareUpdateInformationOfResource(notification.payload.resourceId, true);
-      resourceDevicesStore.getFirmwareUpdateJobsOfResource(notification.payload.resourceId)
-      break;
-    }
-    default: {
-      resourceDevicesStore.updateStore();
-      resourceClustersStore.updateStore();
-      break;
-    }
-  }
-}

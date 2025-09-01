@@ -75,8 +75,10 @@ import ResourcesCreateDialog from "@/components/resources/dialogs/create/Resourc
 import DeviceInfoView from "@/components/resources/deviceinfo/DeviceInfoView.vue";
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 import ResourcesTableDevices from "@/components/resources/ResourcesTableDevices.vue";
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
 
 const resourceDevicesStore = useResourceDevicesStore();
+const capabilitiesStore = useCapabilitiesStore();
 
 const selectedResource = ref(null);
 const selectedSection = ref("common");
@@ -96,7 +98,7 @@ const onResourceSelected = (resource, section) => {
 };
 
 onMounted(() => {
-  resourceDevicesStore.getDeploymentCapabilities();
+  capabilitiesStore.getCapabilities();
 });
 </script>
 

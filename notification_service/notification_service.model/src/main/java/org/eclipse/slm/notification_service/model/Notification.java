@@ -22,7 +22,7 @@ public class Notification extends AbstractBaseEntityLong {
 
     private NotificationSubCategory subCategory;
 
-    private EventType eventType;
+    private NotificationEventType eventType;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "LONGTEXT")
@@ -33,7 +33,7 @@ public class Notification extends AbstractBaseEntityLong {
     public Notification() {
     }
 
-    public Notification(String userId, NotificationCategory category, NotificationSubCategory subCategory, EventType eventType, Object payload) {
+    public Notification(String userId, NotificationCategory category, NotificationSubCategory subCategory, NotificationEventType eventType, Object payload) {
         this.userId = userId;
         this.timestamp = new Date();
         this.category = category;
@@ -42,7 +42,7 @@ public class Notification extends AbstractBaseEntityLong {
         this.payload = convertPayload(payload);
     }
 
-    public Notification(String userId, Date timestamp, NotificationCategory category, NotificationSubCategory subCategory, EventType eventType, Object payload) {
+    public Notification(String userId, Date timestamp, NotificationCategory category, NotificationSubCategory subCategory, NotificationEventType eventType, Object payload) {
         this.userId = userId;
         this.timestamp = timestamp;
         this.category = category;
@@ -83,11 +83,11 @@ public class Notification extends AbstractBaseEntityLong {
         this.subCategory = subCategory;
     }
 
-    public EventType getEventType() {
+    public NotificationEventType getEventType() {
         return eventType;
     }
 
-    public void setEventType(EventType eventType) {
+    public void setEventType(NotificationEventType eventType) {
         this.eventType = eventType;
     }
 

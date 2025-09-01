@@ -33,7 +33,6 @@ class ResourceManagementClient{
     resourcesSubmodelRepositoryApi = new ResourcesAASApi(undefined, this.apiUrl);
     resourcesUpdatesApi = new UpdatesApi(undefined, this.apiUrl);
     resourceTypesApi = new ResourceTypesApi(undefined, this.apiUrl);
-
 }
 
 export default new ResourceManagementClient()
