@@ -28,7 +28,7 @@ const showCapabilityParamsDialog = ref(false)
 const resourceDevicesStore = useResourceDevicesStore();
 const { resourceById } = storeToRefs(resourceDevicesStore);
 const capabilitiesStore = useCapabilitiesStore();
-const { availableSingleHostCapabilitiesNoDefault, isCapabilityInstalledOnResource } = storeToRefs(capabilitiesStore);
+const { availableSingleHostCapabilities, isCapabilityInstalledOnResource } = storeToRefs(capabilitiesStore);
 const capabilityUtils = useCapabilityUtils();
 
 const insertWhiteSpaceInCamelCase = (string) => {
@@ -85,7 +85,7 @@ const onCapabilityParamsDialogConfirmed = (capabilityParametersMap) => {
           color="info"
           size="small"
           v-bind="props"
-          :disabled="resourceById(props.resourceId)?.clusterMember || availableSingleHostCapabilitiesNoDefault.length === 0"
+          :disabled="resourceById(props.resourceId)?.clusterMember || availableSingleHostCapabilities.length === 0"
         >
           <v-icon
             color="white"

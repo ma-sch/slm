@@ -5,7 +5,7 @@ export function useCapabilityUtils() {
 
   const getCapability = (capabilityId) => {
     try {
-      return capabilitiesStore.availableSingleHostCapabilitiesNoDefault.find(
+      return capabilitiesStore.availableSingleHostCapabilities.find(
           cap => cap.id === capabilityId
       );
     } catch (e) {
@@ -27,12 +27,12 @@ export function useCapabilityUtils() {
   };
 
   const getCapabilitiesByCapabilityClass = (capabilityClass) => {
-    return capabilitiesStore.availableSingleHostCapabilitiesNoDefault.filter(shc => shc.capabilityClass === capabilityClass)
+    return capabilitiesStore.availableSingleHostCapabilities.filter(shc => shc.capabilityClass === capabilityClass)
   };
 
   const getUniqueCapabilityClasses = () => {
     return [...new Set(
-        capabilitiesStore.availableSingleHostCapabilitiesNoDefault.map(shc => shc.capabilityClass)
+        capabilitiesStore.availableSingleHostCapabilities.map(shc => shc.capabilityClass)
     )].sort();
   };
 

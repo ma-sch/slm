@@ -20,14 +20,10 @@ export const useCapabilitiesStore = defineStore('capabilitiesStore', {
     }),
     getters: {
         availableSingleHostCapabilities: (state) => {
-            return state.capabilities.filter(cap => {
-                return cap.cluster === false
+            const singleHostCaps = state.capabilities.filter(cap => {
+                return !cap.type.includes("SCALE")
             })
-        },
-        availableSingleHostCapabilitiesNoDefault: (state) => {
-            return state.capabilities.filter(cap => {
-                return cap.clusterMemberTypes === undefined
-            })
+            return singleHostCaps
         },
         availableBaseConfigurationCapabilities: (state) => {
             return state.capabilities.filter(cap => {
