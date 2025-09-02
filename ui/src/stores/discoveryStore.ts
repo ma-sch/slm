@@ -19,6 +19,9 @@ export const useDiscoveryStore = defineStore('discoveryStore', {
     }),
 
     getters: {
+        discoveredResourceByResultId: (state) => (resultId) => {
+            return state.discoveredResources.find(discoveredResource => discoveredResource.resultId === resultId)
+        },
     },
 
     actions: {

@@ -16,6 +16,7 @@
         <v-row v-else>
           <discovered-resources-table
             v-if="discoveredResources.length > 0"
+            :selected-discovered-resource-ids="selectedDiscoveredResourceIds"
             class="mt-0 flex"
             @selected-discovered-resources-changed="onSelectedDiscoveredResourcesChanged"
           />
@@ -51,7 +52,7 @@
     />
     <onboarding-dialog
       :show="showOnboardingDialog"
-      :discovered-resources-ids="selectedDiscoveredResourceIds"
+      :discovered-resources-result-ids="selectedDiscoveredResourceIds"
       @canceled="showOnboardingDialog = false"
       @completed="triggerOnboarding"
     />
@@ -108,6 +109,7 @@ export default {
     },
     triggerOnboarding() {
       this.showOnboardingDialog = false;
+      this.selectedDiscoveredResourceIds = [];
       this.discoveryStore.updateStore();
     },
     onSelectedDiscoveredResourcesChanged: function(selectedDiscoveredResourceIds) {
