@@ -202,9 +202,12 @@ import FirmwareUpdateVersion from "@/components/updates/FirmwareUpdateVersion.vu
 import ApiState from "@/api/apiState";
 import DeviceUtils from '@/utils/deviceUtils';
 import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
+import {useToast} from "vue-toast-notification";
 
 
 const emit = defineEmits(['resource-selected']);
+
+const $toast = useToast();
 
 const resourceDevicesStore = useResourceDevicesStore();
 const {resources} = storeToRefs(resourceDevicesStore);
@@ -296,7 +299,7 @@ const resourcesHaveLocations = () => {
 
 const runProfiler = () => {
   ResourceManagementClient.profilerApi.runProfiler1().then().catch(logRequestError);
-  this.$toast.info('Started Profiler for all devices.');
+  $toast.info('Started Profiler for all devices.');
 };
 
 </script>
