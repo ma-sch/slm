@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +69,15 @@ public class FirmwareUpdateManager {
         this.submodelRegistryClient = submodelRegistryClientFactroy.getClient();
         this.minioClient = minioClient;
         this.keycloakServiceClient = keycloakServiceClient;
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            this.minioClient.createBucket(FIRMWARE_UPDATE_BUCKET_NAME);
+        } catch (MinioBucketCreateException | MinioBucketNameException e) {
+            LOG.error("Error creating bucket '" + FIRMWARE_UPDATE_BUCKET_NAME + "' at startup: ", e);
+        }
     }
 
     public UpdateInformationResource getUpdateInformationOfResource(UUID resourceId) {
