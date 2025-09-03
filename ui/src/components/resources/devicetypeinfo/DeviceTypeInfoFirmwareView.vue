@@ -76,12 +76,12 @@ function triggerFileDownloadFromVendor (firmwareVersion) {
   ResourceManagementClient.resourcesUpdatesApi.downloadFirmwareUpdateFileFromVendor(softwareNameplateIdBase64Encoded)
       .then(() => {
         firmwareDownloadFromVendorActive.value = false;
-        $toast.success("Firmware successfully downloaded from vendor");
+        $toast.info("Firmware successfully downloaded from vendor");
         refreshUpdateInformation();   // Refresh the update information after file download
       })
       .catch(error => {
         firmwareDownloadFromVendorActive.value = false;
-        $toast.success("Failed to download firmware update from vendor");
+        $toast.error("Failed to download firmware update from vendor");
         logRequestError(error)
       })
 
@@ -105,7 +105,7 @@ async function uploadFile(softwareNameplateId) {
     let softwareNameplateIdBase64Encoded = btoa(softwareNameplateId)
     ResourceManagementClient.resourcesUpdatesApi.addOrUpdateFirmwareUpdateFile(softwareNameplateIdBase64Encoded, selectedFile.value)
         .then(() => {
-          $toast.success("File uploaded successfully");
+          $toast.info("File uploaded successfully");
           selectedFile.value = null;
           refreshUpdateInformation();   // Refresh the update information after upload
         })

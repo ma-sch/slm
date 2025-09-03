@@ -89,7 +89,7 @@ function installFirmwareUpdate() {
       softwareNameplateSubmodelIdBase64Encoded
   ).then(() => {
     resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);     // Reload jobs
-    $toast.success("Firmware update preparation started");
+    $toast.info("Firmware update preparation started");
   }).catch(e => {;
     console.error("Error starting firmware update preparation:", e);
     $toast.error("Failed to start firmware update preparation");
@@ -103,7 +103,7 @@ function activateFirmwareUpdate(firmwareUpdateJobId) {
       props.resourceId,
       firmwareUpdateJobId
   ).then(() => {
-    $toast.success("Firmware update activation started");
+    $toast.info("Firmware update activation started");
   }).catch(e => {
     console.error("Error starting firmware update activation:", e);
     $toast.error("Failed to start firmware update activation");
