@@ -10,7 +10,9 @@ import org.eclipse.digitaltwin.basyx.submodelservice.value.ValueOnly;
 import org.eclipse.digitaltwin.basyx.submodelservice.value.mapper.ValueMapperUtil;
 
 public class SubmodelValueOnly {
+    private String id;
     private String idShort;
+    private String semanticId;
     private Map<String, SubmodelElementValue> submodelValuesMap;
 
     public SubmodelValueOnly() {
@@ -24,12 +26,28 @@ public class SubmodelValueOnly {
         return !(element instanceof Operation);
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getIdShort() {
         return this.idShort;
     }
 
     public void setIdShort(String idShort) {
         this.idShort = idShort;
+    }
+
+    public String getSemanticId() {
+        return semanticId;
+    }
+
+    public void setSemanticId(String semanticId) {
+        this.semanticId = semanticId;
     }
 
     public Map<String, SubmodelElementValue> getValuesOnlyMap() {

@@ -152,6 +152,15 @@ export const useResourceDevicesStore = defineStore('resourceDevicesStore', {
             }));
         },
 
+        getResourceSubmodelByIdShort (resourceId, submodelIdShort) {
+            try {
+                var submodel =this.resourceAASValues[resourceId][submodelIdShort]
+                return submodel
+            } catch (e) {
+                return "N/A"
+            }
+        },
+
         getSubmodelElementValueOfResourceSubmodel (resourceId, submodelIdShort, submodelElementJsonPath) {
             try {
                 var value = jp.value(this.resourceAASValues[resourceId][submodelIdShort]["valuesOnlyMap"], submodelElementJsonPath);

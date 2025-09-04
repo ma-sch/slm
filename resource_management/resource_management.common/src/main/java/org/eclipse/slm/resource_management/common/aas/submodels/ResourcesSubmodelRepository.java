@@ -119,6 +119,12 @@ public class ResourcesSubmodelRepository extends AbstractSubmodelRepository {
                                 var submodelValueOnly = new SubmodelValueOnly();
                                 submodelValueOnly.setValuesOnlyMap(submodelValueOnlyBasyx.getValuesOnlyMap());
                                 submodelValueOnly.setIdShort(submodelDescriptor.getIdShort());
+                                submodelValueOnly.setId(submodelDescriptor.getId());
+                                try {
+                                    submodelValueOnly.setSemanticId(submodelDescriptor.getSemanticId().getKeys().get(0).getValue());
+                                } catch (Exception e) {
+                                    LOG.debug("No semantic ID for submodel '{}'", submodelDescriptor.getIdShort());
+                                }
 
                                 submodelsValueOnlyLocalRemote.putIfAbsent(submodelDescriptor.getIdShort(), submodelValueOnly);
                             }
