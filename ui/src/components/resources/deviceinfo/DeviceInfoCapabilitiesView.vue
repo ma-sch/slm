@@ -1,18 +1,18 @@
 <script setup lang="ts">
 
 import ResourceManagementClient from "@/api/resource-management/resource-management-client";
-import {computed, onMounted, Ref, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import RowWithLabel from "@/components/base/RowWithLabel.vue";
-import FirmwareUpdateStatusIcon from "@/components/updates/FirmwareUpdateStatusIcon.vue";
-import formatDate, {formatDateTime} from "@/utils/dateUtils";
-import axios from 'axios'
-import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
+import {formatDateTime} from "@/utils/dateUtils";
 import {useToast} from "vue-toast-notification";
 import {storeToRefs} from "pinia";
 import {useResourceDevicesStore} from "@/stores/resourceDevicesStore";
 import VCodeBlock from '@wdns/vue-code-block';
-import {FirmwareUpdateJobState} from "@/api/resource-management/client";
+import {CapabilityJobDTO} from "@/api/resource-management/client";
+import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
+import logRequestError from "@/api/restApiHelper";
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 
 const $toast = useToast();
 
@@ -24,112 +24,68 @@ const props = defineProps({
 });
 
 const resourceDevicesStore = useResourceDevicesStore();
+const capabilitiesStore = useCapabilitiesStore();
+const {resourceById} = storeToRefs(resourceDevicesStore)
+const {capabilityById, capabilityServiceById} = storeToRefs(capabilitiesStore)
 
 const loading = ref(false);
-const {firmwareUpdateInformationOfResource, firmwareUpdateJobsOfResource} = storeToRefs(resourceDevicesStore)
+const capabilityJobs = ref<CapabilityJobDTO[]>([])
+const showConfirmCapabilityDeleteDialog = ref(false);
 
 onMounted(() => {
   loading.value = true;
-  resourceDevicesStore.getFirmwareUpdateInformationOfResource(props.resourceId).then(
-      response => {
-        loading.value = false;
-      }
-  ).catch(e => {
+
+  ResourceManagementClient.capabilityApi.getCapabilityJobsOfResource(props.resourceId).then((response) => {
+    capabilityJobs.value = response.data
+  }).catch(e => {
+    logRequestError(e)
+    console.error("Error loading capability jobs:", e)
+  }).finally(() => {
     loading.value = false;
-  });
-  resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);
+  })
 });
 
-const filesTableHeaders = [
-  { title: 'Name', key: 'fileName', value: 'fileName' },
-  { title: 'Size', key: 'fileSize', value: 'fileSizeBytes' },
-  { title: 'Date', key: 'fileUploadDate', value: 'uploadDate' },
-  { title: 'Actions', key: 'fileActions', value: 'fileActions' },
+const capabilityServicesTableHeaders = [
+  { title: 'Capability Name', key: 'capabilityName', width: "20%" },
+  { title: 'Status', key: 'status', width: "10%" },
+  { title: 'Capability Id', key: 'capabilityId', width: "30%" },
+  { title: 'Capability Service Id', key: 'capabilityServiceId', width: "30%" },
+  { title: 'Actions', key: 'actions', width: "10%" },
 ];
 
 const jobTableHeaders = [
-  { title: 'Created', key: 'create', value: 'createdAt', width: "20%" },
-  { title: 'Target Version', key: 'version', value: 'version', width: "20%" },
-  { title: 'State', key: 'state',  value: 'firmwareUpdateState', width: "20%" },
-  { title: 'Job Id', key: 'id', value: 'id', width: "40%" },
+  { title: 'Created', key: 'created', width: "20%" },
+  { title: 'Capability', key: 'capability', width: "20%" },
+  { title: 'State', key: 'state', width: "20%" },
+  { title: 'Job Id', key: 'id', width: "40%" },
 ];
-
-const installedVersionText = computed(() => {
-  const version = firmwareUpdateInformationOfResource.value(props.resourceId).currentFirmwareVersion?.version;
-  if (!version) {
-    return "N/A"
-  }
-  const date = firmwareUpdateInformationOfResource.value(props.resourceId).currentFirmwareVersion?.date;
-  return date ? `${version} (${formatDate(date)})` : version;
-});
-
-function humanFileSize(size) {
-  var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
-  return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
-}
-
-function downloadItem (item) {
-  axios.get(item.downloadUrl, { responseType: 'blob' })
-      .then(response => {
-        const blob = new Blob([response.data])
-        const link = document.createElement('a')
-        link.href = URL.createObjectURL(blob)
-        link.download = item.fileName
-        link.click()
-        URL.revokeObjectURL(link.href)
-      }).catch(console.error)
-}
-
-const selectedFirmwareVersion = ref(undefined);
-const showConfirmFirmwareUpdateInstallation = ref(false);
-function installFirmwareUpdate() {
-  let softwareNameplateSubmodelIdBase64Encoded = btoa(selectedFirmwareVersion.value.softwareNameplateSubmodelId);
-  ResourceManagementClient.resourcesUpdatesApi.startFirmwareUpdateOnResource(
-      props.resourceId,
-      softwareNameplateSubmodelIdBase64Encoded
-  ).then(() => {
-    resourceDevicesStore.getFirmwareUpdateJobsOfResource(props.resourceId);     // Reload jobs
-    $toast.info("Firmware update preparation started");
-  }).catch(e => {;
-    console.error("Error starting firmware update preparation:", e);
-    $toast.error("Failed to start firmware update preparation");
-  });
-
-  selectedFirmwareVersion.value = undefined;
-}
-
-function activateFirmwareUpdate(firmwareUpdateJobId) {
-  ResourceManagementClient.resourcesUpdatesApi.activateFirmwareUpdateOnResource(
-      props.resourceId,
-      firmwareUpdateJobId
-  ).then(() => {
-    $toast.info("Firmware update activation started");
-  }).catch(e => {
-    console.error("Error starting firmware update activation:", e);
-    $toast.error("Failed to start firmware update activation");
-  });
-}
-
-function getVersionTextOfSoftwareNameplate(softwareNameplateSubmodelId) {
-  const version = firmwareUpdateInformationOfResource.value(props.resourceId).availableFirmwareVersions?.find(
-      firmwareVersion =>
-          firmwareVersion.softwareNameplateSubmodelId?.trim() === softwareNameplateSubmodelId?.trim()
-  )?.version;
-  return version ?? "N/A";
-}
 
 const logCollapsedStates = ref<Record<string, boolean>>({});
 function toggleLogCollapse(firmwareUpdateJobId: string) {
   logCollapsedStates.value[firmwareUpdateJobId] = !logCollapsedStates.value[firmwareUpdateJobId];
 }
-const firmwareUpdateJobLogMessages = computed(() => (firmwareUpdateJobId: string) => {
-  const jobs = firmwareUpdateJobsOfResource.value(props.resourceId);
-  const job = jobs?.find(j => j.id === firmwareUpdateJobId);
+const capabilityJobLogMessages = computed(() => (capabilityJobId: string) => {
+  const job = capabilityJobs.value?.find(j => j.id === capabilityJobId);
   if (job?.logMessages?.length) {
     return job.logMessages.join('\n');
   }
   return "No messages available";
 });
+
+const capabilityServiceIdToDelete = ref<string>("");
+const onCapabilityDeletedConfirmed = () => {
+  showConfirmCapabilityDeleteDialog.value = false;
+  ResourceManagementClient.capabilityApi.removeCapabilityFromSingleHost(props.resourceId, capabilityServiceById.value(capabilityServiceIdToDelete.value)?.capabilityId ?? "")
+    .then(() => {
+      $toast.info(`Capability '${capabilityById.value(capabilityServiceById.value(capabilityServiceIdToDelete.value)?.capabilityId)?.name}' removal initiated`);
+    })
+    .catch((e) => {
+      logRequestError(e);
+      $toast.error(`Failed to remove capability '${capabilityById.value(capabilityServiceById.value(capabilityServiceIdToDelete.value)?.capabilityId ?? "")?.name}'`);
+    });
+  capabilityServiceIdToDelete.value = ""
+};
+
 </script>
 
 <template>
@@ -140,200 +96,85 @@ const firmwareUpdateJobLogMessages = computed(() => (firmwareUpdateJobId: string
 
     <div v-else>
       <RowWithLabel
-        label="Installed version"
-        :text="installedVersionText"
-      />
-
-      <RowWithLabel
-        label="Update status"
+        label="Installed capabilities"
       >
         <template #content>
-          <v-row
-            v-if="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
-            class="ma-1"
-          >
-            <div v-if="firmwareUpdateJobsOfResource(props.resourceId)[0].state !== FirmwareUpdateJobState.Prepared">
-              <progress-circular
-                size="20"
-                width="2"
-              />
-              <v-chip
-                color="primary"
-                variant="elevated"
-                class="mx-8"
-                label
-                size="small"
-              >
-                {{ firmwareUpdateJobsOfResource(props.resourceId)[0].state }}
-              </v-chip>
-            </div>
-            <div v-else>
-              Firmware update to version {{ getVersionTextOfSoftwareNameplate(firmwareUpdateJobsOfResource(props.resourceId)[0].softwareNameplateId) }} prepared
-
-              <v-icon class="mx-2">
-                mdi-arrow-right
-              </v-icon>
-              <v-btn
-                class="mx-2"
-                color="primary"
-                size="small"
-                @click="activateFirmwareUpdate(firmwareUpdateJobsOfResource(props.resourceId)[0].id)"
-              >
-                Activate
-              </v-btn>
-            </div>
-          </v-row>
-
-          <v-row
-            v-else
-            class="ma-1"
-          >
-            <FirmwareUpdateStatusIcon
-              :firmware-update-status="firmwareUpdateInformationOfResource(props.resourceId).firmwareUpdateStatus"
-              :clickable="false"
-            />
-          </v-row>
-        </template>
-      </RowWithLabel>
-
-      <RowWithLabel
-        label="Available versions"
-        :divider="true"
-      >
-        <template #content>
-          <div v-if="firmwareUpdateInformationOfResource(props.resourceId).availableFirmwareVersions?.length == 0">
-            No updates available
+          <div v-if="resourceById(resourceId)?.capabilityServiceIds?.length === 0">
+            No capabilities installed
           </div>
-          <v-expansion-panels
-            v-else
-            variant="accordion"
-            flat
+
+          <v-data-table
+              v-else
+              :headers="capabilityServicesTableHeaders"
+              :items="resourceById(resourceId)?.capabilityServiceIds as string[]"
+              hide-default-footer
+              items-per-page="-1"
+              class="elevation-0"
           >
-            <v-expansion-panel
-              v-for="firmwareVersion in firmwareUpdateInformationOfResource(props.resourceId).availableFirmwareVersions"
-              :key="firmwareVersion.version"
-              expand
-            >
-              <template #title>
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                  <v-row>
-                    <v-col cols="11">
-                      <span>{{ firmwareVersion.version }}</span>
-                    </v-col>
-                    <v-col cols="1">
-                      <v-btn
-                        v-if="firmwareVersion.version === firmwareUpdateInformationOfResource(props.resourceId)?.currentFirmwareVersion?.version"
-                        color="secondary"
-                        size="small"
-                      >
-                        Installed
-                      </v-btn>
-                      <div v-else>
-                        <v-btn
-                          v-if="firmwareVersion.firmwareUpdateFile"
-                          color="primary"
-                          size="small"
-                          :disabled="firmwareUpdateInformationOfResource(props.resourceId).isUpdateInProgress"
-                          @click.stop="selectedFirmwareVersion = firmwareVersion; showConfirmFirmwareUpdateInstallation = true;"
-                        >
-                          Install
-                          <ConfirmDialog
-                            :show="showConfirmFirmwareUpdateInstallation"
-                            :title="`Install firmware update`"
-                            :text="`Do you want to update the firmware of the device to version '${selectedFirmwareVersion?.version}'?`"
-                            @confirmed="showConfirmFirmwareUpdateInstallation = false; installFirmwareUpdate()"
-                            @canceled="showConfirmFirmwareUpdateInstallation = false"
-                          />
-                        </v-btn>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </div>
-              </template>
-              <template #text>
-                <RowWithLabel
-                  label="Version"
-                  :text="firmwareVersion.version"
+            <template #item.capabilityName="{ item }">
+              <v-icon color="black" class="mr-3">
+                {{ capabilityById(capabilityServiceById(item)?.capabilityId)?.logo }}
+              </v-icon>
+              <span>{{ capabilityById(capabilityServiceById(item)?.capabilityId)?.name }}</span>
+            </template>
+            <template #item.status="{ item }">
+              <span>{{ capabilityServiceById(item)?.status }}</span>
+            </template>
+            <template #item.capabilityId="{ item }">
+              <span>{{ capabilityServiceById(item)?.capabilityId }}</span>
+            </template>
+            <template #item.capabilityServiceId="{ item }">
+              <span>{{ item }}</span>
+            </template>
+            <template #item.actions="{ item }">
+              <v-btn
+                  color="error"
+                  @click.stop="showConfirmCapabilityDeleteDialog = true; capabilityServiceIdToDelete = item;"
+                  class="ma-2"
+                  size="small"
+              >
+                <v-icon
+                    icon="mdi-trash-can"
+                    color="white"
                 />
-                <RowWithLabel
-                  label="Date"
-                  :text="firmwareVersion.date"
-                />
-                <RowWithLabel
-                  label="Installation URI"
-                >
-                  <template #content>
-                    <a
-                      :href="firmwareVersion.installationUri"
-                      target="_blank"
-                    >{{ firmwareVersion.installationUri }}</a>
-                  </template>
-                </RowWithLabel>
-                <RowWithLabel
-                  label="Checksum"
-                  :text="firmwareVersion.installationChecksum"
-                />
-                <RowWithLabel
-                  label="File"
-                >
-                  <template #content>
-                    <v-data-table
-                      v-if="firmwareVersion.firmwareUpdateFile"
-                      :headers="filesTableHeaders"
-                      :items="[ firmwareVersion.firmwareUpdateFile ]"
-                      hide-default-footer
-                    >
-                      <template #item.fileSize="{ item }">
-                        {{ humanFileSize(item.fileSizeBytes) }}
-                      </template>
-                      <template #item.fileUploadDate="{ item }">
-                        {{ formatDate(item.uploadDate) }}
-                      </template>
-                      <template #item.fileActions="{ item }">
-                        <v-icon
-                          class="ml-4"
-                          color="secondary"
-                          @click.prevent="downloadItem(item)"
-                        >
-                          mdi-download
-                        </v-icon>
-                      </template>
-                    </v-data-table>
-                    <div v-else>
-                      No file available
-                    </div>
-                  </template>
-                </RowWithLabel>
-              </template>
-            </v-expansion-panel>
-          </v-expansion-panels>
+              </v-btn>
+              <confirm-dialog
+                  :show="showConfirmCapabilityDeleteDialog"
+                  title="Remove capability"
+                  :text="`Do you want to remove the capability '${capabilityById(capabilityServiceById(capabilityServiceIdToDelete)?.capabilityId)?.name}'?`"
+                  confirm-button-label="Remove"
+                  @canceled="showConfirmCapabilityDeleteDialog = false"
+                  @confirmed="onCapabilityDeletedConfirmed"
+              ></confirm-dialog>
+            </template>
+          </v-data-table>
         </template>
       </RowWithLabel>
 
       <RowWithLabel
-        label="Update jobs"
+        label="Capability jobs"
         :divider="true"
       >
         <template #content>
-          <div v-if="firmwareUpdateJobsOfResource(props.resourceId)?.length === 0">
+          <div v-if="capabilityJobs?.length === 0">
             No jobs available
           </div>
           <v-data-table
             v-else
             :headers="jobTableHeaders"
-            :items="firmwareUpdateJobsOfResource(props.resourceId)"
+            :items="capabilityJobs"
             item-key="id"
             :sort-by="[{ key: 'createdAt', order: 'desc' }]"
             show-expand
             class="elevation-0"
           >
             <template #item.state="{ item }">
-              <span>{{ item.firmwareUpdateState }}</span>
+              <span>{{ item.state }}</span>
             </template>
-            <template #item.version="{ item }">
-              <span>{{ getVersionTextOfSoftwareNameplate(item.softwareNameplateId) }}</span>
+            <template #item.capability="{ item }">
+              <span>{{ capabilityById(item.capabilityId).name }}</span>
             </template>
-            <template #item.create="{ item }">
+            <template #item.created="{ item }">
               <span>{{ formatDateTime(item.createdAt) }}</span>
             </template>
             <template #expanded-row="{ item }">
@@ -371,7 +212,7 @@ const firmwareUpdateJobLogMessages = computed(() => (firmwareUpdateJobId: string
                   <v-expand-transition>
                     <div v-show="logCollapsedStates[item.id]">
                   <VCodeBlock
-                    :code="firmwareUpdateJobLogMessages(item.id)"
+                    :code="capabilityJobLogMessages(item.id)"
                     prismjs
                     lang="html"
                     theme="coy"
