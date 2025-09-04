@@ -20,6 +20,7 @@ import org.eclipse.slm.resource_management.common.exceptions.ResourceNotFoundExc
 import org.eclipse.slm.resource_management.common.location.Location;
 import org.eclipse.slm.resource_management.common.location.LocationJpaRepository;
 import org.eclipse.slm.resource_management.common.remote_access.ConnectionType;
+import org.eclipse.slm.resource_management.common.remote_access.RemoteAccessManager;
 import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
 import org.eclipse.slm.resource_management.features.capabilities.CapabilitiesService;
 import org.eclipse.slm.resource_management.features.capabilities.CapabilityUtil;
@@ -48,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {
         ResourcesManager.class,
+        RemoteAccessManager.class,
         ResourcesConsulClient.class,
         SingleHostCapabilitiesConsulClient.class,
         ConsulNodesApiClient.class,
@@ -67,7 +69,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 @Disabled
 public class ResourcesManagerImplITDev {
-    private ResourcesManagerITDevConfig config = new ResourcesManagerITDevConfig();
     //region MockBeans
     @MockBean
     NotificationMessageSender notificationMessageSender;
@@ -92,7 +93,7 @@ public class ResourcesManagerImplITDev {
             @Autowired ConsulServicesApiClient consulServicesApiClient,
             @Autowired ConsulKeyValueApiClient consulKeyValueApiClient
     ) {
-        Integer vaultPort = config.dockerCompose.getServicePort(config.VAULT_SERVICE_NAME, config.VAULT_PORT);
+        Integer vaultPort = ResourcesManagerITDevConfig.dockerCompose.getServicePort(ResourcesManagerITDevConfig.VAULT_SERVICE_NAME, ResourcesManagerITDevConfig.VAULT_PORT);
         vaultClient.setPort(vaultPort);
 
         vaultClient.createResourcesKVSecretEngine(
@@ -111,6 +112,8 @@ public class ResourcesManagerImplITDev {
     ConsulAclApiClient consulAclApiClient;
     @Autowired
     ResourcesManager resourcesManager;
+    @Autowired
+    RemoteAccessManager remoteAccessManager;
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
@@ -147,7 +150,7 @@ public class ResourcesManagerImplITDev {
         @Order(10)
         public void getBasicResourcesWithRemoteAccessServiceExpectNoReturn() throws ResourceNotFoundException {
             List<BasicResource> resources = resourcesManager.getResources(
-                    config.jwtAuthenticationToken
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken
             );
 
             //size has to be 1 because consul itself is also registered as node
@@ -158,14 +161,14 @@ public class ResourcesManagerImplITDev {
         @Order(15)
         public void getBasicResourceWithRemoteAccessServiceByResourceIdExpectNoReturn() throws ResourceNotFoundException {
             BasicResource resourceSsh = resourcesManager.getResourceByIdOrThrow(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     basicResourceSshId
             );
 
             assertNull(resourceSsh);
 
             BasicResource resourceWinRm = resourcesManager.getResourceByIdOrThrow(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     basicResourceWinRmId
             );
 
@@ -178,7 +181,7 @@ public class ResourcesManagerImplITDev {
             var digitalNameplate = new DigitalNameplateV3.Builder("", "", "", "").build();
 
             BasicResource basicResourceSsh = resourcesManager.addResource(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     basicResourceSshId,
                     null,
                     "test-host-ssh",
@@ -187,19 +190,19 @@ public class ResourcesManagerImplITDev {
                     null,
                     digitalNameplate
             );
-            resourcesManager.setRemoteAccessOfResource(
-                    config.jwtAuthenticationToken,
+            remoteAccessManager.addUsernamePasswordRemoteAccessService(
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken.getToken().getSubject(),
                     basicResourceSshId,
-                    username,
-                    password,
                     ConnectionType.ssh,
-                    ConnectionType.ssh.getDefaultPort()
+                    ConnectionType.ssh.getDefaultPort(),
+                    username,
+                    password
             );
 
             assertEquals(basicResourceSshId, basicResourceSsh.getId());
 
             BasicResource basicResourceWinrm = resourcesManager.addResource(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     basicResourceWinRmId,
                     null,
                     "test-host-winrm",
@@ -208,13 +211,13 @@ public class ResourcesManagerImplITDev {
                     null,
                     digitalNameplate
             );
-            resourcesManager.setRemoteAccessOfResource(
-                    config.jwtAuthenticationToken,
-                    basicResourceWinRmId,
-                    username,
-                    password,
+            remoteAccessManager.addUsernamePasswordRemoteAccessService(
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken.getToken().getSubject(),
+                    basicResourceSshId,
                     ConnectionType.WinRM,
-                    ConnectionType.WinRM.getDefaultPort()
+                    ConnectionType.WinRM.getDefaultPort(),
+                    username,
+                    password
             );
 
             assertEquals(basicResourceWinRmId, basicResourceWinrm.getId());
@@ -224,7 +227,7 @@ public class ResourcesManagerImplITDev {
         @Order(30)
         public void getBasicResourcesWithRemoteAccessService() throws ResourceNotFoundException {
             List<BasicResource> resources = resourcesManager.getResources(
-                    config.jwtAuthenticationToken
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken
             );
 
             //size has to be +1 because consul itself is also registered as node
@@ -233,10 +236,10 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(40)
-        public void getBasicResourceWithRemoteAccessServiceByResourceId() throws ConsulLoginFailedException, ResourceNotFoundException, JsonProcessingException {
+        public void getBasicResourceWithRemoteAccessServiceByResourceId() throws ResourceNotFoundException {
             //region SSH
             BasicResource newResourceSsh = resourcesManager.getResourceByIdOrThrow(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     basicResourceSshId
             );
             var remAccServSshIds = newResourceSsh.getRemoteAccessIds();
@@ -250,7 +253,7 @@ public class ResourcesManagerImplITDev {
 
             //region WinRM
             var newResourceWinRM = resourcesManager.getResourceByIdOrThrow(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     basicResourceWinRmId
             );
             var remoteAccessWinRMIds = newResourceWinRM.getRemoteAccessIds();
@@ -263,7 +266,6 @@ public class ResourcesManagerImplITDev {
 //            assertEquals(conTypeWinrm, remoteAccessWinRMIds.getConnectionType());
 //            assertEquals(conTypeWinrm.getDefaultPort(), remoteAccessWinRMIds.getPort());
             //endregion
-            return;
         }
 
         @Test
@@ -271,7 +273,7 @@ public class ResourcesManagerImplITDev {
         public void addSingleHostDeploymentCapabilityToResource() throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException {
             singleHostCapabilitiesConsulClient.addSingleHostCapabilityToNode(
                     new ConsulCredential(),
-                    config.dockerDeploymentCapability,
+                    ResourcesManagerITDevConfig.dockerDeploymentCapability,
                     basicResourceSshId,
                     CapabilityServiceStatus.INSTALL,
                     false,
@@ -281,18 +283,18 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(60)
-        public void deleteBasicResourceWithRemoteAccessServiceByResourceId() throws ConsulLoginFailedException, ResourceNotFoundException, JsonProcessingException {
-            List<Node> nodesBefore = consulNodesApiClient.getNodes(config.cCred);
+        public void deleteBasicResourceWithRemoteAccessServiceByResourceId() throws ConsulLoginFailedException, ResourceNotFoundException {
+            List<Node> nodesBefore = consulNodesApiClient.getNodes(ResourcesManagerITDevConfig.cCred);
             List<UUID> ids = Arrays.asList(basicResourceSshId, basicResourceWinRmId);
 
             for(UUID id : ids) {
                 resourcesManager.deleteResource(
-                        config.jwtAuthenticationToken,
+                        ResourcesManagerITDevConfig.jwtAuthenticationToken,
                         id
                 );
 
                 var resource = resourcesManager.getResourceByIdOrThrow(
-                        config.jwtAuthenticationToken,
+                        ResourcesManagerITDevConfig.jwtAuthenticationToken,
                         id
                 );
 
@@ -302,9 +304,9 @@ public class ResourcesManagerImplITDev {
             //region Assert
             List<Policy> policiesAfter = consulAclApiClient.getPolicies(new ConsulCredential());
             List<Role> rolesAfter = consulAclApiClient.getRoles(new ConsulCredential());
-            List<Node> nodesAfter = consulNodesApiClient.getNodes(config.cCred);
-            Map<String, List<String>> servicesAfter = consulServicesApiClient.getServices(config.cCred);
-            List<String> keysAfter = consulKeyValueApiClient.getKeys(config.cCred,"");
+            List<Node> nodesAfter = consulNodesApiClient.getNodes(ResourcesManagerITDevConfig.cCred);
+            Map<String, List<String>> servicesAfter = consulServicesApiClient.getServices(ResourcesManagerITDevConfig.cCred);
+            List<String> keysAfter = consulKeyValueApiClient.getKeys(ResourcesManagerITDevConfig.cCred,"");
             List<String> keysOfResourceSecretEngine = vaultClient.getKeysOfPath(new VaultCredential(), "resources", "");
 
             assertEquals(
@@ -340,9 +342,9 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(10)
-        public void getBasicResourcesWithoutRemoteAccessServiceExpectNoReturn() throws ConsulLoginFailedException, JsonProcessingException, ResourceNotFoundException {
+        public void getBasicResourcesWithoutRemoteAccessServiceExpectNoReturn() throws ResourceNotFoundException {
             var resources = resourcesManager.getResources(
-                    config.jwtAuthenticationToken
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken
             );
 
             //size has to be 1 because consul itself is also registered as node
@@ -351,11 +353,11 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(20)
-        public void createBasicResourcesWithoutRemoteAccessService() throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
+        public void createBasicResourcesWithoutRemoteAccessService() throws ResourceNotFoundException, CapabilityNotFoundException {
             var digitalNameplate = new DigitalNameplateV3.Builder("", "", "", "").build();
 
             var basicResourceWithNoCredentials = resourcesManager.addResource(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     uuid,
                     null,
                     hostname,
@@ -370,9 +372,9 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(30)
-        public void getBasicResourcesWithoutRemoteAccessServiceExpectOneResource() throws ConsulLoginFailedException, JsonProcessingException, ResourceNotFoundException {
+        public void getBasicResourcesWithoutRemoteAccessServiceExpectOneResource() throws ResourceNotFoundException {
             var resources = resourcesManager.getResources(
-                    config.jwtAuthenticationToken
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken
             );
 
             //size has to be +1 because consul itself is also registered as node
@@ -381,9 +383,9 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(40)
-        public void getBasicResourceWithoutRemoteAccessServiceByResourceId() throws ConsulLoginFailedException, ResourceNotFoundException, JsonProcessingException {
+        public void getBasicResourceWithoutRemoteAccessServiceByResourceId() throws ResourceNotFoundException {
             var resource = resourcesManager.getResourceByIdOrThrow(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     uuid
             );
             var remAccServSsh = resource.getRemoteAccessIds();
@@ -394,14 +396,14 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(50)
-        public void deleteBasicResourceWithoutRemoteAccessServiceByResourceId() throws ConsulLoginFailedException, ResourceNotFoundException, JsonProcessingException {
-            List<Node> nodesBefore = consulNodesApiClient.getNodes(config.cCred);
-            Map<String, List<String>> servicesBefore = consulServicesApiClient.getServices(config.cCred);
+        public void deleteBasicResourceWithoutRemoteAccessServiceByResourceId() throws ConsulLoginFailedException, ResourceNotFoundException {
+            List<Node> nodesBefore = consulNodesApiClient.getNodes(ResourcesManagerITDevConfig.cCred);
+            Map<String, List<String>> servicesBefore = consulServicesApiClient.getServices(ResourcesManagerITDevConfig.cCred);
 
-            resourcesManager.deleteResource(config.jwtAuthenticationToken,uuid);
+            resourcesManager.deleteResource(ResourcesManagerITDevConfig.jwtAuthenticationToken,uuid);
 
             var resource = resourcesManager.getResourceByIdOrThrow(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     uuid
             );
 
@@ -410,9 +412,9 @@ public class ResourcesManagerImplITDev {
             //region Assert
             List<Policy> policiesAfter = consulAclApiClient.getPolicies(new ConsulCredential());
             List<Role> rolesAfter = consulAclApiClient.getRoles(new ConsulCredential());
-            List<Node> nodesAfter = consulNodesApiClient.getNodes(config.cCred);
-            Map<String, List<String>> servicesAfter = consulServicesApiClient.getServices(config.cCred);
-            List<String> keysAfter = consulKeyValueApiClient.getKeys(config.cCred,"");
+            List<Node> nodesAfter = consulNodesApiClient.getNodes(ResourcesManagerITDevConfig.cCred);
+            Map<String, List<String>> servicesAfter = consulServicesApiClient.getServices(ResourcesManagerITDevConfig.cCred);
+            List<String> keysAfter = consulKeyValueApiClient.getKeys(ResourcesManagerITDevConfig.cCred,"");
             List<String> keysOfResourceSecretEngine = vaultClient.getKeysOfPath(new VaultCredential(), "resources", "");
 
             assertEquals(
@@ -449,14 +451,14 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(10)
-        public void registerResourceWithLocation() throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
+        public void registerResourceWithLocation() throws ConsulLoginFailedException, ResourceNotFoundException, CapabilityNotFoundException {
             Mockito
                     .doReturn(Optional.of(location))
                     .when(locationJpaRepository)
                     .findById(location.getId());
 
             var basicResourceWithLocation = resourcesManager.addResource(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     resourceId,
                     null,
                     hostname,
@@ -473,9 +475,9 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(20)
-        public void registerResourceWithoutLocationExpectLocationNull() throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
+        public void registerResourceWithoutLocationExpectLocationNull() throws ResourceNotFoundException, CapabilityNotFoundException {
             BasicResource basicResourceWithoutLocation = resourcesManager.addResource(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     resourceId,
                     null,
                     hostname,
@@ -490,9 +492,9 @@ public class ResourcesManagerImplITDev {
 
         @Test
         @Order(30)
-        public void registerResourceWithWrongLocationIdExpectLocationNull() throws ConsulLoginFailedException, ResourceNotFoundException, IllegalAccessException, CapabilityNotFoundException, SSLException, JsonProcessingException {
+        public void registerResourceWithWrongLocationIdExpectLocationNull() throws ConsulLoginFailedException, ResourceNotFoundException, CapabilityNotFoundException {
             BasicResource basicResourceWithWrongLocationId = resourcesManager.addResource(
-                    config.jwtAuthenticationToken,
+                    ResourcesManagerITDevConfig.jwtAuthenticationToken,
                     resourceId,
                     null,
                     hostname,
