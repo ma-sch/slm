@@ -2,6 +2,8 @@ package org.eclipse.slm.resource_management.features.importer;
 
 import org.eclipse.slm.resource_management.common.remote_access.ConnectionType;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class ImportDevice {
@@ -15,6 +17,7 @@ public class ImportDevice {
     public String username;
     public String password;
     public UUID locationId;
+    public List<ImportCapability> capabilities;
     public String firmwareVersion;
 
     private ImportDevice(Builder builder) {
@@ -27,6 +30,7 @@ public class ImportDevice {
         this.username = builder.username;
         this.password = builder.password;
         this.locationId = builder.locationId;
+        this.capabilities = builder.capabilities;
         this.firmwareVersion = builder.firmwareVersion;
     }
 
@@ -40,6 +44,7 @@ public class ImportDevice {
         private String username;
         private String password;
         private UUID locationId;
+        private List<ImportCapability> capabilities = Collections.emptyList();
         private String firmwareVersion;
 
         public Builder resourceId(UUID resourceId) {
@@ -84,6 +89,11 @@ public class ImportDevice {
 
         public Builder locationId(UUID locationId) {
             this.locationId = locationId;
+            return this;
+        }
+
+        public Builder capabilities(List<ImportCapability> capabilities) {
+            this.capabilities = capabilities;
             return this;
         }
 

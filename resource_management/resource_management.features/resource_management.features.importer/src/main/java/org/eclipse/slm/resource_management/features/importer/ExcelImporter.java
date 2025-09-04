@@ -1,5 +1,7 @@
 package org.eclipse.slm.resource_management.features.importer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.eclipse.slm.resource_management.common.remote_access.ConnectionType;
 import org.slf4j.Logger;
@@ -27,6 +29,23 @@ public class ExcelImporter {
                     var locationName = row.getCell(1).asString();
 
                     importDefinition.addLocation(locationId, locationName);
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            var capabilitiesSheet = workbook.getSheets()
+                    .filter(s -> s.getName().equals("Capabilities")).findFirst().orElseThrow();
+            try (var rows = capabilitiesSheet.openStream()) {
+                rows.skip(1).forEach(row -> {
+                    var capabilityIdString = row.getCell(0).asString();
+                    if (capabilityIdString.isEmpty()) {
+                        return;
+                    }
+                    var capabilityId = UUID.fromString(capabilityIdString);
+                    var capabilityName = row.getCell(1).asString();
+
+                    importDefinition.addCapability(capabilityName, capabilityId);
                 });
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -63,6 +82,29 @@ public class ExcelImporter {
                     var password = passwordCell.getRawValue();
                     var locationIdString = row.getCellAsString(columnNamesToIndex.get("location id")).get();
                     var locationId = UUID.fromString(locationIdString);
+                    var capabilities = new ArrayList<ImportCapability>();
+                    try {
+                        var capabilityNamesString = row.getCellAsString(columnNamesToIndex.get("capabilities")).orElseGet(() -> "");
+                        var objectMapper = new ObjectMapper();
+                        var capabilityNames = objectMapper.readValue(capabilityNamesString, new TypeReference<List<String>>(){});
+                        for (var capabilityName : capabilityNames) {
+                            boolean skipInstall = false;
+                            if (capabilityName.contains(":")) {
+                                var segments = capabilityName.split(":");
+                                capabilityName = segments[0];
+                                var capabilityOption = segments[segments.length - 1];
+                                if (capabilityOption.equals("skip")) {
+                                    skipInstall = true;
+                                }
+                            }
+                            var capabilityId = importDefinition.getCapabilities().get(capabilityName);
+                            if (capabilityId != null) {
+                                capabilities.add(new ImportCapability(capabilityId, skipInstall));
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Failed to parse capabilities for device {}", name, e);
+                    }
 
                     if (isResource.equals("yes")) {
                         var importDeviceBuilder = new ImportDevice.Builder()
@@ -74,7 +116,8 @@ public class ExcelImporter {
                                 .connectionPort(connectionPort)
                                 .username(username)
                                 .password(password)
-                                .locationId(locationId);
+                                .locationId(locationId)
+                                .capabilities(capabilities);
                         if (!assetId.isEmpty()) {
                             importDeviceBuilder.assetId(assetId);
                         }

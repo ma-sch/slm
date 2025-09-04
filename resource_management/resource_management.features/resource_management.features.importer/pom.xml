@@ -28,6 +28,12 @@
             <artifactId>fastexcel-reader</artifactId>
             <version>${fastexcel.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.slm</groupId>
+            <artifactId>resource_management.features.capabilities</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

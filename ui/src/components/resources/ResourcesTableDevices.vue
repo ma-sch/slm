@@ -134,20 +134,22 @@
       </template>
 
       <template #item.capabilityServices="{ item }">
-        <v-tooltip
-          v-for="capabilityServiceId in item.capabilityServiceIds"
-          :key="capabilityServiceId"
-          location="top"
-        >
-          <template #activator="{ props }">
-            <CapabilityIcon
-                v-if="capabilityServiceById(capabilityServiceId)"
-                v-bind="props"
-                :capability-service="capabilityServiceById(capabilityServiceId)"
-            />
-          </template>
-          <span>Status: {{ capabilityServiceById(capabilityServiceId)?.status }}</span>
-        </v-tooltip>
+        <v-row>
+          <v-tooltip
+            v-for="capabilityServiceId in item.capabilityServiceIds"
+            :key="capabilityServiceId"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <CapabilityIcon
+                  v-if="capabilityServiceById(capabilityServiceId)"
+                  v-bind="props"
+                  :capability-service="capabilityServiceById(capabilityServiceId)"
+              />
+            </template>
+            <span>Status: {{ capabilityServiceById(capabilityServiceId)?.status }}</span>
+          </v-tooltip>
+        </v-row>
       </template>
 
       <template #item.firmware="{ item }">
@@ -217,9 +219,9 @@ const { capabilityServiceById } = storeToRefs(capabilitiesStore);
 const tableHeaders = [
   { title: "Product", key: "product", width: "20%" },
   { title: "Vendor", key: "vendor", width: "20%" },
-  { title: 'Capabilities', key: 'capabilityServices', value: 'capabilityServices', width: "10%" },
+  { title: 'Capabilities', key: 'capabilityServices', value: 'capabilityServices', width: "15%" },
   { title: 'Hostname', key: 'hostname', value: 'hostname', width: "10%" },
-  { title: 'IP', key: 'ip', value: 'ip', width: "10%" },
+  { title: 'IP', key: 'ip', value: 'ip', width: "5%" },
   { title: 'Location', key: 'location.name', value: 'location.name', width: "10%"},
   { title: 'Firmware', key: 'firmware', width: "10%" },
   { title: 'Actions', value: 'actions', sortable: false, width: "10%" },
