@@ -67,9 +67,10 @@ const onDeleteRemoteAccessDialogConfirmed = (remoteAccessId: string) => {
 }
 
 const { copy, isSupported } = useClipboard()
-const copyPassword = () => {
-  if (resource.value?.remoteAccessService?.credential?.password !== undefined) {
-    copy(resource.value.remoteAccessService.credential.password)
+const copyPassword = (remoteAccessId) => {
+  const selectedRemoteAccess = remoteAccess.value.find(ra => ra.id === remoteAccessId);
+  if (selectedRemoteAccess?.credential?.password !== undefined) {
+    copy(selectedRemoteAccess?.credential.password)
     $toast.info(`Password copied to clipboard`)
   }
   else {
@@ -208,7 +209,7 @@ onMounted(() => {
                         >
                           <v-btn
                             color="info"
-                            @click="copyPassword"
+                            @click="copyPassword(item.id)"
                           >
                             <v-icon icon="mdi-content-copy" />
                           </v-btn>
