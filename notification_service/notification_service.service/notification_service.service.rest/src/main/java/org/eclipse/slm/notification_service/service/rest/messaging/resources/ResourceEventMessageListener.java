@@ -13,6 +13,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.NotFoundException;
 import java.util.*;
 
 @Component
@@ -56,9 +57,13 @@ public class ResourceEventMessageListener extends GenericMessageListener<Resourc
             var roleName = ResourcesConsulClient.getResourceKeycloakRoleName(resourceId);
 
             switch (eventMessage.getEventType()) {
-                case CREATED -> {
-                    userIds = this.keycloakAdminClient.getUserIdsAssignedToRole(roleName);
-                    this.resourceIdToUserIdsCache.put(resourceId, userIds);
+                case CREATED, UPDATED -> {
+                    try {
+                        userIds = this.keycloakAdminClient.getUserIdsAssignedToRole(roleName);
+                        this.resourceIdToUserIdsCache.put(resourceId, userIds);
+                    } catch (NotFoundException e) {
+                        userIds = this.resourceIdToUserIdsCache.getOrDefault(resourceId, new ArrayList<>());
+                    }
                 }
                 case DELETED -> {
                     userIds = this.resourceIdToUserIdsCache.getOrDefault(resourceId, new ArrayList<>());

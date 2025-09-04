@@ -20,11 +20,11 @@ public class RemoteAccessController {
 
     private final static Logger LOG = LoggerFactory.getLogger(RemoteAccessController.class);
 
-    private final RemoteAccessService remoteAccessService;
+    private final RemoteAccessManager remoteAccessManager;
 
     @Autowired
-    public RemoteAccessController(RemoteAccessService remoteAccessService) {
-        this.remoteAccessService = remoteAccessService;
+    public RemoteAccessController(RemoteAccessManager remoteAccessManager) {
+        this.remoteAccessManager = remoteAccessManager;
     }
 
     @RequestMapping(value = "/{resourceId}/remote-access/{remoteAccessId}", method = RequestMethod.GET)
@@ -35,7 +35,7 @@ public class RemoteAccessController {
 
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        var remoteAccessDto = remoteAccessService.getRemoteAccessService(resourceId, remoteAccessId, jwtAuthenticationToken);
+        var remoteAccessDto = remoteAccessManager.getRemoteAccessService(resourceId, remoteAccessId, jwtAuthenticationToken);
 
         return ResponseEntity.ok(remoteAccessDto);
     }
@@ -51,9 +51,21 @@ public class RemoteAccessController {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         var ownerUserId = jwtAuthenticationToken.getToken().getSubject();
-        var remoteAccessDto = this.remoteAccessService.addUsernamePasswordRemoteAccessService(ownerUserId, resourceId, connectionType, connectionPort, resourceUsername, resourcePassword);
+        var remoteAccessDto = this.remoteAccessManager.addUsernamePasswordRemoteAccessService(ownerUserId, resourceId, connectionType, connectionPort, resourceUsername, resourcePassword);
 
         return ResponseEntity.ok(remoteAccessDto);
+    }
+
+    @RequestMapping(value = "/{resourceId}/remote-access/{remoteAccessId}", method = RequestMethod.DELETE)
+    @Operation(summary = "Delete remote access of resource by id")
+    public @ResponseBody ResponseEntity<RemoteAccessDTO> deleteRemoteAccessOfResourceById(
+            @PathVariable(name = "resourceId")      UUID resourceId,
+            @PathVariable(name = "remoteAccessId")  UUID remoteAccessId) {
+        var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
+        remoteAccessManager.deleteRemoteAccess(resourceId, remoteAccessId);
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(value = "/connection-types", method = RequestMethod.GET)

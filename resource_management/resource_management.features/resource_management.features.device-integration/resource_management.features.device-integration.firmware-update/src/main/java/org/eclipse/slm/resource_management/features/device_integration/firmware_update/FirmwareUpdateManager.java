@@ -17,7 +17,6 @@ import org.eclipse.slm.resource_management.common.resource_types.ResourceTypesMa
 import org.eclipse.slm.resource_management.features.device_integration.firmware_update.exceptions.FirmwareUpdateFileNotFoundException;
 import org.eclipse.slm.resource_management.features.device_integration.firmware_update.model.*;
 import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
-import org.eclipse.slm.resource_management.features.device_integration.firmware_update.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

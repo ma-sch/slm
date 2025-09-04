@@ -11,7 +11,6 @@ public class ResourceEventMessageSender extends GenericMessageSender<ResourceEve
         super(rabbitTemplate);
     }
 
-
     public void sendMessage(BasicResource resource, ResourceEventType eventType) {
         var resourceMessagingDTO = ResourceMapper.INSTANCE.toDto(resource);
 

@@ -66,7 +66,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 @Disabled
-public class ResourcesManagerITDev {
+public class ResourcesManagerImplITDev {
     private ResourcesManagerITDevConfig config = new ResourcesManagerITDevConfig();
     //region MockBeans
     @MockBean

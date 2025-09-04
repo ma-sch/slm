@@ -6,6 +6,8 @@ import org.eclipse.slm.common.keycloak.config.KeycloakAdminClient;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.resource_management.common.adapters.ResourcesConsulClient;
 import org.eclipse.slm.resource_management.common.adapters.ResourcesVaultClient;
+import org.eclipse.slm.resource_management.common.resources.ResourceUpdatedListener;
+import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -17,9 +19,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class RemoteAccessService {
+public class RemoteAccessManagerImpl implements RemoteAccessManager {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RemoteAccessService.class);
+    private final static Logger LOG = LoggerFactory.getLogger(RemoteAccessManagerImpl.class);
 
     private final KeycloakAdminClient keycloakAdminClient;
 
@@ -27,14 +29,15 @@ public class RemoteAccessService {
 
     private final ResourcesVaultClient resourcesVaultClient;
 
-    public RemoteAccessService(KeycloakAdminClient keycloakAdminClient,
-                               ResourcesConsulClient resourcesConsulClient,
-                               ResourcesVaultClient resourcesVaultClient) {
+    private final List<ResourceUpdatedListener> resourceUpdatedListeners = new ArrayList<>();
+
+    public RemoteAccessManagerImpl(KeycloakAdminClient keycloakAdminClient,
+                                   ResourcesConsulClient resourcesConsulClient,
+                                   ResourcesVaultClient resourcesVaultClient) {
         this.keycloakAdminClient = keycloakAdminClient;
         this.resourcesConsulClient = resourcesConsulClient;
         this.resourcesVaultClient = resourcesVaultClient;
     }
-
 
     public List<UUID> getRemoteAccessServiceIdsOfResource(UUID resourceId) {
         var remoteAccessServiceIds = new ArrayList<UUID>();
@@ -114,6 +117,10 @@ public class RemoteAccessService {
         try {
             this.resourcesVaultClient.removeSecretsOfRemoteAccessService(new VaultCredential(), resourceId, remoteAccessId);
             this.resourcesConsulClient.removeConnectionService(resourceId, remoteAccessId);
+            for (var listener : this.resourceUpdatedListeners) {
+                listener.onResourceUpdated(resourceId);
+            }
+            LOG.info("Deleted remote access service '{}' of resource '{}'", remoteAccessId, resourceId);
         } catch (Exception e) {
             LOG.error("Error while deleting remote access service: {}", e.getMessage(), e);
             throw new RemoteAccessRuntimeException("Error while deleting remote access service: " + e.getMessage());
@@ -140,10 +147,20 @@ public class RemoteAccessService {
 
             this.resourcesVaultClient.addSecretsForConnectionService(resourceId, remoteAccessService);
 
+            for (var listener : this.resourceUpdatedListeners) {
+                listener.onResourceUpdated(resourceId);
+            }
+
+            LOG.info("Added remote access '{}' for resource '{}'", remoteAccessService.getId(), resourceId);
+
             return RemoteAccessMapper.INSTANCE.toDto(remoteAccessService);
         } catch (Exception ex) {
             LOG.error("Error while adding remote access service: {}", ex.getMessage(), ex);
             throw new RemoteAccessRuntimeException("Error while adding remote access service: " + ex.getMessage());
         }
+    }
+
+    public void registerResourceUpdatedListener(ResourceUpdatedListener resourceUpdatedListener) {
+        this.resourceUpdatedListeners.add(resourceUpdatedListener);
     }
 }

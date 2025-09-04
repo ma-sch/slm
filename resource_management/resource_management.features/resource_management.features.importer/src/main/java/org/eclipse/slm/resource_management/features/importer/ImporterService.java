@@ -5,6 +5,7 @@ import org.eclipse.slm.resource_management.common.aas.ResourcesSubmodelManager;
 import org.eclipse.slm.resource_management.common.aas.submodels.digitalnameplate.DigitalNameplateV3;
 import org.eclipse.slm.resource_management.common.location.Location;
 import org.eclipse.slm.resource_management.common.location.LocationHandler;
+import org.eclipse.slm.resource_management.common.remote_access.RemoteAccessManager;
 import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
 import org.eclipse.slm.resource_management.features.capabilities.jobs.CapabilityAlreadyInstalledException;
 import org.eclipse.slm.resource_management.features.capabilities.jobs.CapabilityJobService;
@@ -30,11 +31,18 @@ public class ImporterService {
 
     private final ResourcesSubmodelManager resourcesSubmodelManager;
 
-    public ImporterService(ResourcesManager resourcesManager, CapabilityJobService capabilityJobService, LocationHandler locationHandler, ResourcesSubmodelManager resourcesSubmodelManager) {
+    private final RemoteAccessManager remoteAccessManager;
+
+    public ImporterService(ResourcesManager resourcesManager,
+                           CapabilityJobService capabilityJobService,
+                           LocationHandler locationHandler,
+                           ResourcesSubmodelManager resourcesSubmodelManager,
+                           RemoteAccessManager remoteAccessManager) {
         this.resourcesManager = resourcesManager;
         this.capabilityJobService = capabilityJobService;
         this.locationHandler = locationHandler;
         this.resourcesSubmodelManager = resourcesSubmodelManager;
+        this.remoteAccessManager = remoteAccessManager;
     }
 
     public ImportDefinition getImportDefinition(MultipartFile importFile) {
@@ -73,12 +81,13 @@ public class ImporterService {
                         && device.connectionType != null
                         && device.username != null
                         && device.password != null) {
-                    this.resourcesManager.setRemoteAccessOfResource(jwtAuthenticationToken,
+                    var userId = jwtAuthenticationToken.getToken().getSubject();
+                    this.remoteAccessManager.addUsernamePasswordRemoteAccessService(userId,
                             device.resourceId,
-                            device.username,
-                            device.password,
                             device.connectionType,
-                            device.connectionPort);
+                            device.connectionPort,
+                            device.username,
+                            device.password);
                 }
 
                 if (device.locationId != null) {

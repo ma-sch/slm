@@ -9,7 +9,7 @@ info:
     email: "matthias.schneider@ipa.fraunhofer.de"
   version: "1.4.0-SNAPSHOT"
 servers:
-- url: "http://localhost:9010/resource-management"
+- url: "http://slm.local:9010/resource-management"
   description: "Generated server url"
 security:
 - bearer_auth: []
@@ -907,12 +907,32 @@ paths:
       responses:
         "200":
           description: "OK"
-  /importer/file:
+  /importer/resources:
     post:
       tags:
       - "Importer"
-      summary: "Import from file"
+      summary: "Import resources from file"
       operationId: "importFromFile"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - "file"
+              type: "object"
+              properties:
+                file:
+                  type: "string"
+                  format: "binary"
+      responses:
+        "200":
+          description: "OK"
+  /importer/capabilities:
+    post:
+      tags:
+      - "Importer"
+      summary: "Import capabilities from file"
+      operationId: "importCapabilitiesFromFile"
       requestBody:
         content:
           multipart/form-data:
@@ -953,6 +973,31 @@ paths:
       - "Resources"
       summary: "Get remote access of resource by id"
       operationId: "getRemoteAccessOfResourceById"
+      parameters:
+      - name: "resourceId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+          format: "uuid"
+      - name: "remoteAccessId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RemoteAccessDTO"
+    delete:
+      tags:
+      - "Resources"
+      summary: "Delete remote access of resource by id"
+      operationId: "deleteRemoteAccessOfResourceById"
       parameters:
       - name: "resourceId"
         in: "path"
@@ -2776,10 +2821,10 @@ components:
     Key:
       type: "object"
       properties:
-        value:
-          type: "string"
         type:
           $ref: "#/components/schemas/KeyTypes"
+        value:
+          type: "string"
     KeyTypes:
       type: "string"
       enum:
@@ -3467,9 +3512,9 @@ components:
           type: "string"
         creator:
           $ref: "#/components/schemas/Reference"
-        templateId:
-          type: "string"
         revision:
+          type: "string"
+        templateId:
           type: "string"
         embeddedDataSpecifications:
           type: "array"
@@ -3480,28 +3525,32 @@ components:
       properties:
         id:
           type: "string"
-        idShort:
-          type: "string"
         endpoints:
           type: "array"
           items:
             $ref: "#/components/schemas/Endpoint"
+        idShort:
+          type: "string"
         administration:
           $ref: "#/components/schemas/AdministrativeInformation"
-        globalAssetId:
-          type: "string"
         assetKind:
           $ref: "#/components/schemas/AssetKind"
+        globalAssetId:
+          type: "string"
         assetType:
           type: "string"
-        submodelDescriptors:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/SubmodelDescriptor"
         specificAssetIds:
           type: "array"
           items:
             $ref: "#/components/schemas/SpecificAssetId"
+        submodelDescriptors:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SubmodelDescriptor"
+        description:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LangStringTextType"
         displayName:
           type: "array"
           items:
@@ -3510,10 +3559,6 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Extension"
-        description:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/LangStringTextType"
     AssetKind:
       type: "string"
       enum:
@@ -3565,10 +3610,10 @@ components:
     Endpoint:
       type: "object"
       properties:
-        protocolInformation:
-          $ref: "#/components/schemas/ProtocolInformation"
         get_interface:
           type: "string"
+        protocolInformation:
+          $ref: "#/components/schemas/ProtocolInformation"
     Extension:
       type: "object"
       properties:
@@ -3607,10 +3652,6 @@ components:
       properties:
         href:
           type: "string"
-        endpointProtocolVersion:
-          type: "array"
-          items:
-            type: "string"
         subprotocolBodyEncoding:
           type: "string"
         securityAttributes:
@@ -3619,6 +3660,10 @@ components:
             $ref: "#/components/schemas/SecurityAttributeObject"
         endpointProtocol:
           type: "string"
+        endpointProtocolVersion:
+          type: "array"
+          items:
+            type: "string"
         subprotocol:
           type: "string"
         subprotocolBody:
@@ -3626,12 +3671,12 @@ components:
     SecurityAttributeObject:
       type: "object"
       properties:
+        type:
+          $ref: "#/components/schemas/SecurityTypeEnum"
         value:
           type: "string"
         key:
           type: "string"
-        type:
-          $ref: "#/components/schemas/SecurityTypeEnum"
     SecurityTypeEnum:
       type: "string"
       enum:
@@ -3658,20 +3703,24 @@ components:
       properties:
         id:
           type: "string"
-        idShort:
-          type: "string"
         semanticId:
           $ref: "#/components/schemas/Reference"
         endpoints:
           type: "array"
           items:
             $ref: "#/components/schemas/Endpoint"
+        idShort:
+          type: "string"
         administration:
           $ref: "#/components/schemas/AdministrativeInformation"
         supplementalSemanticId:
           type: "array"
           items:
             $ref: "#/components/schemas/Reference"
+        description:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LangStringTextType"
         displayName:
           type: "array"
           items:
@@ -3680,10 +3729,6 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Extension"
-        description:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/LangStringTextType"
     Base64UrlEncodedCursor:
       type: "object"
       properties:
@@ -3714,9 +3759,9 @@ components:
     Qualifier:
       type: "object"
       properties:
-        value:
-          type: "string"
         type:
+          type: "string"
+        value:
           type: "string"
         kind:
           $ref: "#/components/schemas/QualifierKind"
@@ -3747,16 +3792,16 @@ components:
           type: "string"
         administration:
           $ref: "#/components/schemas/AdministrativeInformation"
-        displayName:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/LangStringNameType"
         description:
           type: "array"
           items:
             $ref: "#/components/schemas/LangStringTextType"
         idShort:
           type: "string"
+        displayName:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LangStringNameType"
         category:
           type: "string"
         extensions:
@@ -3786,16 +3831,16 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/EmbeddedDataSpecification"
-        displayName:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/LangStringNameType"
         description:
           type: "array"
           items:
             $ref: "#/components/schemas/LangStringTextType"
         idShort:
           type: "string"
+        displayName:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LangStringNameType"
         category:
           type: "string"
         extensions:
@@ -3861,28 +3906,28 @@ components:
     AssetAdministrationShell:
       type: "object"
       properties:
-        assetInformation:
-          $ref: "#/components/schemas/AssetInformation"
         submodels:
           type: "array"
           items:
             $ref: "#/components/schemas/Reference"
+        assetInformation:
+          $ref: "#/components/schemas/AssetInformation"
         derivedFrom:
           $ref: "#/components/schemas/Reference"
         id:
           type: "string"
         administration:
           $ref: "#/components/schemas/AdministrativeInformation"
-        displayName:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/LangStringNameType"
         description:
           type: "array"
           items:
             $ref: "#/components/schemas/LangStringTextType"
         idShort:
           type: "string"
+        displayName:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LangStringNameType"
         category:
           type: "string"
         extensions:
@@ -3896,24 +3941,24 @@ components:
     AssetInformation:
       type: "object"
       properties:
-        defaultThumbnail:
-          $ref: "#/components/schemas/Resource"
-        globalAssetId:
-          type: "string"
         assetKind:
           $ref: "#/components/schemas/AssetKind"
+        globalAssetId:
+          type: "string"
         assetType:
           type: "string"
         specificAssetIds:
           type: "array"
           items:
             $ref: "#/components/schemas/SpecificAssetId"
+        defaultThumbnail:
+          $ref: "#/components/schemas/Resource"
     Resource:
       type: "object"
       properties:
-        path:
-          type: "string"
         contentType:
+          type: "string"
+        path:
           type: "string"
     GetReferencesResult:
       type: "object"

@@ -2,13 +2,6 @@ package org.eclipse.slm.resource_management.features.importer;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.eclipse.slm.resource_management.common.aas.ResourceAas;
-import org.eclipse.slm.resource_management.common.aas.ResourcesSubmodelManager;
-import org.eclipse.slm.resource_management.common.aas.submodels.digitalnameplate.DigitalNameplateV3;
-import org.eclipse.slm.resource_management.common.location.Location;
-import org.eclipse.slm.resource_management.common.location.LocationHandler;
-import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
-import org.eclipse.slm.resource_management.features.capabilities.jobs.CapabilityJobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -17,9 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.BufferedInputStream;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/importer")

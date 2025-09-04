@@ -60,8 +60,13 @@ export const useNotificationStore = defineStore('notificationStore', {
         case EVENTCLASS.ResourceEvent: {
           const resourceDevicesStore = useResourceDevicesStore();
           const resourceEventNotification = eventNotification  as unknown as ResourceEventNotification;
+          console.log(resourceEventNotification)
           switch (resourceEventNotification.eventType) {
             case ResourceEventType.Created: {
+              resourceDevicesStore.addOrUpdateResource(resourceEventNotification.resource);
+              break;
+            }
+            case ResourceEventType.Updated: {
               resourceDevicesStore.addOrUpdateResource(resourceEventNotification.resource);
               break;
             }

@@ -248,7 +248,7 @@ export default {
           return ct.name === connectionTypeName
         });
 
-        if(connectionType !== undefined)
+        if (connectionType !== undefined)
           this.remoteAccess.connectionPort = connectionType.defaultPort
       },
       clearForm () {
