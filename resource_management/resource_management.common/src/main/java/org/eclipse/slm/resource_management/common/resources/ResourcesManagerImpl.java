@@ -92,25 +92,26 @@ public class ResourcesManagerImpl implements ResourcesManager, ResourceUpdatedLi
             JwtAuthenticationToken jwtAuthenticationToken,
             UUID resourceId
     ) throws ResourceRuntimeException, ResourceNotFoundException {
+        Optional<BasicResource> optionalResource;
         try {
             var consulCredential = new ConsulCredential();
-
-            Optional<BasicResource> optionalResource = resourcesConsulClient.getResourceById(
+            optionalResource = resourcesConsulClient.getResourceById(
                     consulCredential,
                     resourceId
             );
-
-            if (optionalResource.isEmpty()) {
-                throw new ResourceNotFoundException(resourceId);
-            }
-
-            var resource = this.addDetailsToResource(optionalResource.get());
-
-            return resource;
         } catch (Exception e) {
             LOG.error("Failed to get resource by id '{}': {}", resourceId, e.getMessage(), e);
             throw new ResourceRuntimeException("Failed to get resource by id: " + resourceId + " - " + e.getMessage());
         }
+
+        if (optionalResource.isEmpty()) {
+            throw new ResourceNotFoundException(resourceId);
+        }
+
+        var resource = this.addDetailsToResource(optionalResource.get());
+
+        return resource;
+
     }
 
     public BasicResource getResourceByIdOrThrow(

@@ -1,6 +1,8 @@
 package org.eclipse.slm.resource_management.features.device_integration.discovery;
 
 import org.eclipse.slm.resource_management.common.aas.submodels.digitalnameplate.DigitalNameplateV3;
+import org.eclipse.slm.resource_management.common.exceptions.ResourceNotFoundException;
+import org.eclipse.slm.resource_management.common.exceptions.ResourceRuntimeException;
 import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
 import org.eclipse.slm.resource_management.features.device_integration.common.discovery.driver.DriverRegistryClient;
 import org.eclipse.slm.resource_management.features.device_integration.common.discovery.exceptions.DriverNotFoundException;
@@ -130,16 +132,16 @@ public class DiscoveryService implements DiscoveryJobListener {
         discoveredResourceDTO.setDiscoveryJobId(discoveryJob.getId());
         discoveredResourceDTO.setResultId(discoveryJob.getId() + ":" + discoveredResourceDTO.getResourceId());
 
-//        try {
-//            var existingResource = resourcesManager.getResourceWithCredentialsByRemoteAccessService(jwtAuthenticationToken,
-//                    discoveredResourceDTO.getResourceId());
-//            if (existingResource != null) {
-//                discoveredResourceDTO.setOnboarded(true);
-//            }
-//        } catch (ConsulLoginFailedException | JsonProcessingException e) {
-//            LOG.error(e.getMessage());
-//        } catch (ResourceNotFoundException ignored) {
-//        }
+        try {
+            var existingResource = resourcesManager.getResourceByIdOrThrow(jwtAuthenticationToken, discoveredResourceDTO.getResourceId());
+            if (existingResource != null) {
+                discoveredResourceDTO.setOnboarded(true);
+            }
+        } catch (ResourceNotFoundException ignored) {
+        }
+        catch (Exception e) {
+            LOG.error("Failed to get resource with id {} to check if it is onboarded", discoveredResourceDTO.getResourceId(), e);
+        }
     }
 
     @Override

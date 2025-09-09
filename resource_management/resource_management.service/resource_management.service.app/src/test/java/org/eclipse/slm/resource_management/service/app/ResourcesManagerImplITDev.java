@@ -1,6 +1,5 @@
 package org.eclipse.slm.resource_management.service.app;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.client.apis.*;
@@ -41,7 +40,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.SSLException;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
