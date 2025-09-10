@@ -45,7 +45,7 @@ services:
       - "8013:8013"  # http
       - "8053:8043"  # https
     extra_hosts:
-      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:host-gateway"
 
   awx-jwt-authenticator:
     image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/awx-jwt-authenticator:1.1.0-SNAPSHOT"
@@ -70,7 +70,7 @@ services:
         aliases:
           - awx-jwt-authenticator
     extra_hosts:
-      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:host-gateway"
 
   awx-redis:
     image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/awx/redis:{{ ENV.AWX.REDIS_VERSION }}"

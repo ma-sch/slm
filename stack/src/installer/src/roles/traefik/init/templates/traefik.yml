@@ -38,4 +38,4 @@ services:
       retries: 3
       start_period: 3s
     extra_hosts:
-      - "{{ ENV.SLM_HOSTNAME }}:172.17.0.1"
+      - "{{ ENV.SLM_HOSTNAME }}:host-gateway"
