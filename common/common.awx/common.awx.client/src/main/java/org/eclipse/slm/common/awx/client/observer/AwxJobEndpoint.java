@@ -70,7 +70,7 @@ public class AwxJobEndpoint extends Endpoint implements MessageHandler.Partial<S
                 }
             }
         } catch (Exception e) {
-            LOG.error("Mapping error of AWX Server");
+            LOG.error("Could not parse message from AWX server: " + messagePart, e);
         }
     }
 
