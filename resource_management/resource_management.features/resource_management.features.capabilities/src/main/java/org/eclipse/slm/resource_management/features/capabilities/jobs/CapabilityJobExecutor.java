@@ -20,10 +20,16 @@ import org.eclipse.slm.resource_management.features.capabilities.persistence.Sin
 import org.eclipse.slm.resource_management.features.capabilities.persistence.SingleHostCapabilitiesVaultClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
 public class CapabilityJobExecutor implements IAwxJobObserverListener {
@@ -47,13 +53,18 @@ public class CapabilityJobExecutor implements IAwxJobObserverListener {
 
     private final CapabilityService capabilityService;
 
+    private final int awxJobTimeoutInMin;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final Map<AwxJobObserver, ScheduledFuture<?>> awxJobObserverTimeouts = new HashMap<>();
+
     public CapabilityJobExecutor(CapabilitiesService capabilitiesService,
                                  CapabilityUtil capabilityUtil,
                                  AwxJobExecutor awxJobExecutor,
                                  AwxJobObserverInitializer awxJobObserverInitializer,
                                  SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient,
                                  @NonNull CapabilityJob capabilityJob,
-                                 @NonNull CapabilityService capabilityService) {
+                                 @NonNull CapabilityService capabilityService,
+                                 @Value("${resource-management.capabilities.awx-job-timeout-in-minutes:20}") int awxJobTimeoutInMin) {
         this.capabilitiesService = capabilitiesService;
         this.capabilityUtil = capabilityUtil;
         this.awxJobExecutor = awxJobExecutor;
@@ -61,6 +72,7 @@ public class CapabilityJobExecutor implements IAwxJobObserverListener {
         this.singleHostCapabilitiesConsulClient = singleHostCapabilitiesConsulClient;
         this.capabilityJob = capabilityJob;
         this.capabilityService = capabilityService;
+        this.awxJobTimeoutInMin = awxJobTimeoutInMin;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -111,6 +123,16 @@ public class CapabilityJobExecutor implements IAwxJobObserverListener {
                     awxJobId, JobTarget.DEPLOYMENT_CAPABILITY, JobGoal.ADD, this
             );
 
+            var timeoutFuture = scheduler.schedule(() -> {
+                for (var listener : this.capabilityJobExecutorListeners) {
+                    listener.onError(this.capabilityJob, this.capabilityService,
+                            new CapabilityJobRuntimeException(this.capabilityJob.getId(),
+                                    "AWX Job Observer Timeout, job did not finished after " + this.awxJobTimeoutInMin + " minutes"));
+                    awxJobObserver.removeListener(this);
+                }
+            }, this.awxJobTimeoutInMin, TimeUnit.MINUTES);
+            this.awxJobObserverTimeouts.put(awxJobObserver, timeoutFuture);
+
         } catch (Exception e) {
             throw new CapabilityRuntimeException(capability.getId(),
                     "Failed to install capability [id='" + capability.getId() + "'] on resource [id='" + resourceId + "']: " + e.getMessage());
@@ -150,6 +172,16 @@ public class CapabilityJobExecutor implements IAwxJobObserverListener {
 
             var awxJobObserver = this.awxJobObserverInitializer.initNewObserver(awxJobId, JobTarget.DEPLOYMENT_CAPABILITY, JobGoal.DELETE, this);
 
+            var timeoutFuture = scheduler.schedule(() -> {
+                for (var listener : this.capabilityJobExecutorListeners) {
+                    listener.onError(this.capabilityJob, this.capabilityService,
+                            new CapabilityJobRuntimeException(this.capabilityJob.getId(),
+                                    "AWX Job Observer Timeout, job did not finished after " + this.awxJobTimeoutInMin + " minutes"));
+                    awxJobObserver.removeListener(this);
+                }
+            }, this.awxJobTimeoutInMin, TimeUnit.MINUTES);
+            this.awxJobObserverTimeouts.put(awxJobObserver, timeoutFuture);
+
         } catch (Exception e) {
             throw new CapabilityRuntimeException(capability.getId(), "Failed to uninstall capability [id='" + capability.getId() + "'] from resource [id='" + resourceId + "']: " + e.getMessage());
         }
@@ -169,11 +201,17 @@ public class CapabilityJobExecutor implements IAwxJobObserverListener {
         var jobGoal = awxJobObserver.jobGoal;
         var resourceId = this.capabilityJob.getResourceId();
         var capabilityId = this.capabilityJob.getCapabilityId();
+        var awxJobObserverTimeout = this.awxJobObserverTimeouts.get(awxJobObserver);
+        if (awxJobObserverTimeout != null) {
+            awxJobObserverTimeout.cancel(false);
+            this.awxJobObserverTimeouts.remove(awxJobObserver);
+        }
 
         if (finalState != JobFinalState.SUCCESSFUL) {
             for (var listener : this.capabilityJobExecutorListeners) {
                 listener.onError(this.capabilityJob, this.capabilityService, new CapabilityRuntimeException(capabilityId,
                         "Failed to install capability [id='" + capabilityId + "'] on resource [id='" + resourceId + "']: Job final state was '" + finalState + "'"));
+                awxJobObserver.removeListener(this);
             }
             return;
         }
@@ -196,14 +234,14 @@ public class CapabilityJobExecutor implements IAwxJobObserverListener {
 
                 default -> {
                     for (var listener : this.capabilityJobExecutorListeners) {
-                        listener.onError(this.capabilityJob, this.capabilityService, new CapabilityRuntimeException(capabilityId,
+                        listener.onError(this.capabilityJob, this.capabilityService, new CapabilityJobRuntimeException(this.capabilityJob.getId(),
                                 "Failed to install capability [id='" + capabilityId + "'] on resource [id='" + resourceId + "']: " + "Unsupported JobGoal '" + jobGoal + "'"));
                     }
                 }
             }
         } catch (Exception e) {
             for (var listener : this.capabilityJobExecutorListeners) {
-                listener.onError(this.capabilityJob, this.capabilityService, new CapabilityRuntimeException(capabilityId,
+                listener.onError(this.capabilityJob, this.capabilityService, new CapabilityJobRuntimeException(this.capabilityJob.getId(),
                         "Failed to install capability [id='" + capabilityId + "'] on resource [id='" + resourceId + "']: " + e.getMessage()));
             }
         }

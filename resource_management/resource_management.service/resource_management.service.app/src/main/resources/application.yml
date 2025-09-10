@@ -113,6 +113,11 @@ management:
   info:
     git.enabled: false
 
+### Resource Management Config
+resource-management:
+  capabilities:
+    awx-job-timeout-in-minutes: 15
+
 ### Components - Internal
 notification-service:
   scheme: "http"

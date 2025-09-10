@@ -8,6 +8,7 @@ import org.eclipse.slm.resource_management.features.capabilities.CapabilityUtil;
 import org.eclipse.slm.resource_management.features.capabilities.model.CapabilityService;
 import org.eclipse.slm.resource_management.features.capabilities.persistence.SingleHostCapabilitiesConsulClient;
 import org.eclipse.slm.resource_management.features.capabilities.persistence.SingleHostCapabilitiesVaultClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,16 +24,20 @@ public class CapabilityJobExecutorFactory {
 
     private final SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient;
 
+    private final int awxJobTimeoutInMin;
+
     public CapabilityJobExecutorFactory(CapabilitiesService capabilitiesService,
                                         CapabilityUtil capabilityUtil,
                                         AwxJobExecutor awxJobExecutor,
                                         AwxJobObserverInitializer awxJobObserverInitializer,
-                                        SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient) {
+                                        SingleHostCapabilitiesConsulClient singleHostCapabilitiesConsulClient,
+                                        @Value("${resource-management.capabilities.awx-job-timeout-in-minutes:20}") int awxJobTimeoutInMin) {
         this.capabilitiesService = capabilitiesService;
         this.capabilityUtil = capabilityUtil;
         this.awxJobExecutor = awxJobExecutor;
         this.awxJobObserverInitializer = awxJobObserverInitializer;
         this.singleHostCapabilitiesConsulClient = singleHostCapabilitiesConsulClient;
+        this.awxJobTimeoutInMin = awxJobTimeoutInMin;
     }
 
 
@@ -44,7 +49,8 @@ public class CapabilityJobExecutorFactory {
                 this.awxJobObserverInitializer,
                 this.singleHostCapabilitiesConsulClient,
                 capabilityJob,
-                capabilityService
+                capabilityService,
+                awxJobTimeoutInMin
         );
         capabilityJobExecutor.addCapabilityJobExecutorListener(capabilityJobExecutorListener);
 

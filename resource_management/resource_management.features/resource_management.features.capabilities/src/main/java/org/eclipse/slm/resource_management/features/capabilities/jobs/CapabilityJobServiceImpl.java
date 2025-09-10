@@ -326,7 +326,7 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
             var capabilityJobStateMachine = this.capabilityJobStateMachineFactory.create(capabilityJob, this);
             this.changeStateOfCapabilityJobStateMachine(capabilityJob, capabilityJobStateMachine, CapabilityJobEvent.INSTALL_COMPLETED);
         } catch (Exception e) {
-            LOG.error("Error while handling capability uninstallation for capability job [id= " + capabilityJob.getId() + "]", e);
+            LOG.error("Error while handling capability installation for capability job [id= " + capabilityJob.getId() + "]", e);
         }
     }
 
@@ -346,7 +346,7 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
             var capabilityJobStateMachine = this.capabilityJobStateMachineFactory.create(capabilityJob, this);
             this.changeStateOfCapabilityJobStateMachine(capabilityJob, capabilityJobStateMachine, CapabilityJobEvent.ERROR_OCCURRED);
         } catch (Exception e) {
-            LOG.error("Error while handling capability uninstallation for capability job [id= " + capabilityJob.getId() + "]", e);
+            LOG.error("Error while handling capability installation or uninstallation for capability job [id= " + capabilityJob.getId() + "]", e);
         }
     }
     //endregion CapabilityJobExecutorListener
