@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.features.capabilities.jobs;
 
+import jakarta.annotation.PostConstruct;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakAdminClient;
@@ -64,6 +65,24 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
         this.singleHostCapabilitiesConsulClient = singleHostCapabilitiesConsulClient;
         this.singleHostCapabilitiesVaultClient = singleHostCapabilitiesVaultClient;
         this.keycloakAdminClient = keycloakAdminClient;
+    }
+
+    @PostConstruct
+    public void init() {
+        var allCapabilityJobs = this.capabilityJobJpaRepository.findAll();
+        for (var capabilityJob : allCapabilityJobs) {
+            StateMachine<CapabilityJobState, CapabilityJobEvent> capabilityJobStateMachine = null;
+            try {
+                capabilityJobStateMachine = this.capabilityJobStateMachineFactory.create(capabilityJob, this);
+                if (!capabilityJobStateMachine.isComplete()) {
+                    this.changeStateOfCapabilityJobStateMachine(capabilityJob, capabilityJobStateMachine, CapabilityJobEvent.ERROR_OCCURRED);
+                    capabilityJob.addLogMessage("Set job to FAILED state because it was in uncompleted state during system restart");
+                    this.capabilityJobJpaRepository.save(capabilityJob);
+                }
+            } catch (Exception e) {
+                LOG.error("Error while initializing capability job state machine for capability job with id: " + capabilityJob.getId(), e);
+            }
+        }
     }
 
     //region CapabilityJobService
