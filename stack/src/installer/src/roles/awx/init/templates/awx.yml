@@ -17,9 +17,6 @@ services:
       DJANGO_SUPERUSER_PASSWORD: password
       UWSGI_MOUNT_PATH: /
       RUN_MIGRATIONS: 1
-    links:
-      - awx-postgres
-      - awx-redis
     restart: unless-stopped
     logging:
       driver: "json-file"
