@@ -63,7 +63,7 @@
           service_management_url: "{{ service_management.url.proxy }}"
           monitoring_service_url: "{{ monitoring_service.url.proxy }}"
           awx_url: "{{ awx.url.external }}"
-          consul_url: "{{ catalog_service.url.external }}"
+          consul_url: "{{ consul.url.external }}"
           vault_url: "{{ vault.url.external }}"
           keycloak_url: "{{ keycloak.url.external_without_port }}"
           aas_aas_gui_url: "{{ aas.aas_gui.url.proxy }}"
