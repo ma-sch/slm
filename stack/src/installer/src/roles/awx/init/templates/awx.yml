@@ -3,7 +3,6 @@ services:
   awx:
     image: "{{ ENV.DOCKER_IMAGE_REGISTRY }}/awx/awx-task:{{ ENV.AWX.VERSION }}"
     user: "0"
-    command: launch_awx.sh
     environment:
       OS: " Operating System: Docker Desktop"
       SDB_HOST: 0.0.0.0
@@ -17,6 +16,7 @@ services:
       DJANGO_SUPERUSER_PASSWORD: password
       UWSGI_MOUNT_PATH: /
       RUN_MIGRATIONS: 1
+      NGINX_INTERNAL_DNS_RESOLVER: "{{ ENV.AWX.NGINX.INTERNAL_DNS_RESOLVER }}"
     restart: unless-stopped
     logging:
       driver: "json-file"
