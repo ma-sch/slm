@@ -76,14 +76,14 @@ public class AwxJobObserver {
     }
 
     public void fireOnJobStateChanged(JobState newState) {
-        for (var listener : this.jobObserverListeners) {
+        for (var listener : new ArrayList<>(this.jobObserverListeners)) {
             listener.onJobStateChanged(this, newState);
         }
     }
 
     public void fireOnJobFinished(JobFinalState finalState) {
         this.stopListenToEndpoint();
-        for (var listener : this.jobObserverListeners) {
+        for (var listener : new ArrayList<>(this.jobObserverListeners)) {
             listener.onJobStateFinished(this, finalState);
         }
     }

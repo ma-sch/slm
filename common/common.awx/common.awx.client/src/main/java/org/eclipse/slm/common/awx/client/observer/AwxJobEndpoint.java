@@ -51,7 +51,7 @@ public class AwxJobEndpoint extends Endpoint implements MessageHandler.Partial<S
 
 
         } catch (IOException e) {
-            LOG.error("Could not connect to AWX server.");
+            LOG.error("Failed to open WebSocket connection to AWX server", e);
         }
     }
 
@@ -70,13 +70,13 @@ public class AwxJobEndpoint extends Endpoint implements MessageHandler.Partial<S
                 }
             }
         } catch (Exception e) {
-            LOG.error("Could not parse message from AWX server: " + messagePart, e);
+            LOG.error("Could not handle message from AWX server: " + messagePart, e);
         }
     }
 
     @Override
     public void onError(Session session, Throwable cause) {
-        LOG.error("Connection Error");
+        LOG.error("WebSocket error occurred", cause);
     }
 
 
