@@ -74,12 +74,12 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
             StateMachine<CapabilityJobState, CapabilityJobEvent> capabilityJobStateMachine = null;
             try {
                 capabilityJobStateMachine = this.capabilityJobStateMachineFactory.create(capabilityJob, this);
-                if (!capabilityJobStateMachine.isComplete()) {
-                    LOG.info("Capability job with id: " + capabilityJob.getId() + " was in uncompleted state '" + capabilityJob.getState() + "' " +
+                if (!CapabilityJobState.getStableStates().contains(capabilityJobStateMachine.getState().getId())) {
+                    LOG.info("Capability job with id: " + capabilityJob.getId() + " was in unstable state '" + capabilityJob.getState() + "' " +
                             "during system restart, setting it to FAILED");
+                    capabilityJob.addLogMessage("Set job to FAILED state because it was in unstable state '" +  capabilityJob.getState() + "' during system restart");
+                    capabilityJob = this.capabilityJobJpaRepository.save(capabilityJob);
                     this.changeStateOfCapabilityJobStateMachine(capabilityJob, capabilityJobStateMachine, CapabilityJobEvent.ERROR_OCCURRED);
-                    capabilityJob.addLogMessage("Set job to FAILED state because it was in uncompleted state '" +  capabilityJob.getState() + "' during system restart");
-                    this.capabilityJobJpaRepository.save(capabilityJob);
                 }
             } catch (Exception e) {
                 LOG.error("Error while initializing capability job state machine for capability job with id: " + capabilityJob.getId(), e);
