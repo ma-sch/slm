@@ -10,7 +10,8 @@ public interface CapabilityJobService {
 
     List<CapabilityJob> getCapabilityJobsOfResource(UUID resourceId);
 
-    void initCapabilityJob(JwtAuthenticationToken jwtAuthenticationToken, UUID resourceId, UUID capabilityId, boolean skipInstall, Map<String, String> configParameters) throws Exception;
+    void initCapabilityJob(JwtAuthenticationToken jwtAuthenticationToken, UUID resourceId, UUID capabilityId,
+                           boolean skipInstall, Map<String, String> configParameters, boolean force) throws Exception;
 
     void uninstallCapability(JwtAuthenticationToken jwtAuthenticationToken, UUID resourceId, UUID capabilityId) throws Exception;
 

@@ -112,11 +112,11 @@ public class ImporterService {
         }
     }
 
-    public void importCapabilities(JwtAuthenticationToken jwtAuthenticationToken, ImportDefinition importDefinition) {
+    public void importCapabilities(JwtAuthenticationToken jwtAuthenticationToken, ImportDefinition importDefinition, boolean forceInstall) {
         for (var device : importDefinition.getDevices()) {
             for (var capability : device.capabilities) {
                 try {
-                    this.capabilityJobService.initCapabilityJob(jwtAuthenticationToken, device.resourceId, capability.getCapabilityId(), capability.isSkipInstall(), Map.of());
+                    this.capabilityJobService.initCapabilityJob(jwtAuthenticationToken, device.resourceId, capability.getCapabilityId(), capability.isSkipInstall(), Map.of(), forceInstall);
                 } catch (CapabilityAlreadyInstalledException e) {
                     LOG.info("Capability {} already installed for resource '{}'", capability.getCapabilityId(), device.resourceId);
                 } catch (Exception e) {

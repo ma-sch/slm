@@ -41,12 +41,13 @@ public class ImporterRestController {
     @RequestMapping(value = "/capabilities", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
     @Operation(summary = "Import capabilities from file")
     public ResponseEntity<Void> importCapabilitiesFromFile(
-            @RequestParam(name = "file") MultipartFile importFile
+            @RequestParam(name = "file") MultipartFile importFile,
+            @RequestParam(name = "forceInstall", required = false, defaultValue = "false") boolean forceInstall
     ) {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         var importDefinition = this.importerService.getImportDefinition(importFile);
-        this.importerService.importCapabilities(jwtAuthenticationToken, importDefinition);
+        this.importerService.importCapabilities(jwtAuthenticationToken, importDefinition, forceInstall);
 
         return ResponseEntity.ok().build();
     }

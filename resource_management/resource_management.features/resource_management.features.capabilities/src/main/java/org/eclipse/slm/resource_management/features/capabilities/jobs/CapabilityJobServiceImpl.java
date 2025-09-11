@@ -75,8 +75,10 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
             try {
                 capabilityJobStateMachine = this.capabilityJobStateMachineFactory.create(capabilityJob, this);
                 if (!capabilityJobStateMachine.isComplete()) {
+                    LOG.info("Capability job with id: " + capabilityJob.getId() + " was in uncompleted state '" + capabilityJob.getState() + "' " +
+                            "during system restart, setting it to FAILED");
                     this.changeStateOfCapabilityJobStateMachine(capabilityJob, capabilityJobStateMachine, CapabilityJobEvent.ERROR_OCCURRED);
-                    capabilityJob.addLogMessage("Set job to FAILED state because it was in uncompleted state during system restart");
+                    capabilityJob.addLogMessage("Set job to FAILED state because it was in uncompleted state '" +  capabilityJob.getState() + "' during system restart");
                     this.capabilityJobJpaRepository.save(capabilityJob);
                 }
             } catch (Exception e) {
@@ -93,7 +95,7 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
     }
 
     @Override
-    public void initCapabilityJob(JwtAuthenticationToken jwtAuthenticationToken, UUID resourceId, UUID capabilityId, boolean skipInstall, Map<String, String> configParameters) throws Exception {
+    public void initCapabilityJob(JwtAuthenticationToken jwtAuthenticationToken, UUID resourceId, UUID capabilityId, boolean skipInstall, Map<String, String> configParameters, boolean force) throws Exception {
         try {
             // Check if resource exists
             var resource = this.resourcesManager.getResourceByIdOrThrow(resourceId);
@@ -109,7 +111,17 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
             for (var capabilityJob : matchingCapabilityJobsOfResource) {
                 var capabilityJobStateMachine = this.capabilityJobStateMachineFactory.create(capabilityJob, this);
                 if (!capabilityJobStateMachine.isComplete()) {
-                    throw new CapabilityJobRuntimeException("Uncompleted capability job already exists for resource [id=" + resourceId + "] and capability [id=" + capabilityId + "]");
+                    if (force) {
+                        LOG.info("Capability job with id: " + capabilityJob.getId() + " was in uncompleted state '" + capabilityJob.getState() + "' " +
+                                ", setting it to FAILED because init of new capability job was forced");
+                        this.changeStateOfCapabilityJobStateMachine(capabilityJob, capabilityJobStateMachine, CapabilityJobEvent.ERROR_OCCURRED);
+                        capabilityJob.addLogMessage("Set job to FAILED state because it was in uncompleted state '" +  capabilityJob.getState() + "' " +
+                                "during system restart and init of new capability job was forced");
+                        this.capabilityJobJpaRepository.save(capabilityJob);
+                    }
+                    else {
+                        throw new CapabilityJobRuntimeException("Uncompleted capability job already exists for resource [id=" + resourceId + "] and capability [id=" + capabilityId + "]");
+                    }
                 }
             }
             // Create capability service

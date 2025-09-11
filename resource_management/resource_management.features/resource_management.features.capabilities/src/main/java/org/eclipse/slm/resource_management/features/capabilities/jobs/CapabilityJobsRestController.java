@@ -43,12 +43,13 @@ public class CapabilityJobsRestController {
     public ResponseEntity installCapabilityOnSingleHost(
             @PathVariable(name = "resourceId")                                                   UUID resourceId,
             @RequestParam(name = "capabilityId")                                                 UUID capabilityId,
-            @RequestParam(name = "skipInstall", required = false, defaultValue = "false")        Boolean skipInstall,
+            @RequestParam(name = "skipInstall", required = false, defaultValue = "false")        boolean skipInstall,
+            @RequestParam(name = "forceInstall", required = false, defaultValue = "false")        boolean forceInstall,
             @RequestBody Map<String, String> configParameters
     ) throws Exception {
         var jwtAuthenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
-        this.capabilityJobService.initCapabilityJob(jwtAuthenticationToken, resourceId, capabilityId, skipInstall, configParameters);
+        this.capabilityJobService.initCapabilityJob(jwtAuthenticationToken, resourceId, capabilityId, skipInstall, configParameters, forceInstall);
 
         return ResponseEntity.ok().build();
     }
