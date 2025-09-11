@@ -370,9 +370,6 @@ public class ResourcesConsulClient {
                 for (BindingRule bindingRule : bindingRulesOfResource) {
                     this.consulAclApiClient.deleteBindingRuleById(consulCredential, bindingRule.getId());
                 }
-            } else {
-                LOG.error("Unable to delete Consul binding rules for resource with id '" + resource.getId()
-                        + "', no binding rules found");
             }
         }
 

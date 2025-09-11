@@ -512,7 +512,7 @@ public class VaultClient {
             ResponseEntity<String> responseEntity = restTemplate.exchange(path, HttpMethod.POST, httpEntity, String.class);
         } catch (HttpClientErrorException.BadRequest e) {
             if (e.getMessage().contains("combination of mount and group alias name is already in use")) {
-                LOG.info("Combination of mount and group alias name already exists --> Creation of JwtGroupAlias skipped");
+                LOG.debug("Combination of mount and group alias name already exists --> Creation of JwtGroupAlias skipped");
             }
         }
 

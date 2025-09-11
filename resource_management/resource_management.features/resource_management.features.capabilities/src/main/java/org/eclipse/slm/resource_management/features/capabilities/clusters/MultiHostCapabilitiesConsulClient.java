@@ -364,9 +364,6 @@ public class MultiHostCapabilitiesConsulClient {
                     for (BindingRule bindingRule : bindingRulesOfResource) {
                         this.consulAclApiClient.deleteBindingRuleById(consulCredential, bindingRule.getId());
                     }
-                } else {
-                    LOG.error("Unable to delete Consul binding rules for resource with id '" + multiHostCapabilityService.getId()
-                            + "', no binding rules found");
                 }
                 LOG.info("Cluster resource with id '" + multiHostCapabilityService.getId() + "' successfully deleted in Consul");
             }

@@ -1,5 +1,6 @@
 package org.eclipse.slm.resource_management.common.resources;
 
+import org.eclipse.slm.common.aas.clients.exceptions.ShellNotFoundException;
 import org.eclipse.slm.common.consul.client.ConsulCredential;
 import org.eclipse.slm.common.consul.model.exceptions.ConsulLoginFailedException;
 import org.eclipse.slm.common.keycloak.config.KeycloakAdminClient;
@@ -214,8 +215,8 @@ public class ResourcesManagerImpl implements ResourcesManager, ResourceUpdatedLi
 
             this.resourceEventMessageSender.sendMessage(resource, ResourceEventType.DELETED);
             this.applicationEventPublisher.publishEvent(new ResourceEvent(this, resourceId, ResourceEvent.Operation.DELETE));
+        } catch (ShellNotFoundException ignored) {
         } catch (Exception e) {
-            LOG.error("Failed to delete resource: {}", e.getMessage(), e);
             throw new ResourceRuntimeException("Failed to delete resource: " + e.getMessage());
         }
     }
