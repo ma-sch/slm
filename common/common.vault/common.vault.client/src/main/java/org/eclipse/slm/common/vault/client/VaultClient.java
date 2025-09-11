@@ -272,9 +272,12 @@ public class VaultClient {
     }
 
     public void removeSecretFromKvEngine(VaultCredential vaultCredential, String engineName, String path) {
-        String url = "/" + engineName + "/metadata/" + path;
-        HttpEntity httpEntity = loginAndCreateRequestWithBody(vaultCredential, null);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String.class);
+        var urlData = "/" + engineName + "/data/" + path;
+        var urlMetadata = "/" + engineName + "/metadata/" + path;
+        var httpEntity = loginAndCreateRequestWithBody(vaultCredential, null);
+
+        var responseEntityDeleteData = restTemplate.exchange(urlData, HttpMethod.DELETE, httpEntity, String.class);
+        var responseEntityDeleteMetadata = restTemplate.exchange(urlMetadata, HttpMethod.DELETE, httpEntity, String.class);
     }
 
     public void addRuleToPolicy(VaultCredential vaultCredential, String policyName, String rule) {
@@ -537,6 +540,24 @@ public class VaultClient {
         } catch (HttpClientErrorException.NotFound e) {
             return new ArrayList<>();
         }
+    }
+
+    public List<String> listAllSecretsRecursive(VaultCredential vaultCredential, String secretEngineName, String secretPath) {
+        List<String> allSecrets = new ArrayList<>();
+        List<String> keys = listSecrets(vaultCredential, secretEngineName, secretPath);
+
+        if (keys == null) {
+            return allSecrets;
+        }
+
+        for (String key : keys) {
+            if (key.endsWith("/")) {
+                allSecrets.addAll(listAllSecretsRecursive(vaultCredential, secretEngineName, secretPath + "/" + key.substring(0, key.length() - 1)));
+            } else {
+                allSecrets.add(secretPath + "/" + key);
+            }
+        }
+        return allSecrets;
     }
 
 

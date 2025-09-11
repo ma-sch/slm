@@ -163,9 +163,9 @@ public class ResourcesVaultClient {
     public void removeSecretsForResource(VaultCredential vaultCredential, UUID resourceId) {
         var secretsEngine = "resources";
 
-        List<String> secrets = vaultClient.listSecrets(vaultCredential, secretsEngine, resourceId.toString());
+        List<String> secrets = vaultClient.listAllSecretsRecursive(vaultCredential, secretsEngine, resourceId.toString());
         for (var secret : secrets) {
-            vaultClient.removeSecretFromKvEngine(vaultCredential, "resources", resourceId + "/" + secret);
+            vaultClient.removeSecretFromKvEngine(vaultCredential, "resources", secret);
         }
         this.vaultClient.removePolicy(vaultCredential, "policy_resource_" + resourceId);
 
