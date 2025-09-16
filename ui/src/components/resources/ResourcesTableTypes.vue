@@ -48,6 +48,7 @@ const onRowClickResourceInstance = (click, row) => {
       item-value="typeName"
       class="elevation-1"
       show-expand
+      :items-per-page="25"
       @click:row="onRowClickResourceTypes"
     >
       <template #item.resourceInstanceCount="{ item }">

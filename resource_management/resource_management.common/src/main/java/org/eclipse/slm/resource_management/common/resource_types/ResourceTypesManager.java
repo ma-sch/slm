@@ -1,6 +1,7 @@
 package org.eclipse.slm.resource_management.common.resource_types;
 
 import org.eclipse.digitaltwin.aas4j.v3.model.MultiLanguageProperty;
+import org.eclipse.digitaltwin.aas4j.v3.model.Property;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.slm.common.aas.clients.*;
 import org.eclipse.slm.resource_management.common.aas.ResourceAas;
@@ -73,11 +74,17 @@ public class ResourceTypesManager {
                 var manufacturerProductType = SubmodelUtils.findSubmodelElement(nameplateSubmodel.getSubmodelElements(), "ManufacturerProductType");
 
                 if (manufacturerName.isPresent() && manufacturerProductType.isPresent()) {
-                    var manufacturerProductTypeProp = (MultiLanguageProperty) manufacturerProductType.get();
                     var manufacturerNameProp = (MultiLanguageProperty) manufacturerName.get();
-
-                    var manufacturerProductTypeValue = manufacturerProductTypeProp.getValue().get(0).getText();
                     var manufacturerNameValue = manufacturerNameProp.getValue().get(0).getText();
+
+                    var manufacturerProductTypeValue = "";
+                    if (nameplateSubmodel.getSemanticId().getKeys().get(0).getValue().equals(IDTASubmodelTemplates.NAMEPLATE_V2_SUBMODEL_SEMANTIC_ID)) {
+                        var manufacturerProductTypeProp = (MultiLanguageProperty) manufacturerProductType.get();
+                        manufacturerProductTypeValue = manufacturerProductTypeProp.getValue().get(0).getText();
+                    } else {
+                        var manufacturerProductTypeProp = (Property) manufacturerProductType.get();
+                        manufacturerProductTypeValue = manufacturerProductTypeProp.getValue();
+                    }
 
                     ResourceType resourceType;
                     if (resourceTypes.containsKey(manufacturerProductTypeValue)) {
