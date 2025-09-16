@@ -14,6 +14,8 @@ public class FirmwareUpdateDriverClient extends AbstractDriverClient {
 
     public final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdateDriverClient.class);
 
+    public static final int FIRMWARE_FILE_CHUNK_SIZE = 1024 * 1024; // 1 MB
+
     public FirmwareUpdateDriverClient(DriverInfo driverInfo) {
         super(driverInfo);
     }

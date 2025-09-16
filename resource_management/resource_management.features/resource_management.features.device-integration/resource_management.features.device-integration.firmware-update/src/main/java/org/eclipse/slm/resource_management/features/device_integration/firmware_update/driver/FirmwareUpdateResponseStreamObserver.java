@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static org.eclipse.slm.resource_management.features.device_integration.firmware_update.driver.FirmwareUpdateDriverClient.FIRMWARE_FILE_CHUNK_SIZE;
+
 public class FirmwareUpdateResponseStreamObserver implements StreamObserver<ArtefactUpdate.ArtefactMessage> {
 
     public final static Logger LOG = LoggerFactory.getLogger(FirmwareUpdateResponseStreamObserver.class);
@@ -73,12 +75,20 @@ public class FirmwareUpdateResponseStreamObserver implements StreamObserver<Arte
             case REQUEST -> {
                 switch (artefactMessage.getRequest().getType()) {
                     case AORT_ARTEFACT_TRANSMISSION -> {
-                        var fileContent = ByteString.copyFrom(firmwareUpdateFile);
-                        ArtefactUpdate.ArtefactChunk chunkFile = ArtefactUpdate.ArtefactChunk.newBuilder()
-                                .setFileContent(fileContent)
-                                .build();
+                        int offset = 0;
+                        while (offset < firmwareUpdateFile.length) {
+                            int end = Math.min(offset + FirmwareUpdateDriverClient.FIRMWARE_FILE_CHUNK_SIZE, firmwareUpdateFile.length);
+                            byte[] chunkData = java.util.Arrays.copyOfRange(firmwareUpdateFile, offset, end);
+                            var chunkByteString = ByteString.copyFrom(chunkData);
 
-                        this.requestStreamObserver.onNext(chunkFile);
+                            var chunkFilePart = ArtefactUpdate.ArtefactChunk.newBuilder()
+                                    .setFileContent(chunkByteString)
+                                    .build();
+
+                            this.requestStreamObserver.onNext(chunkFilePart);
+                            offset = end;
+                        }
+
                         this.requestStreamObserver.onCompleted();
                     }
 
