@@ -63,12 +63,54 @@ export function useCapabilityUtils() {
       return true;
   };
 
+  const filterDeploymentCapabilityServices = (capabilityServiceIds) => {
+    const deploymentCapabilityServices = [];
+    capabilityServiceIds.forEach(capabilityServiceId => {
+        const capabilityService = capabilitiesStore.capabilityServiceById(capabilityServiceId);
+        const capability = capabilitiesStore.capabilityById(capabilityService.capabilityId);
+
+        if (isDeploymentCapability(capability)) {
+          deploymentCapabilityServices.push(capabilityServiceId);
+        }
+    });
+
+    return deploymentCapabilityServices;
+  };
+
+  const filterConfigurationCapabilityServices = (capabilityServiceIds) => {
+    const configrationCapabilityServices = [];
+    capabilityServiceIds.forEach(capabilityServiceId => {
+      const capabilityService = capabilitiesStore.capabilityServiceById(capabilityServiceId);
+      const capability = capabilitiesStore.capabilityById(capabilityService.capabilityId);
+
+      if (isConfigurationCapability(capability)) {
+        configrationCapabilityServices.push(capabilityServiceId);
+      }
+    });
+
+    return configrationCapabilityServices;
+  };
+
+  const isDeploymentCapability = (capability) => {
+    console.log(capability);
+    return capability.capabilityClass === "DeploymentCapability";
+  };
+
+  const isConfigurationCapability = (capability) => {
+    console.log(capability);
+    return capability.capabilityClass === "BaseConfigurationCapability";
+  };
+
   return {
     getCapability,
     getParamsOfInstallAction,
     getCapabilitiesByCapabilityClass,
     getUniqueCapabilityClasses,
     isDefineCapabilityDialogRequired,
-    isCapabilitySkipable
+    isCapabilitySkipable,
+    filterDeploymentCapabilityServices,
+    filterConfigurationCapabilityServices,
+    isDeploymentCapability,
+    isConfigurationCapability,
   };
 }

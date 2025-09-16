@@ -12,10 +12,13 @@ import DeviceUtils from '@/utils/deviceUtils';
 import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
 import {useToast} from "vue-toast-notification";
 import ResourcesDeleteDialog from "@/components/resources/ResourcesDeleteDialog.vue";
+import {useCapabilityUtils} from "@/utils/capabilityUtils";
 
 const emit = defineEmits(['resourceClicked']);
 
 const $toast = useToast();
+
+const capabilityUtils = useCapabilityUtils()
 
 const resourceDevicesStore = useResourceDevicesStore();
 const {resources} = storeToRefs(resourceDevicesStore);
@@ -25,12 +28,13 @@ const { capabilityServiceById } = storeToRefs(capabilitiesStore);
 const tableHeaders = [
   { title: "Product", key: "product", width: "20%" },
   { title: "Manufacturer", key: "manufacturer", width: "20%" },
-  { title: 'Capabilities', key: 'capabilityServices', value: 'capabilityServices', width: "15%" },
+  { title: 'Capabilities', key: 'deploymentCapabilityServices', value: 'deploymentCapabilityServices', width: "10%" },
+  { title: 'Configurations', key: 'configurationCapabilityServices', value: 'configurationCapabilityServices', width: "10%" },
   { title: 'Hostname', key: 'hostname', value: 'hostname', width: "10%" },
   { title: 'IP', key: 'ip', value: 'ip', width: "5%" },
   { title: 'Location', key: 'location.name', value: 'location.name', width: "10%"},
   { title: 'Firmware', key: 'firmware', width: "10%" },
-  { title: 'Actions', value: 'actions', sortable: false, width: "10%" },
+  { title: 'Actions', value: 'actions', sortable: false, width: "5%" },
 ];
 
 const groupBy = ref([]);
@@ -260,10 +264,10 @@ const colorRowItem = (row) => {
         </div>
       </template>
 
-      <template #item.capabilityServices="{ item }">
+      <template #item.deploymentCapabilityServices="{ item }">
         <v-row>
           <v-tooltip
-            v-for="capabilityServiceId in item.capabilityServiceIds"
+            v-for="capabilityServiceId in capabilityUtils.filterDeploymentCapabilityServices(item.capabilityServiceIds)"
             :key="capabilityServiceId"
             location="top"
           >
@@ -278,6 +282,25 @@ const colorRowItem = (row) => {
           </v-tooltip>
         </v-row>
       </template>
+
+      <template #item.configurationCapabilityServices="{ item }">
+      <v-row>
+        <v-tooltip
+            v-for="capabilityServiceId in capabilityUtils.filterConfigurationCapabilityServices(item.capabilityServiceIds)"
+            :key="capabilityServiceId"
+            location="top"
+        >
+          <template #activator="{ props }">
+            <CapabilityIcon
+                v-if="capabilityServiceById(capabilityServiceId)"
+                v-bind="props"
+                :capability-service="capabilityServiceById(capabilityServiceId)"
+            />
+          </template>
+          <span>Status: {{ capabilityServiceById(capabilityServiceId)?.status }}</span>
+        </v-tooltip>
+      </v-row>
+    </template>
 
       <template #item.firmware="{ item }">
         <FirmwareUpdateVersion
