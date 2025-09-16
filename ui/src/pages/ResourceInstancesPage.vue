@@ -36,7 +36,7 @@
               <ResourcesTableDevices
                 v-if="resources.length > 0"
                 class="mt-0 flex"
-                @resource-selected="onResourceSelected"
+                @resourceClicked="onResourceClicked"
               />
             </v-row>
           </v-card-text>
@@ -76,6 +76,8 @@ import DeviceInfoView from "@/components/resources/deviceinfo/DeviceInfoView.vue
 import OverviewHeading from "@/components/base/OverviewHeading.vue";
 import ResourcesTableDevices from "@/components/resources/ResourcesTableDevices.vue";
 import {useCapabilitiesStore} from "@/stores/capabilitiesStore";
+import ResourceManagementClient from "@/api/resource-management/resource-management-client";
+import ConfirmDialog from "@/components/base/ConfirmDialog.vue";
 
 const resourceDevicesStore = useResourceDevicesStore();
 const capabilitiesStore = useCapabilitiesStore();
@@ -92,7 +94,7 @@ const apiStateLoaded = computed(() => apiStateResources.value === ApiState.LOADE
 const apiStateLoading = computed(() => apiStateResources.value === ApiState.LOADING || apiStateResources.value === ApiState.INIT);
 const apiStateError = computed(() => apiStateResources.value === ApiState.ERROR);
 
-const onResourceSelected = (resource, section) => {
+const onResourceClicked = (resource, section) => {
   selectedResource.value = resource;
   selectedSection.value = section;
 };

@@ -96,7 +96,7 @@ onMounted(() => {
       />
       <RowWithLabel
         label="Vendor"
-        :text="DeviceUtils.getVendor(resourceId)"
+        :text="DeviceUtils.getManufacturer(resourceId)"
       />
       <RowWithLabel
         label="Resource Id"
