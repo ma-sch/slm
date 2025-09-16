@@ -7,6 +7,8 @@ import org.eclipse.slm.common.keycloak.config.KeycloakAdminClient;
 import org.eclipse.slm.common.model.exceptions.EventNotAcceptedException;
 import org.eclipse.slm.common.vault.client.VaultCredential;
 import org.eclipse.slm.resource_management.common.exceptions.ResourceNotFoundException;
+import org.eclipse.slm.resource_management.common.resources.ResourceDTO;
+import org.eclipse.slm.resource_management.common.resources.ResourceEventInternalListener;
 import org.eclipse.slm.resource_management.common.resources.ResourcesManager;
 import org.eclipse.slm.resource_management.features.capabilities.CapabilitiesService;
 import org.eclipse.slm.resource_management.features.capabilities.exceptions.CapabilityRuntimeException;
@@ -27,7 +29,7 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 
 @Service
-public class CapabilityJobServiceImpl implements CapabilityJobService, CapabilityJobStateMachineListener, CapabilityJobExecutorListener {
+public class CapabilityJobServiceImpl implements CapabilityJobService, CapabilityJobStateMachineListener, CapabilityJobExecutorListener, ResourceEventInternalListener {
 
     private final static Logger LOG = LoggerFactory.getLogger(CapabilityJobServiceImpl.class);
 
@@ -381,4 +383,24 @@ public class CapabilityJobServiceImpl implements CapabilityJobService, Capabilit
         }
     }
     //endregion CapabilityJobExecutorListener
+
+    //region ResourceEventInternalListener
+    @Override
+    public void onResourceCreated(ResourceDTO resourceDTO) {
+    }
+
+    @Override
+    public void onResourceUpdated(ResourceDTO resourceDTO) {
+    }
+
+    @Override
+    public void onResourceDeleted(ResourceDTO resourceDTO) {
+        // Cleanup all capability jobs of resource
+        var capabilityJobsOfResource = this.capabilityJobJpaRepository.findByResourceId(resourceDTO.getId());
+        this.capabilityJobJpaRepository.deleteAll(capabilityJobsOfResource);
+        LOG.debug("Deleted " + capabilityJobsOfResource.size() + " capability jobs of resource [id=" + resourceDTO.getId() + "] because resource was deleted");
+    }
+    //endregion ResourceEventInternalListener
+
+
 }
