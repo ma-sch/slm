@@ -13,6 +13,7 @@ const discoveryStore = useDiscoveryStore();
 const { discoveryJobs, apiState } = storeToRefs(discoveryStore);
 
 const selectedDiscoveryJobIds = ref([]);
+const sortBy = ref([{ key: 'startDate', order: 'desc' }])
 const tableHeaders = [
   { title: 'Start', key: 'startDate' },
   { title: 'End', key: 'finishDate' },
@@ -89,6 +90,7 @@ const colorRowItem = (row) => {
               show-select
               :row-props="colorRowItem"
               :loading="apiState === ApiState.INIT || apiState === ApiState.LOADING || apiState === ApiState.UPDATING"
+              :sort-by="sortBy"
               @click:row="onRowClicked"
             >
               <template #item.startDate="{ item }">
