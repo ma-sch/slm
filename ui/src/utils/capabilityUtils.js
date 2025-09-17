@@ -92,12 +92,10 @@ export function useCapabilityUtils() {
   };
 
   const isDeploymentCapability = (capability) => {
-    console.log(capability);
     return capability.capabilityClass === "DeploymentCapability";
   };
 
   const isConfigurationCapability = (capability) => {
-    console.log(capability);
     return capability.capabilityClass === "BaseConfigurationCapability";
   };
 
