@@ -174,7 +174,7 @@ const messages = {
 app.use(i18nInstance);
 
 app.use(VueToast,{
-    position: 'bottom',
+    position: 'bottom-right',
     duration: 5000,
     dismissible: true,}
 );
