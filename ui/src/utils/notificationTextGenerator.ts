@@ -4,7 +4,7 @@ import {
     ResourceEventNotification,
     ResourceEventType,
     FirmwareUpdateJobEventNotification,
-    DiscoveryEventNotification,
+    DiscoveryJobEventNotification,
     CapabilityJobEventNotification,
     ServiceInstanceEventNotification, ServiceInstanceEventType
 } from "@/api/notification-service/client";
@@ -45,8 +45,8 @@ class NotificationTextGenerator {
             }
 
             case EVENTCLASS.DiscoveryEvent: {
-                const discoveryEventNotification = eventNotification  as unknown as DiscoveryEventNotification;
-                break;
+                const discoveryEventNotification = eventNotification  as unknown as DiscoveryJobEventNotification;
+                return `Discovery job finished`
             }
 
             case EVENTCLASS.FirmwareUpdateJobEvent: {

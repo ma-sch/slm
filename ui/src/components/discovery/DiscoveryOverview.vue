@@ -26,7 +26,7 @@ function triggerDiscovery(driver, filterValues: any, optionValues: any) {
     optionValues
   };
   ResourceManagementClient.discoveryApi.discover(driver.instanceId, discoveryRequest);
-  $toast.info(`Scan started by driver '${driver.instanceId}'`);
+  $toast.info(`Discovery job started by driver '${driver.instanceId}'`);
 }
 
 function triggerOnboarding() {
