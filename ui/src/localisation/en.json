@@ -26,6 +26,9 @@
           "inbox": {
               "title": "Inbox"
           },
+          "jobs": {
+            "title": "Jobs"
+          },
           "drivers": {
             "title": "Drivers"
           }

@@ -199,14 +199,21 @@ export default {
             goToChildOnClick: 0,
             children: [
               {
-                id: 'main-menu-button-admin-components',
+                id: 'main-menu-button-discovery-inbox',
                 title: this.$t('drawer.section.resources.discovery.inbox.title'),
                 icon: 'mdi-tray-full',
                 to: 'inbox',
                 visible: true
               },
               {
-                id: 'main-menu-button-admin-service-categories',
+                id: 'main-menu-button-discovery-jobs',
+                title: this.$t('drawer.section.resources.discovery.jobs.title'),
+                icon: 'mdi-file-tree',
+                to: 'jobs',
+                visible: true
+              },
+              {
+                id: 'main-menu-button-discovery-drivers',
                 title: this.$t('drawer.section.resources.discovery.drivers.title'),
                 icon: 'mdi-magnify-scan',
                 to: 'drivers',

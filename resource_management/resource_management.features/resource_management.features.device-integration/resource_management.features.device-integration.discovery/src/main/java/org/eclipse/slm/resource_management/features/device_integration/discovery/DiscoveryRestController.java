@@ -57,7 +57,19 @@ public class DiscoveryRestController {
         else {
             throw new DiscoveryJobNotFoundException(discoveryJobId);
         }
+    }
 
+    @RequestMapping(value = "/jobs/{discoveryJobId}", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> deleteDiscoveryJob(@PathVariable(name = "discoveryJobId") UUID discoveryJobId)
+            throws DiscoveryJobNotFoundException {
+        var discoveryJobOptional = this.discoveryJobRepository.findById(discoveryJobId);
+        if (discoveryJobOptional.isPresent()) {
+            this.discoveryJobRepository.delete(discoveryJobOptional.get());
+            return ResponseEntity.ok().build();
+        }
+        else {
+            throw new DiscoveryJobNotFoundException(discoveryJobId);
+        }
     }
 
     @RequestMapping(value = "/drivers", method = RequestMethod.GET)

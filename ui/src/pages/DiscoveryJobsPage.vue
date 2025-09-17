@@ -9,9 +9,7 @@
     </div>
 
     <div v-else>
-      <DriversTable
-        :drivers="drivers"
-      />
+      <DiscoveryJobsTable/>
     </div>
   </v-container>
 </template>
@@ -23,6 +21,7 @@ import { useDiscoveryStore } from "@/stores/discoveryStore";
 import ApiState from '@/api/apiState';
 import ProgressCircular from "@/components/base/ProgressCircular.vue";
 import DriversTable from "@/components/discovery/DriversTable.vue";
+import DiscoveryJobsTable from "@/components/discovery/DiscoveryJobsTable.vue";
 
 const discoveryStore = useDiscoveryStore();
 const {apiState, drivers} = storeToRefs(discoveryStore);

@@ -48,6 +48,11 @@ const routes = [
         component: () => import('@/pages/DiscoveryInboxPage.vue'),
       },
       {
+        name: 'Discovery Jobs',
+        path: '/discovery/jobs',
+        component: () => import('@/pages/DiscoveryJobsPage.vue'),
+      },
+      {
         name: 'Discovery Drivers',
         path: '/discovery/drivers',
         component: () => import('@/pages/DiscoveryDriversPage.vue'),
