@@ -186,7 +186,7 @@ onMounted(() => {
                             {{ ` | ${clusterById(item.raw.resourceId).clusterType} ${clusterById(item.raw.resourceId).isManaged? 'managed': 'with '+clusterById(item.raw.resourceId).nodes.length+' nodes' } | ${item.raw.resourceId}` }}
                           </div>
                           <div>
-                            <strong>{{ resourceById(item.raw.resourceId).hostname }}</strong>{{ ` | ${item.raw.resourceId} | ${resourceById(item.raw.resourceId).ip}` }}
+                            <strong>{{ resourceById(item.raw.resourceId).hostname }}</strong>{{ ` | ${resourceById(item.raw.resourceId).ip}` }}
                           </div>
                         </v-list-item-title>
                       </template>
@@ -198,7 +198,7 @@ onMounted(() => {
                               {{ ` | ${clusterById(item.raw.resourceId).clusterType} ${clusterById(item.raw.resourceId).isManaged? 'managed': 'with '+clusterById(item.raw.resourceId).nodes.length+' nodes' } | ${item.raw.resourceId}` }}
                             </div>
                             <div v-else>
-                              <strong>{{ resourceById(item.raw.resourceId).hostname }}</strong>{{ ` | ${item.raw.resourceId} | ${resourceById(item.raw.resourceId).ip}` }}
+                              <strong>{{ resourceById(item.raw.resourceId).hostname }}</strong>{{ ` | ${resourceById(item.raw.resourceId).ip}` }}
                             </div>
                           </v-list-item-title>
                         </v-list-item>
