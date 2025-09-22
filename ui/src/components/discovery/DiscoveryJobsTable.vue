@@ -104,7 +104,10 @@ const colorRowItem = (row) => {
                 </div>
               </template>
               <template #item.discoveredResources="{ item }">
-                <div>
+                <v-icon v-if="item.state === 'CREATED'">
+                  mdi-progress-clock
+                  </v-icon>
+                <div v-else>
                   {{ item.discoveryResult.length }}
                 </div>
               </template>
