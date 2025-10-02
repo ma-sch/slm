@@ -1,16 +1,19 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
+    target-branch: "develop"
     directory: "ui"
     schedule:
       interval: "daily"
 
   - package-ecosystem: "docker"
+    target-branch: "develop"
     directory: "stack"
     schedule:
       interval: "weekly"
 
   - package-ecosystem: "maven"
+    target-branch: "develop"
     directory: "/"
     schedule:
       interval: "weekly"
