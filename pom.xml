@@ -63,7 +63,7 @@
         <mariadb.client.version>2.7.4</mariadb.client.version>
         <model.mapper.version>2.4.5</model.mapper.version>
         <github.docker.java.version>3.2.13</github.docker.java.version>
-        <apache.commons.version>3.12.0</apache.commons.version>
+        <apache.commons.version>3.19.0</apache.commons.version>
         <apache.httpcomponents.version>4.5.12</apache.httpcomponents.version>
         <netty.version>4.1.73.Final</netty.version>
         <jgit.version>6.2.0.202206071550-r</jgit.version>
