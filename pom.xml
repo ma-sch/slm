@@ -59,7 +59,7 @@
         <swagger.version>1.6.7</swagger.version>
         <keycloak.version>18.0.2</keycloak.version>
         <migbase.version>2.2</migbase.version>
-        <joda-time.version>2.10.10</joda-time.version>
+        <joda-time.version>2.14.0</joda-time.version>
         <mariadb.client.version>2.7.4</mariadb.client.version>
         <model.mapper.version>2.4.5</model.mapper.version>
         <github.docker.java.version>3.2.13</github.docker.java.version>
